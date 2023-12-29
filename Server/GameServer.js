@@ -6,8 +6,9 @@ var gs = {
     type: "gs",
     state: 'lobby',
     players:[],
-    map:undefined,
-    theSnatcher:undefined
+    theSnatcher:undefined,
+    map:undefined
+    //Room Types: 0 = empty, 1 = room, 2 = starting room, 3 = door
 };
 
 var playerObject ={
@@ -95,8 +96,10 @@ wss.on('connection', (ws) => {
 
 function generateMap() {
     var map = [];
-    const rows = 20;
-    const cols = 20;
+    const rows = 30;
+    const cols = 30;
+    const totalRooms = 300;
+    const middleSize = 2; //Probably should stay as 2
 
     // Initialize the map with default values of 0
     for (let i = 0; i < rows; i++) {
@@ -106,10 +109,9 @@ function generateMap() {
         }
     }
 
-    const totalRooms = 200;
-    const middleSize = 2;
-    var roomCount = 0;
     
+    
+    var roomCount = 0;
     // Firstly add a square of rooms to the middle of the map
     const startRow = Math.floor(rows / 2) - (middleSize /2);
     const startCol = Math.floor(cols / 2) - (middleSize /2);
@@ -220,7 +222,7 @@ function generateMap() {
     }
 
     //Fill any two blocks that are only touching diagonally
-    var diagonalBlockRoomFillType = 3;
+    var diagonalBlockRoomFillType = 1;
     for (let i = 1; i < rows - 1; i++) {
         for (let j = 1; j < cols - 1; j++) {
             if (map[i][j] === 1) {
@@ -244,14 +246,11 @@ function generateMap() {
         }
     }
 
-    
-
     // Set any rooms to 0 that cannot be reached from the midRoom
     const midRoom = {x: Math.floor(rows / 2), y: Math.floor(cols / 2)};
     const visited = new Array(rows).fill(false).map(() => new Array(cols).fill(false));
     const queue = [];
     queue.push(midRoom);
-
     while (queue.length > 0) {
         const { x, y } = queue.shift();
         visited[x][y] = true;
@@ -273,7 +272,6 @@ function generateMap() {
             }
         }
     }
-
     // Set unreachable rooms to 0
     for (let i = 0; i < rows; i++) {
         for (let j = 0; j < cols; j++) {
@@ -285,6 +283,74 @@ function generateMap() {
 
     var startingRoomType = 2;
     map[Math.floor(rows / 2)][Math.floor(cols / 2)] = startingRoomType;
+
+
+    const leftOrRightDoorSpawns = Math.floor(Math.random() * 2) + 1;
+
+    //Spawn the doors on the top and bottom of the map
+    if(leftOrRightDoorSpawns == 1){
+        // Find the topmost 1 room and set it to 3
+        let topmostRoomFound = false;
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                if (map[i][j] === 1) {
+                    map[i][j] = 3;
+                    topmostRoomFound = true;
+                    break;
+                }
+            }
+            if (topmostRoomFound) {
+                break;
+            }
+        }
+        // Find the bottommost 1 room and set it to 3
+        let bottommostRoomFound = false;
+        for (let i = rows - 1; i >= 0; i--) {
+            for (let j = 0; j < cols; j++) {
+                if (map[i][j] === 1) {
+                    map[i][j] = 3;
+                    bottommostRoomFound = true;
+                    break;
+                }
+            }
+            if (bottommostRoomFound) {
+                break;
+            }
+        }
+    }
+
+    //Spawn the doors on the left and right of the map
+    if(leftOrRightDoorSpawns == 2){
+        // Find the leftmost 1 room and set it to 3
+        let leftmostRoomFound = false;
+        for (let j = 0; j < cols; j++) {
+            for (let i = 0; i < rows; i++) {
+                if (map[i][j] === 1) {
+                    map[i][j] = 3;
+                    leftmostRoomFound = true;
+                    break;
+                }
+            }
+            if (leftmostRoomFound) {
+                break;
+            }
+        }
+
+        // Find the rightmost 1 room and set it to 3
+        let rightmostRoomFound = false;
+        for (let j = cols - 1; j >= 0; j--) {
+            for (let i = 0; i < rows; i++) {
+                if (map[i][j] === 1) {
+                    map[i][j] = 3;
+                    rightmostRoomFound = true;
+                    break;
+                }
+            }
+            if (rightmostRoomFound) {
+                break;
+            }
+        }
+    }
 
     gs.map = map;
 }

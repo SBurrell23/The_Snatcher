@@ -96,9 +96,9 @@ wss.on('connection', (ws) => {
 
 function generateMap() {
     var map = [];
-    const rows = 30;
-    const cols = 30;
-    const totalRooms = 300;
+    const rows = 26;
+    const cols = 26;
+    const totalRooms = Math.floor((rows*cols) * .65); //Should not be > then ~.85
     const middleSize = 2; //Probably should stay as 2
 
     // Initialize the map with default values of 0

@@ -48,7 +48,8 @@ function recievedServerMessage(message) {
     }
 }
 
-function gameLoop(gs) {
+function gameLoop() {
+    var gs = globalState
     if (gs)
         drawGameState(gs);
     requestAnimationFrame(gameLoop); // schedule next game loop
@@ -69,16 +70,47 @@ function updateLobby(gs) {
     }
 }
 
-function updateInput(gs,id){
+function updateInput(gs, id) {
+    var input = $('#playerNameInput');
+    var joinButton = $('#joinGameButton');
+
+    if (gs.players.some(player => player.id === id)) {
+        input.prop('disabled', true);
+        joinButton.prop('disabled', true);
+    } else {
+        input.prop('disabled', false);
+        joinButton.prop('disabled', false);
+    }
 }
 
 function drawGameState(gs) {
     
     var ctx = document.getElementById('canvas').getContext('2d');
-
+    
     drawBackground(ctx);
+    drawMap(ctx, gs);
 
 }   
+
+function drawMap(ctx, gs) {
+    if(gs.map){
+        const roomSize = 15;
+        const roomColor0 = 'black';
+        const roomColor1 = 'red';
+
+        for (let row = 0; row < gs.map.length; row++) {
+            for (let col = 0; col < gs.map[row].length; col++) {
+                const room = gs.map[row][col];
+                const roomX = ctx.canvas.width - (roomSize * (col + 1));
+                const roomY = roomSize * row;
+
+                ctx.fillStyle = room === 0 ? roomColor0 : roomColor1;
+                ctx.fillRect(roomX, roomY, roomSize, roomSize);
+            }
+        }
+    }
+}
+
 
 function drawBackground(ctx) {
     const squareSize = 10;

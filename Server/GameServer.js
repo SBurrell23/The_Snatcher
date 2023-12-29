@@ -4,9 +4,9 @@ const wss = new WebSocket.Server({ port: 8080 });
 
 var gs = {
     type: "gs",
-    state: '',
+    state: 'lobby',
     players:[],
-    map:[],
+    map:undefined,
     theSnatcher:undefined
 };
 
@@ -16,7 +16,12 @@ var playerObject ={
     isConnected: false,
     points:0,
     sWins:0,
-    rWins:0
+    rWins:0,
+    currRoom:{x:-1,y:-1},
+    hasKey: false,
+    foundDoor1: false,
+    foundDoor2: false,
+    speed:1
 };
 
 var theSnatcherObject ={
@@ -25,7 +30,9 @@ var theSnatcherObject ={
     isConnected: false,
     points: 0,
     sWins:0,
-    rWins:0
+    rWins:0,
+    currRoom:{x:-1,y:-1},
+    speed:2
 };
 
 var playTime = 0;
@@ -63,6 +70,8 @@ wss.on('connection', (ws) => {
         }
     });
 
+    generateMap();
+
     //A user has disconnected
     ws.on('close', function() {
         console.log('User id ' + users.get(ws) + ' disconnected');
@@ -80,6 +89,39 @@ wss.on('connection', (ws) => {
     });
 
 });
+
+function generateMap() {
+    const map = [];
+    const rows = 20;
+    const cols = 20;
+
+    // Initialize the map with default values of 0
+    for (let i = 0; i < rows; i++) {
+        map[i] = [];
+        for (let j = 0; j < cols; j++) {
+            map[i][j] = 0;
+        }
+    }
+
+    // Procedurally add rooms to the map
+    const numRooms = 200;
+    let roomCount = 0;
+
+    while (roomCount < numRooms) {
+        const x = Math.floor(Math.random() * rows);
+        const y = Math.floor(Math.random() * cols);
+
+        // Check if the spot is already occupied by a room
+        if (map[x][y] === 0) {
+            map[x][y] = 1; // Mark the spot as a room
+            roomCount++;
+        }
+    }
+
+    console.log(map);
+
+    gs.map = map;
+}
 
 function playerConnected(id){
     for (let i = 0; i < gs.players.length; i++) 

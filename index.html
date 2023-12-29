@@ -15,7 +15,8 @@
     }
     #gameHeader{
         font-family: 'Nunito';
-        font-size: 65px;
+        font-size: 50px;
+        font-weight: bold;
     }
     #queueHeader{
         font-size: 25px;
@@ -36,7 +37,7 @@
     <div class="container custom-container" style="margin-top:35px;">
         <div class="row">
             <div class="col-3">
-                <div class="text-center" id="gameHeader">The Snatcher!</div>
+                <div class="text-center" id="gameHeader">The<br>Snatcher!</div>
                 <div class="input-group">
                     <div class="input-group" id="joinInputs">
                         <input id="playerNameInput" maxlength="15" class="form-control" placeholder="Choose A Name" />
@@ -84,18 +85,18 @@ The snatcher has to catch all the runners before:
     the runners escape by finding X keys hidden on the map and bringing them to the (2) doors
     (players can only hold 1 key at a time)
     (doors will require something like {numPlayers * 3} keys to open)
-    (The keys are MAYBE??? visible to everyone but also not on the runners map)
+    (The keys are MAYBE??? visible to everyone but not on anybodys map)
     (the number of keys that spawn should be something like ({numPlayers*3} * 2) + 2)
 
 THE MAP
-The map is a procedurally generated maze
+The map is a procedurally generated maze (20*20 ?)
 The map is 2D/2D Array
 Only the runners can see the map
 Each runner can only see the exit doors on the map once they come across them
 Each runner can see the snatchers location on the map always
-The snatcher can not see the map, 
-    BUT instead has a "hint" on each door about how far away from any player they are
-The entire map + doors WILL be revealse to the snatcher once 1 door is opened
+The snatcher CAN?? (not?) see the map, 
+    The snatcher has a "hint" on each door about how far away from any player they are
+The entire map + doors WILL be revealed to the snatcher once 1 door is opened
 
 The snatcher catches the runners by touching them
 If a runner is caught, they are out and can spectate another player of their choosing
@@ -119,7 +120,10 @@ MORE IDEAS
 Maybe add blue portals on the map for runners to use and red portals for the snatcher to use
 
 Add a BOOTS powerup runners can find that makes them faster for a short period of time
+Add a PANDORAS BOX for runners, that randomly teleports them to a new room
+ --When they choose to use it, they drop their key on the ground
 
 Add a BBQ powerup the snatcher can find that temporarily reveals the map & players to them
+Add a BOOTS powerup for the snatcher as well that makes them faster for a short period of time
 
 -->

@@ -6,6 +6,7 @@ var localState = {
     playerId: -1,
     map: null
 };
+var keys = {};
 
 function connectWebSocket() {
     console.log("Attempting to connect to server...");
@@ -53,8 +54,10 @@ function recievedServerMessage(message) {
 }
 
 function gameLoop() {
-    if (serverState)
+    if (serverState){
         drawGameState(serverState);
+        handlePlayerMovement();
+    }
     requestAnimationFrame(gameLoop); // schedule next game loop
 }
 
@@ -91,9 +94,11 @@ function drawGameState(gs) {
     var ctx = document.getElementById('canvas').getContext('2d');
     
     drawBackground(ctx);
+    
+    drawPlayers(ctx, gs);
+
     const roomSize = 10;
     drawMap(ctx,gs,localState.map,roomSize);
-    drawPlayers(ctx, gs);
 
 }   
 
@@ -188,7 +193,31 @@ function drawPlayers(ctx, gs) {
     }
 }
 
+function handlePlayerMovement(){
+    if(keys['a'] || keys['ArrowLeft']){
+        movePlayer("left");
+    }
+    else if(keys['w'] || keys['ArrowUp']){
+        movePlayer("up");
+    }
+    else if(keys['d'] || keys['ArrowRight']){
+        movePlayer("right");
+    }
+    else if(keys['s'] || keys['ArrowDown']){
+        movePlayer("down");
+    }
+}
+
+function movePlayer(direction){
+    socket.send(JSON.stringify({
+        type:"movePlayer",
+        id:localState.playerId,
+        direction:direction
+    }));
+}
+
 $(document).keydown(function(e) {
+    keys[e.key] = true;
     if (e.which === 32) { // Space key
         e.preventDefault();
         socket.send(JSON.stringify({
@@ -196,6 +225,10 @@ $(document).keydown(function(e) {
         }));
     }
 });
+
+window.onkeyup = function(e) {
+    keys[e.key] = false;
+};
 
 $(document).ready(function() {   
 

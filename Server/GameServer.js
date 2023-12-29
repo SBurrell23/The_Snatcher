@@ -23,7 +23,7 @@ var playerObject ={
     hasKey: false,
     foundDoor1: false,
     foundDoor2: false,
-    speed:1
+    speed:4
 };
 
 var theSnatcherObject ={
@@ -82,6 +82,27 @@ wss.on('connection', (ws) => {
             gs.state = 'playing';
             gameMap.spawnPlayers(gs.players);
         }
+
+        if(message.type == "movePlayer"){
+            var player = gs.players.find(player => player.id == message.id);
+            if(player){
+                switch(message.direction){
+                    case "up":
+                        player.currPos.y -= player.speed;
+                        break;
+                    case "down":
+                        player.currPos.y += player.speed;
+                        break;
+                    case "left":
+                        player.currPos.x -= player.speed;
+                        break;
+                    case "right":
+                        player.currPos.x += player.speed;
+                        break;
+                }
+            }
+        }
+
     });
 
     sendClients({type: "map",map: gameMap.generateNewMap()})

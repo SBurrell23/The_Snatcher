@@ -1,10 +1,16 @@
 var socket = null;
 var reConnectInterval = null;
 
+var serverState = null;
+var localState = {
+    playerId: -1,
+    map: null
+};
+
 function connectWebSocket() {
     console.log("Attempting to connect to server...");
-    globalState = null;
-    playerId = -1;
+    serverState = null;
+    localState.playerId = -1;
     
     clearInterval(reConnectInterval);
 
@@ -20,7 +26,6 @@ function connectWebSocket() {
         requestAnimationFrame(gameLoop);
     });
 
-
     socket.addEventListener('close', function(event) {
         console.log('WebSocket connection closed.');
         $("#offlineMessage").css("display", "flex");
@@ -31,26 +36,25 @@ function connectWebSocket() {
 }
 connectWebSocket();
 
-var globalState = null;
-var playerId = -1;
-
 function recievedServerMessage(message) {
     var message = JSON.parse(message);
 
     if(message.type == "playerId"){
-        playerId = message.id
+        localState.playerId = message.id
+    }
+    else if(message.type == "map"){
+        localState.map = message.map;
     }
     else if(message.type == "gs"){
-        globalState = message;
-        updateLobby(globalState);
-        updateInput(globalState,playerId);
+        serverState = message;
+        updateLobby(serverState);
+        updateInput(serverState,localState.playerId);
     }
 }
 
 function gameLoop() {
-    var gs = globalState
-    if (gs)
-        drawGameState(gs);
+    if (serverState)
+        drawGameState(serverState);
     requestAnimationFrame(gameLoop); // schedule next game loop
 }
 
@@ -74,8 +78,8 @@ function updateInput(gs, id) {
     var joinButton = $('#joinGameButton');
 
     if (gs.players.some(player => player.id === id)) {
-        input.prop('disabled', true);
-        joinButton.prop('disabled', true);
+        // input.prop('disabled', true);
+        // joinButton.prop('disabled', true);
     } else {
         input.prop('disabled', false);
         joinButton.prop('disabled', false);
@@ -87,41 +91,11 @@ function drawGameState(gs) {
     var ctx = document.getElementById('canvas').getContext('2d');
     
     drawBackground(ctx);
-    drawMap(ctx, gs);
+    const roomSize = 10;
+    drawMap(ctx,gs,localState.map,roomSize);
+    drawPlayers(ctx, gs);
 
 }   
-
-function drawMap(ctx, gs) {
-    if (gs.map) {
-        const roomSize = 10;
-        const roomColor0 = 'rgba(0, 0, 0, .8)';
-        const roomColor1 = 'red';
-        const roomColor2 = 'blue';
-        const roomColor3 = 'green';
-
-        for (let row = 0; row < gs.map.length; row++) {
-            for (let col = 0; col < gs.map[row].length; col++) {
-                const room = gs.map[row][col];
-                const roomX = ctx.canvas.width - (roomSize * (col + 1));
-                const roomY = roomSize * row;
-
-                var roomColor = 'gray';
-                if (room === 0)
-                    roomColor = roomColor0;
-                if (room === 1) 
-                    roomColor = roomColor1;
-                if (room === 2) 
-                    roomColor = roomColor2;
-                if (room === 3) 
-                    roomColor = roomColor3;
-
-                ctx.fillStyle = roomColor;
-                ctx.fillRect(roomX, roomY, roomSize, roomSize);
-            }
-        }
-    }
-}  
-
 
 function drawBackground(ctx) {
     const squareSize = 10;
@@ -146,6 +120,73 @@ function drawBackground(ctx) {
     ctx.fillRect(0, ctx.canvas.height - lineWidth, ctx.canvas.width, lineWidth);
 }
 
+function drawMap(ctx, gs, map, roomSize) {
+    if (map) {
+        
+        const blankSpace = 'rgba(0, 0, 0, .75)';
+        const emptyRoom = 'red';
+        const snatcherSpawn = 'blue';
+        const exitDoor = 'green';
+
+        for (let row = 0; row < map.length; row++) {
+            for (let col = 0; col < map[row].length; col++) {
+                const room = map[row][col];
+                const roomX = ctx.canvas.width - (roomSize * (col + 1));
+                const roomY = roomSize * row;
+
+                var roomColor = 'gray';
+                if(playerInRoom(gs,row,col)){
+                    roomColor = 'yellow';
+                }
+                else if(room === 0)
+                    roomColor = blankSpace;
+                else if (room === 1) 
+                    roomColor = emptyRoom;
+                else if (room === 2) 
+                    roomColor = snatcherSpawn;
+                else if (room === 3) 
+                    roomColor = exitDoor;
+
+                ctx.fillStyle = roomColor;
+                ctx.fillRect(roomX, roomY, roomSize, roomSize);
+            }
+        }
+    }
+}  
+
+function playerInRoom(gs, row, col) {
+    //console.log(gs.players);
+    if (gs.players) {
+        for (let i = 0; i < gs.players.length; i++) {
+            const player = gs.players[i];
+            if (player.currRoom.x == col && player.currRoom.y == row)
+                return true;
+        }
+    }
+}
+
+function isMe(id){
+    return id == localState.playerId;
+}
+
+function drawPlayers(ctx, gs) {
+    const playerRadius = 25;
+
+    if (gs.players) {
+        for (let i = 0; i < gs.players.length; i++) {
+            
+            var player = gs.players[i];
+            if(playerInRoom(gs,player.currRoom.x,player.currRoom.y) || isMe(player.id)){
+                ctx.fillStyle = '#C19317';
+                if(isMe(player.id))
+                    ctx.fillStyle = '#FFBE0B';
+                ctx.beginPath();
+                ctx.arc(player.currPos.x, player.currPos.y, playerRadius, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+        }
+    }
+}
 
 $(document).keydown(function(e) {
     if (e.which === 32) { // Space key
@@ -158,24 +199,16 @@ $(document).keydown(function(e) {
 
 $(document).ready(function() {   
 
-    var canvas = document.getElementById('canvas');
-    var parentDiv = canvas.parentNode;
-    canvas.width = parentDiv.offsetWidth - 100;
-
-    $(window).resize(function() {
-        canvas.width = parentDiv.offsetWidth - 100;
-    });
-
     $('#joinGameButton').click(function() {
         var playerName = $('#playerNameInput').val();
-        if(playerName == ""){
+        //if(playerName == ""){
           playerName = "Player #"+ (Math.floor(Math.random() * 100) + 1);
           $('#playerNameInput').val(playerName);
-        }
+        //}
         socket.send(JSON.stringify({
             type:"playerJoin",
             name:playerName,
-            id:playerId
+            id:String(Date.now())
         }));
     });
 
@@ -183,6 +216,13 @@ $(document).ready(function() {
         if (e.which === 13) {
             $('#joinGameButton').click();
         }
+    });
+
+    $('#startGameButton').click(function() {
+        socket.send(JSON.stringify({
+            type:"startGame",
+            id:localState.playerId
+        }));
     });
 
 });

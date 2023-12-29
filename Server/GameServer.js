@@ -7,8 +7,7 @@ var gs = {
     type: "gs",
     state: 'lobby',
     players:[],
-    theSnatcher:undefined,
-    map:undefined
+    theSnatcher:undefined
     //Room Types: 0 = empty, 1 = room, 2 = starting room, 3 = door
 };
 
@@ -20,6 +19,7 @@ var playerObject ={
     sWins:0,
     rWins:0,
     currRoom:{x:-1,y:-1},
+    currPos:{x:-100,y:-100},
     hasKey: false,
     foundDoor1: false,
     foundDoor2: false,
@@ -38,8 +38,8 @@ var theSnatcherObject ={
 };
 
 var playTime = 0;
-
 var timeouts = [];
+var gameMap = new GameMap();
 
 var defaultGameState = JSON.parse(JSON.stringify(gs));
 
@@ -70,12 +70,21 @@ wss.on('connection', (ws) => {
                 console.log("Player already connected: " + message.id);
             }
         }
+
         if(message.type == "generateMap"){
-            gs.map  = GameMap.generateMap();
+            gameMap  = new GameMap();
+            sendClients({type: "map", map: gameMap.generateNewMap()})
+            gameMap.spawnPlayers(gs.players);
+        }
+
+        if(message.type =="startGame"){
+            console.log("Starting game...");
+            gs.state = 'playing';
+            gameMap.spawnPlayers(gs.players);
         }
     });
 
-    gs.map = GameMap.generateMap();
+    sendClients({type: "map",map: gameMap.generateNewMap()})
 
     //A user has disconnected
     ws.on('close', function() {
@@ -122,6 +131,13 @@ function clearAllTimeouts() {
     timeouts = [];
 }
 
+function sendClients(object){
+    wss.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN)
+            client.send(JSON.stringify(object));
+    });
+
+}
 setInterval(function() {
     updatePlayTime();
 

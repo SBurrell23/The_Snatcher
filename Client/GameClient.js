@@ -93,10 +93,12 @@ function drawGameState(gs) {
 }   
 
 function drawMap(ctx, gs) {
-    if(gs.map){
+    if (gs.map) {
         const roomSize = 15;
         const roomColor0 = 'black';
         const roomColor1 = 'red';
+        const roomColor2 = 'blue';
+        const roomColor3 = 'green';
 
         for (let row = 0; row < gs.map.length; row++) {
             for (let col = 0; col < gs.map[row].length; col++) {
@@ -104,12 +106,22 @@ function drawMap(ctx, gs) {
                 const roomX = ctx.canvas.width - (roomSize * (col + 1));
                 const roomY = roomSize * row;
 
-                ctx.fillStyle = room === 0 ? roomColor0 : roomColor1;
+                var roomColor = 'gray';
+                if (room === 0)
+                    roomColor = roomColor0;
+                if (room === 1) 
+                    roomColor = roomColor1;
+                if (room === 2) 
+                    roomColor = roomColor2;
+                if (room === 3) 
+                    roomColor = roomColor3;
+
+                ctx.fillStyle = roomColor;
                 ctx.fillRect(roomX, roomY, roomSize, roomSize);
             }
         }
     }
-}
+}  
 
 
 function drawBackground(ctx) {
@@ -137,7 +149,12 @@ function drawBackground(ctx) {
 
 
 $(document).keydown(function(e) {
-
+    if (e.which === 32) { // Space key
+        e.preventDefault();
+        socket.send(JSON.stringify({
+            type: "generateMap"
+        }));
+    }
 });
 
 $(document).ready(function() {   
@@ -173,5 +190,7 @@ $(document).ready(function() {
             $('#joinGameButton').click();
         }
     });
+
 });
+
 

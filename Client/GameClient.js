@@ -39,7 +39,6 @@ function recievedServerMessage(message) {
 
     if(message.type == "playerId"){
         playerId = message.id
-        localStorage.setItem("TSPID", playerId);
     }
     else if(message.type == "gs"){
         globalState = message;
@@ -94,8 +93,8 @@ function drawGameState(gs) {
 
 function drawMap(ctx, gs) {
     if (gs.map) {
-        const roomSize = 15;
-        const roomColor0 = 'black';
+        const roomSize = 10;
+        const roomColor0 = 'rgba(0, 0, 0, .8)';
         const roomColor1 = 'red';
         const roomColor2 = 'blue';
         const roomColor3 = 'green';
@@ -166,11 +165,6 @@ $(document).ready(function() {
     $(window).resize(function() {
         canvas.width = parentDiv.offsetWidth - 100;
     });
-
-    var TSPID = localStorage.getItem('TSPID');
-    if (TSPID) {
-        playerId = TSPID;
-    }
 
     $('#joinGameButton').click(function() {
         var playerName = $('#playerNameInput').val();

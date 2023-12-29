@@ -14,9 +14,20 @@ var playerObject ={
     id: -1,
     name: "",
     isConnected: false,
+    points:0,
     sWins:0,
     rWins:0
 };
+
+var theSnatcherObject ={
+    id: -1,
+    name: "",
+    isConnected: false,
+    points: 0,
+    sWins:0,
+    rWins:0
+};
+}
 
 var playTime = 0;
 

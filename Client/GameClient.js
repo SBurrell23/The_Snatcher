@@ -63,6 +63,7 @@ function updateLobby(gs) {
         var player = gs.players[i];
         var row = $('<tr></tr>').appendTo(playerQueue);
         $('<td></td>').text(player.name).appendTo(row);
+        $('<td></td>').text(player.points).appendTo(row);
         $('<td></td>').text(player.sWins).appendTo(row);
         $('<td></td>').text(player.rWins).appendTo(row);
     }

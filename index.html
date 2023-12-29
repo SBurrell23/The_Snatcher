@@ -27,9 +27,13 @@
         margin-top:30px;
         margin-bottom:10px;
     }
+    .custom-container {
+        max-width: 90% !important; /* Adjust the value as needed */
+        min-width: 1200px;
+    }
 </style>
 <body>
-    <div class="container" style="margin-top:35px;">
+    <div class="container custom-container" style="margin-top:35px;">
         <div class="row">
             <div class="col-3">
                 <div class="text-center" id="gameHeader">The Snatcher!</div>
@@ -44,9 +48,10 @@
                     <table class="table table-sm table-dark" id="playerQueue">
                         <thead>
                             <tr>
-                            <th scope="col" style="border-top-left-radius:4px;">Player Name</th>
-                            <th scope="col">Snatcher Wins</th>
-                            <th scope="col" style="border-top-right-radius:4px;">Runner Wins</th>
+                            <th scope="col" style="border-top-left-radius:4px;">Name</th>
+                            <th scope="col">Points</th>
+                            <th scope="col">S. Wins</th>
+                            <th scope="col" style="border-top-right-radius:4px;">R. Wins</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -70,18 +75,39 @@
 
 IDEAS
 
+The Snatcher (2+ Players)
+One player is the snatcher, the rest are runners.
+A procedurally generated maze is created.
+The snatcher spawns in the middle of the maze, the runners spawn on the outside.
+
+The snatcher has to catch all the runners before:
+    the runners escape by finding X keys hidden on the map and bringing them to the (2) doors
+    (players can only hold 1 key at a time)
+    (door will require something like {numPlayers * 3} keys to open)
+    (The doors are not visible to the snatcher (when locked) but is on the map for runners)
+    (When a door is unlocked, it is visible to the snatcher)
+    (The keys are visible to everyone but also not on the runners map)
+    (the number of keys that spawn should be something like ({numPlayers*3} * 2) + 2)
+
+The snatcher catches the runners by touching them
+If a runner is caught, they are out and can spectate another player of their choosing
+If a runner had a key when they were caught, it is dropped on the ground
+
+As the # of available runners decreases, the snatcher gets faster
+
+Only the runners can see the map
+The snatcher can only see hints on each rooms doors about how far away from  any players they are
 
 
+The game ends when:
+    The snatcher catches all the runners
+    All the runners are caught or escaped
+    The snatcher ragequits
 
+    Runners get 1 Point for adding a key to the door
+    Runners get 1 Point for escaping
 
-
-
-
-
-
-
-
-
-
+    The Snatcher gets 1 Point for catching a runner
+    The Snatcher gets 3 extra points for catching all the runners
 
 -->

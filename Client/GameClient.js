@@ -140,7 +140,7 @@ function drawMap(ctx, gs, map, roomSize) {
                 const roomY = roomSize * row;
 
                 var roomColor = 'gray';
-                if(playerInRoom(gs,row,col)){
+                if(isAnyPlayerInThisRoom(gs,row,col)){
                     roomColor = 'yellow';
                 }
                 else if(room === 0)
@@ -159,7 +159,7 @@ function drawMap(ctx, gs, map, roomSize) {
     }
 }  
 
-function playerInRoom(gs, row, col) {
+function isAnyPlayerInThisRoom(gs, row, col) {
     //console.log(gs.players);
     if (gs.players) {
         for (let i = 0; i < gs.players.length; i++) {
@@ -168,7 +168,20 @@ function playerInRoom(gs, row, col) {
                 return true;
         }
     }
+    return false;
 }
+
+function isPlayerInMyRoom(gs, friendX,friendY) {
+    if(gs.players.length > 0)
+        for (let i = 0; i < gs.players.length; i++) {
+            if (isMe(gs.players[i].id)) {
+                if (gs.players[i].currRoom.x == friendX && gs.players[i].currRoom.y == friendY)
+                    return true;
+            }
+        }
+    return false;
+}
+
 
 function isMe(id){
     return id == localState.playerId;
@@ -181,10 +194,14 @@ function drawPlayers(ctx, gs) {
         for (let i = 0; i < gs.players.length; i++) {
             
             var player = gs.players[i];
-            if(playerInRoom(gs,player.currRoom.x,player.currRoom.y) || isMe(player.id)){
+            if(isMe(player.id)){
+                ctx.fillStyle = 'yellow';
+                ctx.beginPath();
+                ctx.arc(player.currPos.x, player.currPos.y, playerRadius, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+            if(!isMe(player.id) && isPlayerInMyRoom(gs,player.currRoom.x,player.currRoom.y)){
                 ctx.fillStyle = '#C19317';
-                if(isMe(player.id))
-                    ctx.fillStyle = '#FFBE0B';
                 ctx.beginPath();
                 ctx.arc(player.currPos.x, player.currPos.y, playerRadius, 0, 2 * Math.PI);
                 ctx.fill();

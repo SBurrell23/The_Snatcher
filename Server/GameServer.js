@@ -3,6 +3,9 @@ const GameMap = require('./GameMap.js');
 
 const wss = new WebSocket.Server({ port: 8080 });
 
+global.canvasWidth = 1200;
+global.canvasHeight = 700;
+
 var gs = {
     type: "gs",
     state: 'lobby',
@@ -84,23 +87,7 @@ wss.on('connection', (ws) => {
         }
 
         if(message.type == "movePlayer"){
-            var player = gs.players.find(player => player.id == message.id);
-            if(player){
-                switch(message.direction){
-                    case "up":
-                        player.currPos.y -= player.speed;
-                        break;
-                    case "down":
-                        player.currPos.y += player.speed;
-                        break;
-                    case "left":
-                        player.currPos.x -= player.speed;
-                        break;
-                    case "right":
-                        player.currPos.x += player.speed;
-                        break;
-                }
-            }
+            movePlayer(message.id, message.direction);
         }
 
     });
@@ -124,6 +111,42 @@ wss.on('connection', (ws) => {
     });
 
 });
+
+function movePlayer(id, direction){
+    var player = gs.players.find(player => player.id == id);
+    if(player){
+        switch(direction){
+            case "up":
+                if(player.currPos.y - player.speed >= 0){
+                    player.currPos.y -= player.speed;
+                } else {
+                    gameMap.movePlayerToNewRoom(player,player.currRoom.x,player.currRoom.y-1,"south");
+                }
+                break;
+            case "down":
+                if(player.currPos.y + player.speed <= global.canvasHeight){
+                    player.currPos.y += player.speed;
+                } else {
+                    gameMap.movePlayerToNewRoom(player,player.currRoom.x,player.currRoom.y+1,"north");
+                }
+                break;
+            case "left":
+                if(player.currPos.x - player.speed >= 0){
+                    player.currPos.x -= player.speed;
+                } else {
+                    gameMap.movePlayerToNewRoom(player,player.currRoom.x+1,player.currRoom.y,"east");
+                }
+                break;
+            case "right":
+                if(player.currPos.x + player.speed <= global.canvasWidth){
+                    player.currPos.x += player.speed;
+                } else {
+                    gameMap.movePlayerToNewRoom(player,player.currRoom.x-1,player.currRoom.y,"west");
+                }
+                break;
+        }
+    }
+}
 
 function playerConnected(id){
     for (let i = 0; i < gs.players.length; i++) 

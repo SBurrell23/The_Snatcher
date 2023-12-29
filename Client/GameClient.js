@@ -55,7 +55,17 @@ function gameLoop(gs) {
 }
 
 
-function updateLobby(gs){
+function updateLobby(gs) {
+    var playerQueue = $('#playerQueue tbody');
+    playerQueue.empty(); // Clear the table
+
+    for (var i = 0; i < gs.players.length; i++) {
+        var player = gs.players[i];
+        var row = $('<tr></tr>').appendTo(playerQueue);
+        $('<td></td>').text(player.name).appendTo(row);
+        $('<td></td>').text(player.sWins).appendTo(row);
+        $('<td></td>').text(player.rWins).appendTo(row);
+    }
 }
 
 function updateInput(gs,id){

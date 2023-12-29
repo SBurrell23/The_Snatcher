@@ -14,6 +14,8 @@ var playerObject ={
     id: -1,
     name: "",
     isConnected: false,
+    sWins:0,
+    rWins:0
 };
 
 var playTime = 0;

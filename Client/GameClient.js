@@ -160,7 +160,6 @@ function drawMap(ctx, gs, map, roomSize) {
 }  
 
 function isAnyPlayerInThisRoom(gs, row, col) {
-    //console.log(gs.players);
     if (gs.players) {
         for (let i = 0; i < gs.players.length; i++) {
             const player = gs.players[i];
@@ -182,7 +181,6 @@ function isPlayerInMyRoom(gs, friendX,friendY) {
     return false;
 }
 
-
 function isMe(id){
     return id == localState.playerId;
 }
@@ -200,7 +198,7 @@ function drawPlayers(ctx, gs) {
                 ctx.arc(player.currPos.x, player.currPos.y, playerRadius, 0, 2 * Math.PI);
                 ctx.fill();
             }
-            if(!isMe(player.id) && isPlayerInMyRoom(gs,player.currRoom.x,player.currRoom.y)){
+            else if(isPlayerInMyRoom(gs,player.currRoom.x,player.currRoom.y)){
                 ctx.fillStyle = '#C19317';
                 ctx.beginPath();
                 ctx.arc(player.currPos.x, player.currPos.y, playerRadius, 0, 2 * Math.PI);

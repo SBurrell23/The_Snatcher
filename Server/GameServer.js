@@ -27,7 +27,6 @@ var theSnatcherObject ={
     sWins:0,
     rWins:0
 };
-}
 
 var playTime = 0;
 

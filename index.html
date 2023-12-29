@@ -83,21 +83,25 @@ The snatcher spawns in the middle of the maze, the runners spawn on the outside.
 The snatcher has to catch all the runners before:
     the runners escape by finding X keys hidden on the map and bringing them to the (2) doors
     (players can only hold 1 key at a time)
-    (door will require something like {numPlayers * 3} keys to open)
-    (The doors are not visible to the snatcher (when locked) but is on the map for runners)
-    (When a door is unlocked, it is visible to the snatcher)
-    (The keys are visible to everyone but also not on the runners map)
+    (doors will require something like {numPlayers * 3} keys to open)
+    (The keys are MAYBE??? visible to everyone but also not on the runners map)
     (the number of keys that spawn should be something like ({numPlayers*3} * 2) + 2)
+
+THE MAP
+The map is a procedurally generated maze
+The map is 2D/2D Array
+Only the runners can see the map
+Each runner can only see the exit doors on the map once they come across them
+Each runner can see the snatchers location on the map always
+The snatcher can not see the map, 
+    BUT instead has a "hint" on each door about how far away from any player they are
+The entire map + doors WILL be revealse to the snatcher once 1 door is opened
 
 The snatcher catches the runners by touching them
 If a runner is caught, they are out and can spectate another player of their choosing
 If a runner had a key when they were caught, it is dropped on the ground
 
 As the # of available runners decreases, the snatcher gets faster
-
-Only the runners can see the map
-The snatcher can only see hints on each rooms doors about how far away from  any players they are
-
 
 The game ends when:
     The snatcher catches all the runners
@@ -109,5 +113,13 @@ The game ends when:
 
     The Snatcher gets 1 Point for catching a runner
     The Snatcher gets 3 extra points for catching all the runners
+
+
+MORE IDEAS
+Maybe add blue portals on the map for runners to use and red portals for the snatcher to use
+
+Add a BOOTS powerup runners can find that makes them faster for a short period of time
+
+Add a BBQ powerup the snatcher can find that temporarily reveals the map & players to them
 
 -->

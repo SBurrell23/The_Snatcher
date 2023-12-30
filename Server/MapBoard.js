@@ -40,7 +40,7 @@ MapBoard.prototype.generateNewMap = function() {
         }
     }
 
-    // THen add random rooms on the edges until roomCount reaches totalRooms
+    // Then add random rooms on the edges until roomCount reaches totalRooms
     while (roomCount < totalRooms) {
         const randomRow = Math.floor(Math.random() * rows);
         const randomCol = Math.floor(Math.random() * cols);
@@ -313,48 +313,6 @@ MapBoard.prototype.spawnPlayers = function(players) {
     for (let player of players) {
         console.log("Player Spawned: " + JSON.stringify(player));
     }
-}
-
-MapBoard.prototype.createWalls = function(gs) {
-    const canvasWidth = global.canvasWidth;
-    const canvasHeight = global.canvasHeight;
-    const wallWidth = 20;
-
-    // Top wall
-    gs.solidObjects.push({
-        x: 0,
-        y: 0,
-        width: canvasWidth,
-        height: wallWidth,
-        color: 'black'
-    });
-
-    // Bottom wall
-    gs.solidObjects.push({
-        x: 0,
-        y: canvasHeight - wallWidth,
-        width: canvasWidth,
-        height: wallWidth,
-        color: 'black'
-    });
-
-    // Left wall
-    gs.solidObjects.push({
-        x: 0,
-        y: wallWidth,
-        width: wallWidth,
-        height: canvasHeight - (2 * wallWidth),
-        color: 'black'
-    });
-
-    // Right wall
-    gs.solidObjects.push({
-        x: canvasWidth - wallWidth,
-        y: wallWidth,
-        width: wallWidth,
-        height: canvasHeight - (2 * wallWidth),
-        color: 'black'
-    });
 }
 
 MapBoard.prototype.inMiddleOfMap = function(x, y) {

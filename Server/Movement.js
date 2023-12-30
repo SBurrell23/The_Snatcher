@@ -1,42 +1,49 @@
 function Movement() {
 }
 
-Movement.prototype.movePlayer = function(gs,map, id, direction) {
+Movement.prototype.movePlayer = function(gs,map, id, direction,solidObjects) {
     var player = gs.players.find(player => player.id == id);
     if(player){
         switch(direction){
             case "up":
                 if((player.currPos.y - player.speed >= 0)){
-                    var destinationPos = player.currPos.y - player.speed;
-                    if(this.checkForCollision(player,destinationPos,gs.solidObjects) == false)
-                        player.currPos.y -= player.speed;
+                    var destPosY = player.currPos.y - player.speed;
+                    var destPosX = player.currPos.x;
+                    if(!this.checkForCollision(player,destPosX,destPosY,solidObjects))
+                        player.currPos.y = destPosY;
                 } else {
                     this.movePlayerToNewRoom(player,map,player.currRoom.x,player.currRoom.y-1,"south");
                 }
                 break;
+
             case "down":
                 if((player.currPos.y + player.speed <= global.canvasHeight)){
-                    var destinationPos = player.currPos.y + player.speed;
-                    if(this.checkForCollision(player,destinationPos,gs.solidObjects) == false)
-                        player.currPos.y += player.speed;
+                    var destPosY = player.currPos.y + player.speed;
+                    var destPosX = player.currPos.x;
+                    if(!this.checkForCollision(player,destPosX,destPosY,solidObjects))
+                        player.currPos.y = destPosY;
                 } else {
                     this.movePlayerToNewRoom(player,map,player.currRoom.x,player.currRoom.y+1,"north");
                 }
                 break;
+
             case "left":
                 if((player.currPos.x - player.speed >= 0)){
-                    var destinationPos = player.currPos.x - player.speed;
-                    if(this.checkForCollision(player,destinationPos,gs.solidObjects) == false)
-                        player.currPos.x -= player.speed;
+                    var destPosX = player.currPos.x - player.speed;
+                    var destPosY = player.currPos.y;
+                    if(!this.checkForCollision(player,destPosX,destPosY,solidObjects))
+                        player.currPos.x = destPosX;
                 } else {
                     this.movePlayerToNewRoom(player,map,player.currRoom.x+1,player.currRoom.y,"east");
                 }
                 break;
+
             case "right":
                 if((player.currPos.x + player.speed <= global.canvasWidth)){
-                    var destinationPos = player.currPos.x + player.speed;
-                    if(this.checkForCollision(player,destinationPos,gs.solidObjects) == false)
-                        player.currPos.x += player.speed;
+                    var destPosX = player.currPos.x + player.speed
+                    var destPosY = player.currPos.y;
+                    if(!this.checkForCollision(player,destPosX,destPosY,solidObjects))
+                        player.currPos.x = destPosX;
                 } else {
                     this.movePlayerToNewRoom(player,map,player.currRoom.x-1,player.currRoom.y,"west");
                 }
@@ -76,22 +83,36 @@ Movement.prototype.movePlayerToNewRoom = function(player,map, newXRoom, newYRoom
     }
 }
 
-Movement.prototype.checkForCollision = function(player, destinationPos, solidObjects) {
+Movement.prototype.checkForCollision = function(player, destPosX, destPosY, solidObjects) {
+    
+    // Calculate the boundaries of the player's circle
+    var playerLeft = destPosX - player.radius;
+    var playerRight = destPosX + player.radius;
+    var playerTop = destPosY - player.radius;
+    var playerBottom = destPosY + player.radius;
+
+    // Check for collision with each solid object
     for (var i = 0; i < solidObjects.length; i++) {
-        var solidObject = solidObjects[i];
-        if (
-            //update this so the desitionPos passes both the X AND Y variables...
-            destinationPos >= solidObject.y &&
-            destinationPos <= solidObject.y + solidObject.height &&
-            destinationPos >= solidObject.x &&
-            destinationPos <= solidObject.x + solidObject.width
-        ) {
-            return true;
+        var object = solidObjects[i];
+
+        if (object.roomXY[0] != player.currRoom.x || object.roomXY[1] != player.currRoom.y) {
+            continue; // Skip solid objects in other rooms
+        }
+
+        // Calculate the boundaries of the solid object's rectangle
+        var objectLeft = object.x;
+        var objectRight = object.x + object.width;
+        var objectTop = object.y;
+        var objectBottom = object.y + object.height;
+
+        // Check for overlap between the player's circle and the solid object's rectangle
+        if (playerLeft < objectRight && playerRight > objectLeft && playerTop < objectBottom && playerBottom > objectTop) {
+            return true; // Collision detected
         }
     }
-    return false;
-}
 
+    return false; // No collision detected
+}
 
 Movement.prototype.didPlayerTouchSnatcher = function(gs, id) {
     var player = gs.players.find(player => player.id == id);

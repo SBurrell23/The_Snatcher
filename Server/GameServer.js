@@ -1,20 +1,18 @@
 const WebSocket = require('ws');
 const MapBoard = require('./MapBoard.js');
 const Movement = require('./Movement.js');
+const SolidObjects = require('./SolidObjects.js');
 
 const wss = new WebSocket.Server({ port: 8080 });
 
-global.canvasWidth = 1200;
+global.canvasWidth = 1100;
 global.canvasHeight = 700;
 
 var gs = {
     type: "gs",
     state: 'lobby',
     players:[],
-    theSnatcher:undefined,
-    solidObjects :[
-   
-    ]
+    theSnatcher:undefined
 };
 
 var playerObject ={
@@ -27,11 +25,11 @@ var playerObject ={
     currRoom:{x:-1,y:-1},
     currPos:{x:-100,y:-100},
     hasKey: false,
-    speed:5,
+    speed:4,
+    radius:25,
     isSnatcher: false,
     snatcherStats: undefined
 };
-
 
 var snatcherStats = {
     speedMod: 1.5
@@ -40,6 +38,7 @@ var snatcherStats = {
 var playTime = 0;
 var timeouts = [];
 var map = null;
+var solidObjects = null;
 
 var defaultGameState = JSON.parse(JSON.stringify(gs));
 
@@ -72,9 +71,7 @@ wss.on('connection', (ws) => {
         }
 
         if(message.type == "generateMap"){
-            map = new MapBoard();
-            sendClients({type: "map", map: map.generateNewMap()})
-            map.spawnPlayers(gs.players);
+            startGame();
         }
 
         if(message.type =="startGame"){
@@ -82,7 +79,7 @@ wss.on('connection', (ws) => {
         }
 
         if(message.type == "movePlayer"){
-            new Movement().movePlayer(gs,map.get(),message.id, message.direction);
+            new Movement().movePlayer(gs,map.get(),message.id, message.direction,solidObjects.get());
         }
 
     });
@@ -110,10 +107,15 @@ function startGame(){
     console.log("Starting game...");
     gs.state = 'playing';
     setSnatcher();
+
     map = new MapBoard();
     sendClients({type: "map", map: map.generateNewMap()});
-    map.createWalls(gs);
     map.spawnPlayers(gs.players);
+
+    solidObjects = new SolidObjects();
+    solidObjects.createWalls(gs, map.get());
+    sendClients({type: "solidObjects", solidObjects: solidObjects.get()});
+    
 }
 
 function setSnatcher(){

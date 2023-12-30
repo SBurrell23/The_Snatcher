@@ -4,7 +4,8 @@ var reConnectInterval = null;
 var serverState = null;
 var localState = {
     playerId: -1,
-    map: null
+    map: null,
+    solidObjects: null
 };
 var keys = {};
 var colors = {
@@ -50,6 +51,10 @@ function recievedServerMessage(message) {
     }
     else if(message.type == "map"){
         localState.map = message.map;
+    }
+    else if(message.type == "solidObjects"){
+        localState.solidObjects = message.solidObjects;
+        console.log(localState.solidObjects);
     }
     else if(message.type == "gs"){
         serverState = message;
@@ -268,8 +273,6 @@ function isMe(id){
 }
 
 function drawPlayers(ctx, gs) {
-    const playerRadius = 25;
-
     if (gs.players) {
         for (let i = 0, len = gs.players.length; i < len; i++) {
             var player = gs.players[i];
@@ -280,23 +283,36 @@ function drawPlayers(ctx, gs) {
                     color = colors.snatcher;
                 else if (isMe(player.id))
                     color = colors.me;
+
+                if(isMe(player.id)){
+                    // Draw currRoom.x and currRoom.y in the middle of the screen
+                    ctx.fillStyle = color;
+                    ctx.font = '20px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`X: ${player.currRoom.x}, Y: ${player.currRoom.y}`, (canvas.width / 2)-300, (canvas.height / 2)-100);
+                }
                 
                 ctx.fillStyle = color;
                 ctx.beginPath();
-                ctx.arc(player.currPos.x, player.currPos.y, playerRadius, 0, 2 * Math.PI);
+                ctx.arc(player.currPos.x, player.currPos.y, player.radius, 0, 2 * Math.PI);
                 ctx.fill();
             }
         }
     }
 }
 
-function drawSolidObjects(ctx, gs) {
-    const solidObjects = gs.solidObjects;
-    if (solidObjects) {
+function drawSolidObjects(ctx) {
+    const solidObjects = localState.solidObjects;
+    if (solidObjects && getMe(serverState)) {
         for (let i = 0; i < solidObjects.length; i++) {
             const solidObject = solidObjects[i];
-            ctx.fillStyle = solidObject.color;
-            ctx.fillRect(solidObject.x, solidObject.y, solidObject.width, solidObject.height);
+            if(
+                solidObject.roomXY[0] == getMe(serverState).currRoom.x && 
+                solidObject.roomXY[1] == getMe(serverState).currRoom.y
+                ){
+                ctx.fillStyle = solidObject.color;
+                ctx.fillRect(solidObject.x, solidObject.y, solidObject.width, solidObject.height);
+            }
         }
     }
 }

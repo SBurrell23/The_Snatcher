@@ -7,6 +7,11 @@ var localState = {
     map: null
 };
 var keys = {};
+var colors = {
+    snatcher: '#000C66',
+    me: 'yellow',
+    otherPlayer: '#fc2eff'
+}
 
 function connectWebSocket() {
     console.log("Attempting to connect to server...");
@@ -95,10 +100,11 @@ function drawGameState(gs) {
     
     drawBackground(ctx);
     drawWalls(ctx,localState.map,gs);
-    drawPlayers(ctx, gs);
 
-    const roomSize = 10;
-    drawMap(ctx,gs,localState.map,roomSize);
+    if(gs.state == "playing"){
+        drawPlayers(ctx, gs);
+        drawMap(ctx,gs,localState.map,10);
+    }
 
 }   
 
@@ -189,7 +195,7 @@ function drawMap(ctx, gs, map, roomSize) {
         
         const blankSpace = 'rgba(0, 0, 0, .75)';
         const emptyRoom = 'red';
-        const snatcherSpawn = 'blue';
+        const snatcherSpawn = '#7EC8E3';
         const exitDoor = 'green';
 
         for (let row = 0; row < map.length; row++) {
@@ -200,11 +206,12 @@ function drawMap(ctx, gs, map, roomSize) {
 
                 var roomColor = 'gray';
                 if(isAnyPlayerInThisRoom(gs,row,col)){
-                    
-                    if(getMe(gs).currRoom.x == col && getMe(gs).currRoom.y == row)
-                        roomColor = 'yellow';
+                    if(getSnatcher(gs).currRoom.x == col && getSnatcher(gs).currRoom.y == row)
+                        roomColor = colors.snatcher;
+                    else if(getMe(gs).currRoom.x == col && getMe(gs).currRoom.y == row)
+                        roomColor = colors.me;
                     else
-                        roomColor = '#fc2eff';
+                        roomColor = colors.otherPlayer;
                 }
                 else if(room === 0)
                     roomColor = blankSpace;
@@ -244,14 +251,16 @@ function isPlayerInMyRoom(gs, friendX,friendY) {
     return false;
 }
 
+function getSnatcher(gs) {
+    return gs.players.find(player => player.isSnatcher) || false;
+}
+
+function isSnatcher(gs,id){
+    return id == getSnatcher(gs).id;
+}
+
 function getMe(gs) {
-    if(gs.players.length > 0)
-        for (let i = 0; i < gs.players.length; i++) {
-            if (isMe(gs.players[i].id)) {
-                return gs.players[i];
-            }
-        }
-    return null;
+    return gs.players.find(player => isMe(player.id)) || false;
 }
 
 function isMe(id){
@@ -262,17 +271,17 @@ function drawPlayers(ctx, gs) {
     const playerRadius = 25;
 
     if (gs.players) {
-        for (let i = 0; i < gs.players.length; i++) {
-            
+        for (let i = 0, len = gs.players.length; i < len; i++) {
             var player = gs.players[i];
-            if(isMe(player.id)){
-                ctx.fillStyle = 'yellow';
-                ctx.beginPath();
-                ctx.arc(player.currPos.x, player.currPos.y, playerRadius, 0, 2 * Math.PI);
-                ctx.fill();
-            }
-            else if(isPlayerInMyRoom(gs,player.currRoom.x,player.currRoom.y)){
-                ctx.fillStyle = '#fc2eff';
+            if (isPlayerInMyRoom(gs, player.currRoom.x, player.currRoom.y)) {
+                var color = colors.otherPlayer;
+                
+                if (isSnatcher(gs, player.id))
+                    color = colors.snatcher;
+                else if (isMe(player.id))
+                    color = colors.me;
+                
+                ctx.fillStyle = color;
                 ctx.beginPath();
                 ctx.arc(player.currPos.x, player.currPos.y, playerRadius, 0, 2 * Math.PI);
                 ctx.fill();

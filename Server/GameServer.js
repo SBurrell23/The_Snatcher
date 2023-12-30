@@ -25,11 +25,13 @@ var playerObject ={
     currRoom:{x:-1,y:-1},
     currPos:{x:-100,y:-100},
     hasKey: false,
-    foundDoor1: false,
-    foundDoor2: false,
     speed:5,
     isSnatcher: false,
     snatcherStats: undefined
+};
+
+var snatcherStats = {
+    speedMod: 1.5
 };
 
 var playTime = 0;
@@ -73,11 +75,7 @@ wss.on('connection', (ws) => {
         }
 
         if(message.type =="startGame"){
-            console.log("Starting game...");
-            gs.state = 'playing';
-            map = new MapBoard();
-            sendClients({type: "map", map: map.generateNewMap()})
-            map.spawnPlayers(gs.players);
+            startGame();
         }
 
         if(message.type == "movePlayer"){
@@ -104,6 +102,19 @@ wss.on('connection', (ws) => {
 
 });
 
+function startGame(){
+    console.log("Starting game...");
+    gs.state = 'playing';
+    setSnatcher();
+    map = new MapBoard();
+    sendClients({type: "map", map: map.generateNewMap()});
+    map.spawnPlayers(gs.players);
+}
+
+function setSnatcher(){
+    gs.players[0].isSnatcher = true;
+    gs.players[0].snatcherStats = snatcherStats;
+}
 
 function playerConnected(id){
     for (let i = 0; i < gs.players.length; i++) 

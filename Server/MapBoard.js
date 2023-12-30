@@ -281,6 +281,13 @@ MapBoard.prototype.spawnPlayers = function(players) {
     console.log("Spawning Players");
 
     for (let player of players) {
+        if (player.isSnatcher) {
+            // Set the snatcher's currRoom to the middle room
+            player.currRoom.x = Math.floor(this.rows / 2);
+            player.currRoom.y = Math.floor(this.cols / 2);
+            continue;
+        }
+
         let randomX, randomY;
         let roomFound = false;
 
@@ -296,6 +303,7 @@ MapBoard.prototype.spawnPlayers = function(players) {
         }
     }
 
+    //After determining rooms, place each player in the middle of their room
     for (let player of players) {
         player.currPos.x = global.canvasWidth / 2;
         player.currPos.y = global.canvasHeight / 2;

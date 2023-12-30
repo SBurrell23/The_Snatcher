@@ -1,5 +1,5 @@
 
-function GameMap() {
+function MapBoard() {
     this.gameMap = [];
     this.rows = 26;
     this.cols = 26;
@@ -7,10 +7,14 @@ function GameMap() {
     this.middleSize = 2; //Probably should stay as 2
 }
 
-GameMap.prototype.generateNewMap = function() {
+MapBoard.prototype.get = function() {
+    return this.gameMap;
+}
+
+MapBoard.prototype.generateNewMap = function() {
     console.log("Generating New Map");
 
-    var map = this.gameMap
+    var map = [];
     const rows = this.rows;
     const cols = this.cols;
     const totalRooms = this.totalRooms;
@@ -269,10 +273,11 @@ GameMap.prototype.generateNewMap = function() {
     }
 
     //Finally, a good lookin' map!
+    this.gameMap = map;
     return map;
 }
 
-GameMap.prototype.spawnPlayers = function(players) {
+MapBoard.prototype.spawnPlayers = function(players) {
     console.log("Spawning Players");
 
     for (let player of players) {
@@ -302,39 +307,4 @@ GameMap.prototype.spawnPlayers = function(players) {
     
 }
 
-GameMap.prototype.movePlayerToNewRoom = function(player, newXRoom, newYRoom, directionToSpawn) {
-
-    if (this.gameMap[newYRoom][newXRoom] > 0) { // Room is not empty.
-        console.log("Player " + player.name + " moved to " + newYRoom + ", " + newXRoom);
-        player.currRoom.x = newXRoom;
-        player.currRoom.y = newYRoom;
-
-        // Set player's current position near the directionToSpawn
-        switch (directionToSpawn) {
-            case 'north':
-                player.currPos.x = global.canvasWidth / 2;
-                player.currPos.y = 0;
-                break;
-            case 'south':
-                player.currPos.x = global.canvasWidth / 2;
-                player.currPos.y = global.canvasHeight;
-                break;
-            case 'east':
-                player.currPos.x = global.canvasWidth;
-                player.currPos.y = global.canvasHeight / 2;
-                break;
-            case 'west':
-                player.currPos.x = 0;
-                player.currPos.y = global.canvasHeight / 2;
-                break;
-            default:
-                player.currPos.x = global.canvasWidth / 2;
-                player.currPos.y = global.canvasHeight / 2;
-                break;
-        }
-    } else {
-        //console.log("Player " + player.name + " cannot move to this room!");
-    }
-}
-
-module.exports = GameMap;
+module.exports = MapBoard;

@@ -1,5 +1,6 @@
 const WebSocket = require('ws');
-const GameMap = require('./GameMap.js');
+const MapBoard = require('./MapBoard.js');
+const Movement = require('./Movement.js');
 
 const wss = new WebSocket.Server({ port: 8080 });
 
@@ -42,7 +43,7 @@ var theSnatcherObject ={
 
 var playTime = 0;
 var timeouts = [];
-var gameMap = new GameMap();
+var map = null;
 
 var defaultGameState = JSON.parse(JSON.stringify(gs));
 
@@ -75,24 +76,24 @@ wss.on('connection', (ws) => {
         }
 
         if(message.type == "generateMap"){
-            gameMap  = new GameMap();
-            sendClients({type: "map", map: gameMap.generateNewMap()})
-            gameMap.spawnPlayers(gs.players);
+            map = new MapBoard();
+            sendClients({type: "map", map: map.generateNewMap()})
+            map.spawnPlayers(gs.players);
         }
 
         if(message.type =="startGame"){
             console.log("Starting game...");
             gs.state = 'playing';
-            gameMap.spawnPlayers(gs.players);
+            map = new MapBoard();
+            sendClients({type: "map", map: map.generateNewMap()})
+            map.spawnPlayers(gs.players);
         }
 
         if(message.type == "movePlayer"){
-            movePlayer(message.id, message.direction);
+            new Movement().movePlayer(gs,map.get(),message.id, message.direction);
         }
 
     });
-
-    sendClients({type: "map",map: gameMap.generateNewMap()})
 
     //A user has disconnected
     ws.on('close', function() {
@@ -112,41 +113,6 @@ wss.on('connection', (ws) => {
 
 });
 
-function movePlayer(id, direction){
-    var player = gs.players.find(player => player.id == id);
-    if(player){
-        switch(direction){
-            case "up":
-                if(player.currPos.y - player.speed >= 0){
-                    player.currPos.y -= player.speed;
-                } else {
-                    gameMap.movePlayerToNewRoom(player,player.currRoom.x,player.currRoom.y-1,"south");
-                }
-                break;
-            case "down":
-                if(player.currPos.y + player.speed <= global.canvasHeight){
-                    player.currPos.y += player.speed;
-                } else {
-                    gameMap.movePlayerToNewRoom(player,player.currRoom.x,player.currRoom.y+1,"north");
-                }
-                break;
-            case "left":
-                if(player.currPos.x - player.speed >= 0){
-                    player.currPos.x -= player.speed;
-                } else {
-                    gameMap.movePlayerToNewRoom(player,player.currRoom.x+1,player.currRoom.y,"east");
-                }
-                break;
-            case "right":
-                if(player.currPos.x + player.speed <= global.canvasWidth){
-                    player.currPos.x += player.speed;
-                } else {
-                    gameMap.movePlayerToNewRoom(player,player.currRoom.x-1,player.currRoom.y,"west");
-                }
-                break;
-        }
-    }
-}
 
 function playerConnected(id){
     for (let i = 0; i < gs.players.length; i++) 

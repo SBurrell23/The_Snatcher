@@ -103,19 +103,8 @@ function drawGameState(gs) {
 }   
 
 function drawBackground(ctx) {
-    const squareSize = 10;
-    const numRows = Math.ceil(ctx.canvas.height / squareSize);
-    const numCols = Math.ceil(ctx.canvas.width / squareSize);
-
-    for (let row = 0; row < numRows; row++) {
-        for (let col = 0; col < numCols; col++) {
-            if ((row + col) % 2 === 0)
-                ctx.fillStyle = '#B8BADC';
-            else 
-                ctx.fillStyle = '#B2B4D3';
-            ctx.fillRect(col * squareSize, row * squareSize, squareSize, squareSize);
-        }
-    }
+    ctx.fillStyle = '#B8BADC';
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
     var lineWidth = 3;
     ctx.fillStyle = 'black';

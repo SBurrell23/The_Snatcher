@@ -94,7 +94,7 @@ function drawGameState(gs) {
     var ctx = document.getElementById('canvas').getContext('2d');
     
     drawBackground(ctx);
-    
+    drawWalls(ctx,localState.map,gs);
     drawPlayers(ctx, gs);
 
     const roomSize = 10;
@@ -112,6 +112,71 @@ function drawBackground(ctx) {
     ctx.fillRect(0, 0, lineWidth, ctx.canvas.height);
     ctx.fillRect(ctx.canvas.width - lineWidth, 0, lineWidth, ctx.canvas.height);
     ctx.fillRect(0, ctx.canvas.height - lineWidth, ctx.canvas.width, lineWidth);
+}
+
+function drawWalls(ctx,map,gs) {
+    const canvasWidth = ctx.canvas.width;
+    const canvasHeight = ctx.canvas.height;
+    const wallWidth = 10;
+    const gapWidth = 120;
+    const gapOffset = (canvasWidth - gapWidth) / 2;
+    const gapVerticalOffset = (canvasHeight - (2 * wallWidth) - gapWidth) / 2;
+
+    // Top wall
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, canvasWidth, wallWidth);
+    // Bottom wall
+    ctx.fillRect(0, canvasHeight - wallWidth, canvasWidth, wallWidth);
+    // Left wall
+    ctx.fillRect(0, 0, wallWidth, canvasHeight);
+    // Right wall
+    ctx.fillRect(canvasWidth - wallWidth, 0, wallWidth, canvasHeight);
+
+    ctx.fillStyle = 'brown';
+
+    // Top gap
+    if(isRoom(gs,map,'above'))
+        ctx.fillRect(gapOffset, 0, gapWidth, wallWidth);
+    // Bottom gap
+    if(isRoom(gs,map,'below'))
+        ctx.fillRect(gapOffset, canvasHeight - wallWidth, gapWidth, wallWidth);
+    // Left gap
+    if(isRoom(gs,map,'left'))
+        ctx.fillRect(0, wallWidth + gapVerticalOffset, wallWidth, gapWidth);
+    // Right gap
+    if(isRoom(gs,map,'right'))
+        ctx.fillRect(canvasWidth - wallWidth, wallWidth + gapVerticalOffset, wallWidth, gapWidth);
+}
+
+function isRoom(gs, map, location) {
+    if(!map)
+        return false;
+
+    const row = getMe(gs).currRoom.y;
+    const col = getMe(gs).currRoom.x;
+    
+    if(row == -1 || col == -1)
+        return false;
+
+    if (location === 'above') {
+        if (row > 0 && map[row - 1][col] !== 0) {
+            return true;
+        }
+    } else if (location === 'below') {
+        if (row < map.length - 1 && map[row + 1][col] !== 0) {
+            return true;
+        }
+    } else if (location === 'left') {
+        if (col < map[row].length - 1 && map[row][col + 1] !== 0) {
+            return true;
+        }
+
+    } else if (location === 'right') {
+        if (col > 0 && map[row][col - 1] !== 0) {
+            return true;
+        }
+    }
+    return false;
 }
 
 function drawMap(ctx, gs, map, roomSize) {
@@ -168,6 +233,16 @@ function isPlayerInMyRoom(gs, friendX,friendY) {
             }
         }
     return false;
+}
+
+function getMe(gs) {
+    if(gs.players.length > 0)
+        for (let i = 0; i < gs.players.length; i++) {
+            if (isMe(gs.players[i].id)) {
+                return gs.players[i];
+            }
+        }
+    return null;
 }
 
 function isMe(id){

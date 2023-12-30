@@ -288,7 +288,7 @@ MapBoard.prototype.spawnPlayers = function(players) {
             randomX = Math.floor(Math.random() * this.rows);
             randomY = Math.floor(Math.random() * this.cols);
 
-            if (this.gameMap[randomY][randomX] === 1) {
+            if (this.gameMap[randomY][randomX] === 1 && !this.inMiddleOfMap(randomX, randomY)) {
                 roomFound = true;
                 player.currRoom.x = randomX;
                 player.currRoom.y = randomY;
@@ -304,7 +304,16 @@ MapBoard.prototype.spawnPlayers = function(players) {
     for (let player of players) {
         console.log("Player Spawned: " + JSON.stringify(player));
     }
-    
+}
+
+MapBoard.prototype.inMiddleOfMap = function(x, y) {
+    var distanceFromMiddle = 12;
+    const middleGridStartX = Math.floor(this.rows / 2) - 5;
+    const middleGridStartY = Math.floor(this.cols / 2) - 5;
+    const middleGridEndX = middleGridStartX + distanceFromMiddle;
+    const middleGridEndY = middleGridStartY + distanceFromMiddle;
+
+    return x >= middleGridStartX && x <= middleGridEndX && y >= middleGridStartY && y <= middleGridEndY;
 }
 
 module.exports = MapBoard;

@@ -99,7 +99,7 @@ function drawGameState(gs) {
     var ctx = document.getElementById('canvas').getContext('2d');
     
     drawBackground(ctx);
-    drawWalls(ctx,localState.map,gs);
+    drawSolidObjects(ctx, gs);
 
     if(gs.state == "playing"){
         drawPlayers(ctx, gs);
@@ -286,6 +286,17 @@ function drawPlayers(ctx, gs) {
                 ctx.arc(player.currPos.x, player.currPos.y, playerRadius, 0, 2 * Math.PI);
                 ctx.fill();
             }
+        }
+    }
+}
+
+function drawSolidObjects(ctx, gs) {
+    const solidObjects = gs.solidObjects;
+    if (solidObjects) {
+        for (let i = 0; i < solidObjects.length; i++) {
+            const solidObject = solidObjects[i];
+            ctx.fillStyle = solidObject.color;
+            ctx.fillRect(solidObject.x, solidObject.y, solidObject.width, solidObject.height);
         }
     }
 }

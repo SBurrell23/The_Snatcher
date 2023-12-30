@@ -11,8 +11,10 @@ var gs = {
     type: "gs",
     state: 'lobby',
     players:[],
-    theSnatcher:undefined
-    //Room Types: 0 = empty, 1 = room, 2 = starting room, 3 = door
+    theSnatcher:undefined,
+    solidObjects :[
+   
+    ]
 };
 
 var playerObject ={
@@ -29,6 +31,7 @@ var playerObject ={
     isSnatcher: false,
     snatcherStats: undefined
 };
+
 
 var snatcherStats = {
     speedMod: 1.5
@@ -93,7 +96,8 @@ wss.on('connection', (ws) => {
         // Remove the player from the gs.players array with the id of the disconnected user
         gs.players = gs.players.filter(player => player.id !== disconnectedUserId);
         
-        if(users.size === 0) {
+        //If nobody is left or the snatcher leaves, reset the game
+        if(users.size === 0 || isSnatcher(disconnectedUserId)) {
             console.log('All clients disconnected...');
             clearAllTimeouts();
             resetGameState();
@@ -108,12 +112,20 @@ function startGame(){
     setSnatcher();
     map = new MapBoard();
     sendClients({type: "map", map: map.generateNewMap()});
+    map.createWalls(gs);
     map.spawnPlayers(gs.players);
 }
 
 function setSnatcher(){
     gs.players[0].isSnatcher = true;
     gs.players[0].snatcherStats = snatcherStats;
+}
+
+function isSnatcher(id){
+    for (let i = 0; i < gs.players.length; i++) 
+        if (gs.players[i].id == id) 
+            return gs.players[i].isSnatcher;
+    return false;
 }
 
 function playerConnected(id){

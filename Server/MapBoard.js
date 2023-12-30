@@ -5,6 +5,7 @@ function MapBoard() {
     this.cols = 26;
     this.totalRooms = Math.floor((this.rows*this.cols) * .65); //Should not be > then ~.85
     this.middleSize = 2; //Probably should stay as 2
+    //Room Types: 0 = empty, 1 = room, 2 = starting room, 3 = door
 }
 
 MapBoard.prototype.get = function() {
@@ -312,6 +313,48 @@ MapBoard.prototype.spawnPlayers = function(players) {
     for (let player of players) {
         console.log("Player Spawned: " + JSON.stringify(player));
     }
+}
+
+MapBoard.prototype.createWalls = function(gs) {
+    const canvasWidth = global.canvasWidth;
+    const canvasHeight = global.canvasHeight;
+    const wallWidth = 20;
+
+    // Top wall
+    gs.solidObjects.push({
+        x: 0,
+        y: 0,
+        width: canvasWidth,
+        height: wallWidth,
+        color: 'black'
+    });
+
+    // Bottom wall
+    gs.solidObjects.push({
+        x: 0,
+        y: canvasHeight - wallWidth,
+        width: canvasWidth,
+        height: wallWidth,
+        color: 'black'
+    });
+
+    // Left wall
+    gs.solidObjects.push({
+        x: 0,
+        y: wallWidth,
+        width: wallWidth,
+        height: canvasHeight - (2 * wallWidth),
+        color: 'black'
+    });
+
+    // Right wall
+    gs.solidObjects.push({
+        x: canvasWidth - wallWidth,
+        y: wallWidth,
+        width: wallWidth,
+        height: canvasHeight - (2 * wallWidth),
+        color: 'black'
+    });
 }
 
 MapBoard.prototype.inMiddleOfMap = function(x, y) {

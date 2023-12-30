@@ -27,18 +27,9 @@ var playerObject ={
     hasKey: false,
     foundDoor1: false,
     foundDoor2: false,
-    speed:4
-};
-
-var theSnatcherObject ={
-    id: -1,
-    name: "",
-    isConnected: false,
-    points: 0,
-    sWins:0,
-    rWins:0,
-    currRoom:{x:-1,y:-1},
-    speed:2
+    speed:5,
+    isSnatcher: false,
+    snatcherStats: undefined
 };
 
 var playTime = 0;

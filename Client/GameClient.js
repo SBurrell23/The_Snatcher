@@ -152,8 +152,13 @@ function isRoom(gs, map, location) {
     if(!map)
         return false;
 
-    const row = getMe(gs).currRoom.y;
-    const col = getMe(gs).currRoom.x;
+    const me = getMe(gs);
+
+    if(me.currRoom == undefined)
+        return false;
+
+    const row = me.currRoom.y;
+    const col = me.currRoom.x;
     
     if(row == -1 || col == -1)
         return false;
@@ -195,7 +200,11 @@ function drawMap(ctx, gs, map, roomSize) {
 
                 var roomColor = 'gray';
                 if(isAnyPlayerInThisRoom(gs,row,col)){
-                    roomColor = 'yellow';
+                    
+                    if(getMe(gs).currRoom.x == col && getMe(gs).currRoom.y == row)
+                        roomColor = 'yellow';
+                    else
+                        roomColor = '#fc2eff';
                 }
                 else if(room === 0)
                     roomColor = blankSpace;
@@ -263,7 +272,7 @@ function drawPlayers(ctx, gs) {
                 ctx.fill();
             }
             else if(isPlayerInMyRoom(gs,player.currRoom.x,player.currRoom.y)){
-                ctx.fillStyle = '#C19317';
+                ctx.fillStyle = '#fc2eff';
                 ctx.beginPath();
                 ctx.arc(player.currPos.x, player.currPos.y, playerRadius, 0, 2 * Math.PI);
                 ctx.fill();

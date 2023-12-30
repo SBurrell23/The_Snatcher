@@ -40,7 +40,7 @@ Movement.prototype.movePlayer = function(gs,map, id, direction) {
 Movement.prototype.movePlayerToNewRoom = function(player,map, newXRoom, newYRoom, directionToSpawn) {
 
     if (map[newYRoom][newXRoom] > 0) { // Room is not empty.
-        console.log("Player " + player.name + " moved to " + newYRoom + ", " + newXRoom);
+        //console.log("Player " + player.name + " moved to " + newYRoom + ", " + newXRoom);
         player.currRoom.x = newXRoom;
         player.currRoom.y = newYRoom;
 

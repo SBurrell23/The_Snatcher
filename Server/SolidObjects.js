@@ -10,8 +10,8 @@ SolidObjects.prototype.get = function() {
 SolidObjects.prototype.createWalls = function(gs,map) {
     const canvasWidth = global.canvasWidth;
     const canvasHeight = global.canvasHeight;
-    const wallWidth = 20;
-    const doorWidth = 200;
+    const wallWidth = 15;
+    const doorWidth = 150;
 
     var doorSize = 0;
 
@@ -148,7 +148,7 @@ SolidObjects.prototype.isRoom = function(map,location,col,row){
     return false;
 }
 
-SolidObjects.prototype.createFurniture = function(gs, map) {
+SolidObjects.prototype.createMazeWalls = function(gs, map) {
     for (let i = 0; i < map.length; i++) {
         for (let j = 0; j < map[i].length; j++) {
 
@@ -160,17 +160,42 @@ SolidObjects.prototype.createFurniture = function(gs, map) {
             const roomX = j;
             const roomY = i;
             var maze = [
-                ['■','■','■','■','■',' ','■',' ',' ',' ','■'],
-                ['■',' ',' ',' ',' ',' ','■',' ','■',' ',' '],
-                ['■',' ','■','■','■',' ','■',' ','■','■',' '],
-                [' ',' ',' ','■',' ',' ',' ',' ','■','■',' '],
-                ['■','■','■','■',' ','■','■',' ','■',' ',' '],
-                ['■','■','■','■',' ','■','■',' ',' ',' ','■'],
-                ['■','■','■','■',' ',' ','■','■','■','■','■']
+                [' ', '■', '■', '■', '■', '■', ' ', ' ', ' ', '■', ' ', ' ', ' ', ' ', ' '],
+                [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+                [' ', ' ', '■', '■', '■', ' ', ' ', ' ', '■', '■', ' ', ' ', ' ', ' ', ' '],
+                [' ', ' ', ' ', '■', ' ', ' ', ' ', ' ', '■', '■', ' ', ' ', ' ', ' ', '■'],
+                [' ', ' ', ' ', '■', ' ', '■', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+                [' ', ' ', ' ', '■', ' ', '■', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+                [' ', ' ', ' ', '■', ' ', ' ', '■', ' ', ' ', '■', ' ', ' ', ' ', ' ', '■'],
+                [' ', ' ', ' ', '■', ' ', ' ', '■', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+                [' ', ' ', ' ', '■', ' ', ' ', '■', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+                [' ', ' ', ' ', '■', ' ', '■', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
             ];
 
-            
-            
+            //Ratio is 10 to 14
+            //The ratio but be both even or odd or doors wont line up
+
+
+            const blockSize = 75;
+            //Turn the maze into solid objects
+            for (let k = 0; k < maze.length; k++) {
+                for (let l = 0; l < maze[k].length; l++) {
+                    const value = maze[k][l];
+                    if (value == '■') {
+                        //console.log("Creating maze wall at " + l + ", " + k);
+                        this.solidObjects.push({
+                            x: (l * blockSize),
+                            y: (k * blockSize),
+                            width: blockSize,
+                            height: blockSize,
+                            color: 'black',
+                            roomXY: [roomX, roomY],
+                            type:"mazeWall"
+                        });
+                    }
+                }
+            }  
+
         }
     }
 }

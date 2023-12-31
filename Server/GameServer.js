@@ -5,8 +5,8 @@ const SolidObjects = require('./SolidObjects.js');
 
 const wss = new WebSocket.Server({ port: 8080 });
 
-global.canvasWidth = 1100;
-global.canvasHeight = 700;
+global.canvasWidth = 1050;
+global.canvasHeight = 750;
 
 var gs = {
     type: "gs",
@@ -25,7 +25,7 @@ var playerObject ={
     currRoom:{x:-1,y:-1},
     currPos:{x:-100,y:-100},
     hasKey: false,
-    speed:4,
+    speed:3,
     radius:25,
     isSnatcher: false,
     snatcherStats: undefined
@@ -114,7 +114,7 @@ function startGame(){
 
     solidObjects = new SolidObjects();
     solidObjects.createWalls(gs, map.get());
-    solidObjects.createFurniture(gs, map.get());
+    solidObjects.createMazeWalls(gs, map.get());
     sendClients({type: "solidObjects", solidObjects: solidObjects.get()});
     
 }

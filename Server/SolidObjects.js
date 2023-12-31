@@ -160,21 +160,28 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
             const roomX = j;
             const roomY = i;
             var maze = [
-                [' ', '■', '■', '■', '■', '■', ' ', ' ', ' ', '■', ' ', ' ', ' ', ' ', ' '],
-                [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-                [' ', ' ', '■', '■', '■', ' ', ' ', ' ', '■', '■', ' ', ' ', ' ', ' ', ' '],
-                [' ', ' ', ' ', '■', ' ', ' ', ' ', ' ', '■', '■', ' ', ' ', ' ', ' ', '■'],
-                [' ', ' ', ' ', '■', ' ', '■', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-                [' ', ' ', ' ', '■', ' ', '■', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-                [' ', ' ', ' ', '■', ' ', ' ', '■', ' ', ' ', '■', ' ', ' ', ' ', ' ', '■'],
-                [' ', ' ', ' ', '■', ' ', ' ', '■', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-                [' ', ' ', ' ', '■', ' ', ' ', '■', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-                [' ', ' ', ' ', '■', ' ', '■', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
+                ['■', '■', '■', '■', '■', '■', 'N', 'N', '■', '■', '■', '■', '■', '■'],
+                ['■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■'],
+                ['■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■'],
+                ['■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■'],
+                ['W', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', 'E'],
+                ['W', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', 'E'],
+                ['■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■'],
+                ['■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■'],
+                ['■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■'],
+                ['■', '■', '■', '■', '■', '■', 'S', 'S', '■', '■', '■', '■', '■', '■']
             ];
 
-            //Ratio is 10 to 14
-            //The ratio but be both even or odd or doors wont line up
 
+            console.log("Creating path for room " + roomX + ", " + roomY);
+            path = this.createRandomPath(maze,0,5,13,5);
+
+            for (let [x, y] of path) {
+                maze[x][y] = ' ';
+            }
+            
+            
+            //Ratio is 10 to 14 - The ratio but be both even or odd or doors wont line up
 
             const blockSize = 75;
             //Turn the maze into solid objects
@@ -200,9 +207,46 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
     }
 }
 
-function createMaze(rows, cols) {
+SolidObjects.prototype.createRandomPath = function(map, startX, startY, endX, endY) {
 
-}
+    grid = JSON.parse(JSON.stringify(map));    
+
+    const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]]; // Up, Down, Left, Right
+    const path = [];
+    const stack = [[startY,startX]];
+
+    while (stack.length > 0) {
+        let [x, y] = stack.pop();
+        path.push([x, y]);
+
+        if (x === endY && y === endX) {
+            break;
+        }
+
+        // Randomize directions
+        directions.sort(() => Math.random() - 0.5);
+
+        for (let [dx, dy] of directions) {
+            let newX = x + dx;
+            let newY = y + dy;
+
+            // Check if the new position is within the grid and not yet visited
+            if ( newX >= 0 &&
+                 newY >= 0 &&
+                 newX < grid.length && 
+                 newY < grid[0].length && 
+                 grid[newX][newY] != 1
+            ) {
+                stack.push([newX, newY]);
+                // Mark as visited
+                grid[newX][newY] = 1;
+            }
+        }
+    }
+    
+    console.log(stack);
+    return path;
+};
 
 
 module.exports = SolidObjects;

@@ -1,15 +1,11 @@
 
 function MapBoard() {
     this.gameMap = [];
-    this.rows = 26;
-    this.cols = 26;
+    this.rows = 25;
+    this.cols = 25;
     this.totalRooms = Math.floor((this.rows*this.cols) * .65); //Should not be > then ~.85
     this.middleSize = 2; //Probably should stay as 2
     //Room Types: 0 = empty, 1 = room, 2 = starting room, 3 = door
-}
-
-MapBoard.prototype.get = function() {
-    return this.gameMap;
 }
 
 MapBoard.prototype.generateNewMap = function() {
@@ -199,7 +195,6 @@ MapBoard.prototype.generateNewMap = function() {
         }
     }
 
-
     //Set the middle room to be the starting room (for the snatcher)
     var startingRoomType = 2;
     map[Math.floor(rows / 2)][Math.floor(cols / 2)] = startingRoomType;
@@ -323,6 +318,10 @@ MapBoard.prototype.inMiddleOfMap = function(x, y) {
     const middleGridEndY = middleGridStartY + distanceFromMiddle;
 
     return x >= middleGridStartX && x <= middleGridEndX && y >= middleGridStartY && y <= middleGridEndY;
+}
+
+MapBoard.prototype.get = function() {
+    return this.gameMap;
 }
 
 module.exports = MapBoard;

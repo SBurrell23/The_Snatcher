@@ -108,7 +108,7 @@ function drawGameState(gs) {
 
     if(gs.state == "playing"){
         drawPlayers(ctx, gs);
-        drawMap(ctx,gs,localState.map,10);
+        drawMap(ctx,gs,localState.map);
     }
 
 }   
@@ -195,10 +195,12 @@ function isRoom(gs, map, location) {
     return false;
 }
 
-function drawMap(ctx, gs, map, roomSize) {
+function drawMap(ctx, gs, map) {
+    const roomSize = 9;
+    const walloffset = 20;
     if (map) {
         
-        const blankSpace = 'rgba(0, 0, 0, .75)';
+        const blankSpace = 'rgba(255, 255, 255, .75)';
         const emptyRoom = 'red';
         const snatcherSpawn = '#7EC8E3';
         const exitDoor = 'green';
@@ -228,7 +230,7 @@ function drawMap(ctx, gs, map, roomSize) {
                     roomColor = exitDoor;
 
                 ctx.fillStyle = roomColor;
-                ctx.fillRect(roomX, roomY, roomSize, roomSize);
+                ctx.fillRect(roomX - walloffset, roomY + walloffset, roomSize, roomSize);
             }
         }
     }

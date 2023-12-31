@@ -114,11 +114,14 @@ function startGame(){
 
     solidObjects = new SolidObjects();
     solidObjects.createWalls(gs, map.get());
+    solidObjects.createFurniture(gs, map.get());
     sendClients({type: "solidObjects", solidObjects: solidObjects.get()});
     
 }
 
 function setSnatcher(){
+    if(gs.players.length == 0)
+        return;
     gs.players[0].isSnatcher = true;
     gs.players[0].snatcherStats = snatcherStats;
 }

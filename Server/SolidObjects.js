@@ -159,50 +159,16 @@ SolidObjects.prototype.createFurniture = function(gs, map) {
 
             const roomX = j;
             const roomY = i;
-
-            var roomFurniture = [];
-
-            const numObjects = 4; // Random number of objects between 3 and 5
-
-            for (let k = 0; k < numObjects; k++) {
-                const width = Math.floor(Math.random() * 150) + 130;
-                const height = Math.floor(Math.random() * 150) + 130; 
-
-                let x, y;
-                
-                // Spawn objects in each quadrant of the room
-                if (k === 0) {
-                    x = Math.floor(Math.random() * 201) + 75 ; // Top-left quadrant
-                    y = Math.floor(Math.random() * 51) + 40;
-                } else if (k === 1) {
-                    x = (global.canvasWidth / 2) + Math.floor(Math.random() * 201) + 75; // Top-right quadrant
-                    y = Math.floor(Math.random() * 51) + 40;
-                } else if (k === 2) {
-                    x = Math.floor(Math.random() * 101) + 75 // Bottom-left quadrant
-                    y = (global.canvasHeight /2) + 200 - height + Math.floor(Math.random() * 80) + 15;
-                } else if (k === 3) {
-                    x = (global.canvasWidth / 2) + Math.floor(Math.random() * 201) + 75; // Bottom-right quadrant
-                    y = (global.canvasHeight /2) + 200 - height + Math.floor(Math.random() * 80) + 15;
-                }
-                console.log("x: " + x + " y: " + y + " width: " + width + " height: " + height);
-
-                roomFurniture.push({
-                    x: x,
-                    y: y,
-                    width: width,
-                    height: height,
-                    color: 'black',
-                    roomXY: [roomX, roomY],
-                    type: "furniture"
-                });
-            }
-            // Join roomFurniture array with solidObjects
-            this.solidObjects = this.solidObjects.concat(roomFurniture);
+            var maze = createMaze(10,10);
+            return;
+            
         }
     }
 }
 
-                
-module.exports = SolidObjects;
+function createMaze(rows, cols) {
+
+}
+
 
 module.exports = SolidObjects;

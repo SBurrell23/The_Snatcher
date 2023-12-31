@@ -26,7 +26,7 @@ SolidObjects.prototype.createWalls = function(gs,map) {
             const roomX = j;
             const roomY = i;
 
-            if(this.isRoom(map,'above',roomX,roomY))
+            if(this.isRoom(map,'north',roomX,roomY))
                 doorSize = doorWidth;
             else
                 doorSize = 0;
@@ -50,7 +50,7 @@ SolidObjects.prototype.createWalls = function(gs,map) {
                 type:"wall"
             });
         
-            if(this.isRoom(map,'below',roomX,roomY))
+            if(this.isRoom(map,'south',roomX,roomY))
                 doorSize = doorWidth;
             else
                 doorSize = 0;
@@ -75,7 +75,7 @@ SolidObjects.prototype.createWalls = function(gs,map) {
                 type:"wall"
             });
         
-            if(this.isRoom(map,'left',roomX,roomY))
+            if(this.isRoom(map,'west',roomX,roomY))
                 doorSize = doorWidth;
             else
                 doorSize = 0;
@@ -99,7 +99,7 @@ SolidObjects.prototype.createWalls = function(gs,map) {
                 type:"wall"
             });
         
-            if(this.isRoom(map,'right',roomX,roomY))
+            if(this.isRoom(map,'east',roomX,roomY))
                 doorSize = doorWidth;
             else
                 doorSize = 0;
@@ -128,19 +128,19 @@ SolidObjects.prototype.createWalls = function(gs,map) {
 }
 
 SolidObjects.prototype.isRoom = function(map,location,col,row){
-    if (location === 'above') {
+    if (location === 'north') {
         if (row > 0 && map[row - 1][col] !== 0) {
             return true;
         }
-    } else if (location === 'below') {
+    } else if (location === 'south') {
         if (row < map.length - 1 && map[row + 1][col] !== 0) {
             return true;
         }
-    } else if (location === 'left') {
+    } else if (location === 'west') {
         if (col < map[row].length - 1 && map[row][col + 1] !== 0) {
             return true;
         }
-    } else if (location === 'right') {
+    } else if (location === 'east') {
         if (col > 0 && map[row][col - 1] !== 0) {
             return true;
         }
@@ -157,8 +157,8 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
             if (roomType == 0)
                 continue;
 
-            const roomX = j;
-            const roomY = i;
+            const rX = j;
+            const rY = i;
             var maze = [
                 ['■', '■', '■', '■', '■', '■', 'N', 'N', '■', '■', '■', '■', '■', '■'],
                 ['■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■'],
@@ -171,20 +171,69 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
                 ['■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■'],
                 ['■', '■', '■', '■', '■', '■', 'S', 'S', '■', '■', '■', '■', '■', '■']
             ];
+            //Ratio is 10 to 14, each door must be 2 75px blocks wide
+            //N,S,E,W stay to make sure there are always 2 blocks by each door open since the path only uses 1 block
 
+            //BUG, THE ALWAYS OPEN DOORS SHOULD ONLY BE THERE IS THERE IS A ROOM ADJACENT TO IT
+            //THIS IS OBVIOUS WHEN VISTING ANY DEAD END
 
-            console.log("Creating path for room " + roomX + ", " + roomY);
-            path = this.createRandomPath(maze,0,5,13,5);
+            var randCoin = Math.random() >= 0.5;
 
-            for (let [x, y] of path) {
-                maze[x][y] = ' ';
+            //All 4 doors
+            if(this.isRoom(map,'north',rX,rY) && this.isRoom(map,'south',rX,rY) && this.isRoom(map,'west',rX,rY) && this.isRoom(map,'east',rX,rY)){
+                this.createRandomPath(maze,'north','south');//The actual path
+                this.createRandomPath(maze,'east','west');//The actual path
+                //This actually is guaranteed to work because the paths MUST cross
             }
+
+            // 3 DOORS
+            //North, South, East
+            else if(this.isRoom(map,'north',rX,rY) && this.isRoom(map,'south',rX,rY) && this.isRoom(map,'east',rX,rY)){
+                this.createRandomPath(maze,'north','south');
+                this.createRandomPath(maze,'south','east');
+            }
+            //North, South, West
+            else if(this.isRoom(map,'north',rX,rY) && this.isRoom(map,'south',rX,rY) && this.isRoom(map,'west',rX,rY)){
+                this.createRandomPath(maze,'north','south');
+                this.createRandomPath(maze,'north','west');
+            }
+            //North, East, West
+            else if(this.isRoom(map,'north',rX,rY) && this.isRoom(map,'east',rX,rY) && this.isRoom(map,'west',rX,rY)){
+                this.createRandomPath(maze,'east','west');
+                this.createRandomPath(maze,'north','west');
+            }
+            //South, East, West
+            else if(this.isRoom(map,'south',rX,rY) && this.isRoom(map,'east',rX,rY) && this.isRoom(map,'west',rX,rY)){
+                this.createRandomPath(maze,'east','west');
+                this.createRandomPath(maze,'south','east');
+            }
+
+            // 2 DOORS
+            //East to West
+            else if(this.isRoom(map,'east',rX,rY) && this.isRoom(map,'west',rX,rY))
+                this.createRandomPath(maze,'east','west');
+            //North to south
+            else if(this.isRoom(map,'north',rX,rY) && this.isRoom(map,'south',rX,rY))
+                this.createRandomPath(maze,'north','south');
+            //South to West
+            else if(this.isRoom(map,'south',rX,rY) && this.isRoom(map,'west',rX,rY))
+                this.createRandomPath(maze,'south','west');
+            //West to North
+            else if(this.isRoom(map,'west',rX,rY) && this.isRoom(map,'north',rX,rY))
+                this.createRandomPath(maze,'west','north');
+            //North to East
+            else if(this.isRoom(map,'north',rX,rY) && this.isRoom(map,'east',rX,rY))
+                this.createRandomPath(maze,'north','east');
+            //East to South
+            else if(this.isRoom(map,'east',rX,rY) && this.isRoom(map,'south',rX,rY))
+                this.createRandomPath(maze,'east','south');
+
             
+
             
-            //Ratio is 10 to 14 - The ratio but be both even or odd or doors wont line up
 
             const blockSize = 75;
-            //Turn the maze into solid objects
+            //Finally after all the pathing is done turn any leftover '■' into solidObjects to build the room
             for (let k = 0; k < maze.length; k++) {
                 for (let l = 0; l < maze[k].length; l++) {
                     const value = maze[k][l];
@@ -196,7 +245,7 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
                             width: blockSize,
                             height: blockSize,
                             color: 'black',
-                            roomXY: [roomX, roomY],
+                            roomXY: [rX, rY],
                             type:"mazeWall"
                         });
                     }
@@ -207,19 +256,58 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
     }
 }
 
-SolidObjects.prototype.createRandomPath = function(map, startX, startY, endX, endY) {
+SolidObjects.prototype.createRandomPath = function(maze, from, to) {
 
-    grid = JSON.parse(JSON.stringify(map));    
+    var startY = null;
+    var startX = null;
+    var endY = null;
+    var endX = null;
+
+    if(from == 'north'){
+        startY = 6;
+        startX = 0;
+    }
+    else if(from == 'south'){
+        startY = 6;
+        startX = 9;
+    }
+    else if(from == 'west'){
+        startY = 0;
+        startX = 5;
+    }
+    else if(from == 'east'){
+        startY = 13;
+        startX = 5;
+    }
+
+    if(to == 'north'){
+        endY = 6;
+        endX = 0;
+    }
+    else if(to == 'south'){
+        endY = 6;
+        endX = 9;
+    }
+    else if(to == 'west'){
+        endY = 0;
+        endX = 5;
+    }
+    else if(to == 'east'){
+        endY = 13;
+        endX = 5;
+    }
+
+    grid = JSON.parse(JSON.stringify(maze));    
 
     const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]]; // Up, Down, Left, Right
     const path = [];
-    const stack = [[startY,startX]];
+    const stack = [[startX,startY]];
 
     while (stack.length > 0) {
         let [x, y] = stack.pop();
         path.push([x, y]);
 
-        if (x === endY && y === endX) {
+        if (x === endX && y === endY) {
             break;
         }
 
@@ -243,10 +331,10 @@ SolidObjects.prototype.createRandomPath = function(map, startX, startY, endX, en
             }
         }
     }
-    
-    console.log(stack);
-    return path;
-};
 
+    //Finally, loop through all the path x,y's and clear them from the actual maze
+    for (let [x, y] of path)
+        maze[x][y] = ' ';
+};
 
 module.exports = SolidObjects;

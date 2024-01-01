@@ -4,7 +4,7 @@ function Movement() {
 Movement.prototype.movePlayer = function(gs,map, id, direction,solidObjects) {
     var player = gs.players.find(player => player.id == id);
     if(player){
-        console.log("Moving player " + player.name + " at speed " + player.speed);
+        //console.log("Moving player " + player.name + " at speed " + player.speed);
         switch(direction){
             case "up":
                 if((player.currPos.y - player.speed >= 0)){

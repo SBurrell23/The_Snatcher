@@ -10,8 +10,9 @@ var localState = {
 var keys = {};
 var colors = {
     snatcher: '#000C66',
-    me: 'yellow',
-    otherPlayer: '#fc2eff'
+    me: '#FF8300',
+    otherPlayer: '#81B622',
+    key: 'yellow'
 }
 
 function connectWebSocket() {
@@ -104,10 +105,16 @@ function drawGameState(gs) {
     var ctx = document.getElementById('canvas').getContext('2d');
     
     drawBackground(ctx);
-    drawSolidObjects(ctx, gs);
 
-    if(gs.state == "playing"){
-        drawPlayers(ctx, gs);
+
+    if(gs.state == "playing" && getMe(gs).currRoom != undefined){
+        var currentRoomX = getMe(gs).currRoom.x;
+        var currentRoomY = getMe(gs).currRoom.y;
+    
+        drawSolidObjects(ctx, currentRoomX, currentRoomY);  
+        drawPlayers(ctx, gs, currentRoomX, currentRoomY);
+        drawItems(ctx, gs, currentRoomX, currentRoomY);
+        
         drawMap(ctx,gs,localState.map);
     }
 
@@ -203,7 +210,7 @@ function drawMap(ctx, gs, map) {
         const blankSpace = 'rgba(255, 255, 255, .75)';
         const emptyRoom = 'red';
         const snatcherSpawn = '#7EC8E3';
-        const exitDoor = 'green';
+        const exitDoor = '#350300';
 
         for (let row = 0; row < map.length; row++) {
             for (let col = 0; col < map[row].length; col++) {
@@ -274,43 +281,63 @@ function isMe(id){
     return id == localState.playerId;
 }
 
-function drawPlayers(ctx, gs) {
-    if (gs.players) {
-        for (let i = 0, len = gs.players.length; i < len; i++) {
-            var player = gs.players[i];
-            if (isPlayerInMyRoom(gs, player.currRoom.x, player.currRoom.y)) {
-                var color = colors.otherPlayer;
-                
-                if (isSnatcher(gs, player.id))
-                    color = colors.snatcher;
-                else if (isMe(player.id))
-                    color = colors.me;
+function drawPlayers(ctx, gs, currentRoomX, currentRoomY) {
+    for (let i = 0, len = gs.players.length; i < len; i++) {
+        var player = gs.players[i];
+        if (player.currRoom.x == currentRoomX && player.currRoom.y == currentRoomY) {
+            var color = colors.otherPlayer;
+            
+            if (isSnatcher(gs, player.id))
+                color = colors.snatcher;
+            else if (isMe(player.id))
+                color = colors.me;
 
-                if(isMe(player.id)){
-                    // Draw currRoom.x and currRoom.y in the middle of the screen
-                    ctx.fillStyle = color;
-                    ctx.font = '20px Arial';
-                    ctx.textAlign = 'center';
-                    ctx.fillText(`X: ${player.currRoom.x}, Y: ${player.currRoom.y}`, (canvas.width / 2)-300, (canvas.height / 2)-100);
-                }
-                
+            if(isMe(player.id)){
+                // Draw currRoom.x and currRoom.y in the middle of the screen
                 ctx.fillStyle = color;
-                ctx.beginPath();
-                ctx.arc(player.currPos.x, player.currPos.y, player.radius, 0, 2 * Math.PI);
-                ctx.fill();
+                ctx.font = '20px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(`X: ${player.currRoom.x}, Y: ${player.currRoom.y}`, (canvas.width / 2)-300, (canvas.height / 2)-100);
             }
+            
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(player.currPos.x, player.currPos.y, player.radius, 0, 2 * Math.PI);
+            ctx.fill();
         }
     }
 }
 
-function drawSolidObjects(ctx) {
+function drawItems(ctx, gs, currentRoomX, currentRoomY) {
+    for (let i = 0; i < gs.items.length; i++) {
+        var item = gs.items[i];
+        if (
+            item.currRoom.x == currentRoomX && 
+            item.currRoom.y == currentRoomY &&
+            item.isConsumed == false &&
+            item.ownerId == -1
+            ) {
+            if(item.type == 'key'){
+                ctx.fillStyle = colors.key;
+                ctx.font = '20px Arial';
+                ctx.fillText(item.type.toUpperCase(), item.currPos.x, item.currPos.y);
+            }else{
+                ctx.fillStyle = 'magenta';
+                ctx.font = '20px Arial';
+                ctx.fillText(item.type.toUpperCase(), item.currPos.x, item.currPos.y);
+            }
+        }
+    }  
+}
+
+function drawSolidObjects(ctx,currentRoomX, currentRoomY) {
     const solidObjects = localState.solidObjects;
-    if (solidObjects && getMe(serverState)) {
+    if (solidObjects) {
         for (let i = 0; i < solidObjects.length; i++) {
             const solidObject = solidObjects[i];
             if(
-                solidObject.roomXY[0] == getMe(serverState).currRoom.x && 
-                solidObject.roomXY[1] == getMe(serverState).currRoom.y
+                solidObject.roomXY[0] == currentRoomX && 
+                solidObject.roomXY[1] == currentRoomY
                 ){
                 ctx.fillStyle = solidObject.color;
                 ctx.fillRect(solidObject.x, solidObject.y, solidObject.width, solidObject.height);

@@ -7,7 +7,7 @@ SolidObjects.prototype.get = function() {
     return this.solidObjects;
 }
 
-SolidObjects.prototype.createWalls = function(gs,map) {
+SolidObjects.prototype.createPerimeterWalls = function(gs,map) {
     const canvasWidth = global.canvasWidth;
     const canvasHeight = global.canvasHeight;
     const wallWidth = 15;
@@ -265,9 +265,33 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
                     this.openDoors(maze,['middle']);
                 }
 
+                //Adjust the player starting rooms and make sure they have space to spawn
                 for (let p = 0; p < gs.players.length; p++) {
                     const player = gs.players[p];
                     if (player.currRoom.x == rX && player.currRoom.y == rY) {
+                        if(this.isRoom(map,'north',rX,rY)){
+                            this.createRandomPath(maze,'middle','north');
+                            this.openDoors(maze,['middle']); 
+                        }
+                        else if(this.isRoom(map,'south',rX,rY)){
+                            this.createRandomPath(maze,'middle','south');
+                            this.openDoors(maze,['middle']);
+                        }
+                        else if(this.isRoom(map,'east',rX,rY)){
+                            this.createRandomPath(maze,'middle','east');
+                            this.openDoors(maze,['middle']);
+                        }
+                        else if(this.isRoom(map,'west',rX,rY)){
+                            this.createRandomPath(maze,'middle','west');
+                            this.openDoors(maze,['middle']);
+                        }
+                    }
+                }
+
+                //Adjust the rooms with items in them and make sure they have space to spawn
+                for (let e = 0; e < gs.items.length; e++) {
+                    const item = gs.items[e];
+                    if (item.currRoom.x == rX && item.currRoom.y == rY) {
                         if(this.isRoom(map,'north',rX,rY)){
                             this.createRandomPath(maze,'middle','north');
                             this.openDoors(maze,['middle']); 

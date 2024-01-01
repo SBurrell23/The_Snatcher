@@ -12,7 +12,7 @@ var gs = {
     type: "gs",
     state: 'lobby',
     players:[],
-    theSnatcher:undefined
+    items:[]
 };
 
 var playerObject ={
@@ -111,12 +111,13 @@ function startGame(){
     map = new MapBoard();
     sendClients({type: "map", map: map.generateNewMap()});
     map.spawnPlayers(gs.players);
+    map.spawnItems(gs);
 
     solidObjects = new SolidObjects();
-    solidObjects.createWalls(gs, map.get());
+    solidObjects.createPerimeterWalls(gs, map.get());
     solidObjects.createMazeWalls(gs, map.get());
     sendClients({type: "solidObjects", solidObjects: solidObjects.get()});
-    
+
 }
 
 function setSnatcher(){

@@ -288,8 +288,8 @@ MapBoard.prototype.spawnPlayers = function(players) {
         let roomFound = false;
 
         while (!roomFound) {
-            randomX = Math.floor(Math.random() * this.rows);
-            randomY = Math.floor(Math.random() * this.cols);
+            randomX = Math.floor(Math.random() * this.cols);
+            randomY = Math.floor(Math.random() * this.rows);
 
             if (this.gameMap[randomY][randomX] === 1 && !this.inMiddleOfMap(randomX, randomY)) {
                 roomFound = true;
@@ -310,14 +310,84 @@ MapBoard.prototype.spawnPlayers = function(players) {
     }
 }
 
+MapBoard.prototype.spawnItems = function(gs) {
+    console.log("Spawning Items");
+
+    gs.items = [];
+
+    //First create the items before we go and spawn them.
+    this.createItems(gs,'key',gs.players.length * 3);
+    this.createItems(gs,'teleport',gs.players.length * 3);
+
+    for (let item of gs.items) {
+
+        let randomX, randomY;
+        let roomFound = false;
+
+        while (!roomFound) {
+            randomX = Math.floor(Math.random() * this.cols);
+            randomY = Math.floor(Math.random() * this.rows);
+
+            if (
+                this.gameMap[randomY][randomX] === 1 && 
+                !this.isPlayerInRoom(gs.players,randomX,randomY) &&
+                !this.isItemInRoom(gs.items,randomX,randomY)
+                //For now its probably fine if an items spawn near the center of the map
+                //!this.inMiddleOfMap(randomX, randomY)
+                ) {
+                roomFound = true;
+                item.currRoom.x = randomX;
+                item.currRoom.y = randomY;
+                console.log("Item Spawned: " + JSON.stringify(item));
+            }
+        }
+    }
+}
+
+MapBoard.prototype.createItems = function(gs,type,numItems) {
+    for (let i = 1; i <= numItems; i++) {
+        gs.items.push({
+            type: type,
+            itemId: (gs.items.length + 1),
+            currPos: {
+                x: global.canvasWidth / 2,
+                y: global.canvasHeight / 2
+            },
+            currRoom: {
+                x: -1,
+                y: -1
+            },
+            ownerId: -1,
+            isConsumed: false
+        });
+    }
+}
+
 MapBoard.prototype.inMiddleOfMap = function(x, y) {
-    var distanceFromMiddle = 12;
-    const middleGridStartX = Math.floor(this.rows / 2) - 5;
-    const middleGridStartY = Math.floor(this.cols / 2) - 5;
-    const middleGridEndX = middleGridStartX + distanceFromMiddle;
-    const middleGridEndY = middleGridStartY + distanceFromMiddle;
+    const middleGridStartX = Math.floor(this.rows / 2) - Math.floor(this.rows / 4);
+    const middleGridStartY = Math.floor(this.cols / 2) - Math.floor(this.rows / 4);
+    const middleGridEndX = middleGridStartX + Math.floor(this.rows / 2);
+    const middleGridEndY = middleGridStartY +  Math.floor(this.cols / 2);
 
     return x >= middleGridStartX && x <= middleGridEndX && y >= middleGridStartY && y <= middleGridEndY;
+}
+
+MapBoard.prototype.isItemInRoom = function(items,x, y) {
+    for (let item of items) {
+        if(item.currRoom.x == x && item.currRoom.y == y){
+            return true;
+        }
+    }
+    return false;
+}
+
+MapBoard.prototype.isPlayerInRoom = function(players,x, y) {
+    for (let player of players) {
+        if(player.currRoom.x == x && player.currRoom.y == y){
+            return true;
+        }
+    }
+    return false;
 }
 
 MapBoard.prototype.get = function() {

@@ -183,7 +183,6 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
                     this.createRandomPath(maze,'east','west');//The actual path
                     this.openDoors(maze,['north','south','east','west']);
                     //This actually is guaranteed to work because the paths MUST cross
-                    //Usually we end up with a pretty empty room
                 }
 
                 // 3 DOORS
@@ -258,6 +257,35 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
                 else if(this.isRoom(map,'west',rX,rY))
                     this.openDoors(maze,['west']);
 
+                //Adjust the killer starting room and make sure he has space to spawn
+                if(rX == Math.floor(map.length/2) && rY == Math.floor(map[i].length/2)){
+                    //no need to check east and north because these are guaranteed to be rooms based on the map generation
+                    this.createRandomPath(maze,'middle','east');
+                    this.createRandomPath(maze,'middle','north');
+                    this.openDoors(maze,['middle']);
+                }
+
+                for (let p = 0; p < gs.players.length; p++) {
+                    const player = gs.players[p];
+                    if (player.currRoom.x == rX && player.currRoom.y == rY) {
+                        if(this.isRoom(map,'north',rX,rY)){
+                            this.createRandomPath(maze,'middle','north');
+                            this.openDoors(maze,['middle']); 
+                        }
+                        else if(this.isRoom(map,'south',rX,rY)){
+                            this.createRandomPath(maze,'middle','south');
+                            this.openDoors(maze,['middle']);
+                        }
+                        else if(this.isRoom(map,'east',rX,rY)){
+                            this.createRandomPath(maze,'middle','east');
+                            this.openDoors(maze,['middle']);
+                        }
+                        else if(this.isRoom(map,'west',rX,rY)){
+                            this.createRandomPath(maze,'middle','west');
+                            this.openDoors(maze,['middle']);
+                        }
+                    }
+                }
 
                 //Lastly, count how many solid objects are left in the maze,
                 //If its too few, we'll go again, else the maze is fun!
@@ -319,6 +347,10 @@ SolidObjects.prototype.createRandomPath = function(maze, from, to) {
         startY = 13;
         startX = 5;
     }
+    else if(from == 'middle'){
+        startY = 6;
+        startX = 5;
+    }
 
     if(to == 'north'){
         endY = 6;
@@ -335,6 +367,10 @@ SolidObjects.prototype.createRandomPath = function(maze, from, to) {
     else if(to == 'east'){
         endY = 13;
         endX = 5;
+    }
+    else if(to == 'middle'){
+        endY = 5;
+        endX = 6;
     }
 
     grid = JSON.parse(JSON.stringify(maze));    
@@ -392,6 +428,11 @@ SolidObjects.prototype.openDoors = function(maze, directions) {
         } else if (direction === 'east') {
             maze[5][13] = ' ';
             maze[4][13] = ' ';
+        }else if (direction === 'middle') {
+            maze[4][6] = ' ';
+            maze[4][7] = ' ';
+            maze[5][6] = ' ';
+            maze[5][7] = ' ';
         }
     }
 }

@@ -267,7 +267,7 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
                         if (maze[k][l] == '■') 
                             blockCount++; 
 
-                const minNumberOfBlocks = 28; //AKA DIFFICULTY FACTOR!
+                const minNumberOfBlocks = 30; //AKA DIFFICULTY FACTOR! (30 IS OK)
                 if(blockCount > minNumberOfBlocks)
                     isMazeFun = true;
             }

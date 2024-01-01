@@ -117,7 +117,7 @@ function drawBackground(ctx) {
     ctx.fillStyle = '#B8BADC';
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    var lineWidth = 3;
+    var lineWidth = 2;
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, ctx.canvas.width, lineWidth);
     ctx.fillRect(0, 0, lineWidth, ctx.canvas.height);

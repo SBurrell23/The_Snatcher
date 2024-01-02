@@ -245,17 +245,25 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
 
                 // 1 DOOR (AKA DEAD ENDS!)
                 //North
-                else if(this.isRoom(map,'north',rX,rY))
+                else if(this.isRoom(map,'north',rX,rY)){
+                    this.createRandomPath(maze,'north','middle');
                     this.openDoors(maze,['north']);
+                }
                 //South
-                else if(this.isRoom(map,'south',rX,rY))
+                else if(this.isRoom(map,'south',rX,rY)){
+                    this.createRandomPath(maze,'south','middle');
                     this.openDoors(maze,['south']);
+                }
                 //East
-                else if(this.isRoom(map,'east',rX,rY))
+                else if(this.isRoom(map,'east',rX,rY)){
+                    this.createRandomPath(maze,'east','middle');
                     this.openDoors(maze,['east']);
+                }
                 //West
-                else if(this.isRoom(map,'west',rX,rY))
+                else if(this.isRoom(map,'west',rX,rY)){
+                    this.createRandomPath(maze,'west','middle');
                     this.openDoors(maze,['west']);
+                }
 
                 //Adjust the killer starting room and make sure he has space to spawn
                 if(rX == Math.floor(map.length/2) && rY == Math.floor(map[i].length/2)){

@@ -25,7 +25,7 @@ var playerObject ={
     rWins:0,
     currRoom:{x:-1,y:-1},
     currPos:{x:-100,y:-100},
-    hasKey: false,
+    hasKeys: [],
     speed:3,
     radius:25,
     isSnatcher: false,
@@ -125,7 +125,7 @@ function startGame(){
 
     solidObjects = new SolidObjects();
     solidObjects.createPerimeterWalls(gs, map.get());
-    solidObjects.createMazeWalls(gs, map.get());
+    //solidObjects.createMazeWalls(gs, map.get());
     sendClients({type: "solidObjects", solidObjects: solidObjects.get()});
 
 }

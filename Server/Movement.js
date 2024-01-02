@@ -168,23 +168,29 @@ Movement.prototype.checkForPlayerCollision = function(gs, player) {
 
 Movement.prototype.pickupItemIfAllowed = function(gs,player,item) {
     
-    if (item.type == "key" && !item.isConsumed && player.hasKey == false && !player.isSnatcher){
+    if (item.type == "key" && !item.isConsumed && player.hasKeys.length < 2 && !player.isSnatcher){
         item.ownerId = player.id;
-        player.hasKey = true;
+        player.hasKeys.push(true);
         console.log("Player " + player.name + " picked up item " + item.id);
     }
 
     else if(item.type == "exitdoor"){
-        if(player.hasKey && item.specialCount < 3){
-            item.specialCount += 1
-            player.hasKey = false;
-
-            var keyItem = gs.items.find(item => item.type == "key" && item.ownerId == player.id && item.isConsumed == false);
-            keyItem.isConsumed = true;
-            keyItem.ownerId = -1;
+        if(player.hasKeys.length > 0 && item.specialCount < 3){
             
-            player.points += global.pointsForKeyAddedToDoor;
-            console.log("Player added one key to the exit door at " + item.currRoom.x + ", " + item.currRoom.y + "!");
+            player.hasKeys = [];
+            //Set the players inventory to 0 and go through and use each keyItem on the exit door
+            var keyItems = gs.items.filter(item => item.type == "key" && item.ownerId == player.id && item.isConsumed == false);
+            
+            for(var i = 0; i < keyItems.length; i++){
+                var keyItem = keyItems[i];
+                keyItem.isConsumed = true;
+                keyItem.ownerId = -1;
+                item.specialCount += 1;
+                player.points += global.pointsForKeyAddedToDoor;
+                console.log("Player added key to the exit door at " + item.currRoom.x + ", " + item.currRoom.y + "!");
+                if(item.specialCount >= 3)
+                    break;
+            }
             
         }
 

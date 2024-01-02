@@ -5,8 +5,8 @@ var serverState = null;
 var localState = {
     playerId: -1,
     map: null,
-    solidObjects: null
-    //Will want to add items to this as well.
+    solidObjects: null,
+    items: []
 };
 var keys = {};
 var colors = {
@@ -53,6 +53,9 @@ function recievedServerMessage(message) {
     }
     else if(message.type == "map"){
         localState.map = message.map;
+    }
+    else if(message.type == "items"){
+        localState.items = message.i;
     }
     else if(message.type == "solidObjects"){
         localState.solidObjects = message.solidObjects;
@@ -113,7 +116,7 @@ function drawGameState(gs) {
         var currentRoomY = getMe(gs).currRoom.y;
     
         drawSolidObjects(ctx, currentRoomX, currentRoomY);  
-        drawItems(ctx, gs, currentRoomX, currentRoomY);
+        drawItems(ctx,currentRoomX, currentRoomY);
         drawPlayers(ctx, gs, currentRoomX, currentRoomY);
         
         drawMap(ctx,gs,localState.map);
@@ -298,9 +301,9 @@ function drawPlayers(ctx, gs, currentRoomX, currentRoomY) {
     }
 }
 
-function drawItems(ctx, gs, currentRoomX, currentRoomY) {
-    for (let i = 0; i < gs.items.length; i++) {
-        var item = gs.items[i];
+function drawItems(ctx, currentRoomX, currentRoomY) {
+    for (let i = 0; i < localState.items.length; i++) {
+        var item = localState.items[i];
         if (
             item.currRoom.x == currentRoomX && 
             item.currRoom.y == currentRoomY &&
@@ -317,6 +320,7 @@ function drawItems(ctx, gs, currentRoomX, currentRoomY) {
                 ctx.fillRect(item.currPos.x, item.currPos.y, item.width, item.height);
                 ctx.fillStyle = colors.key
                 ctx.font = '18px Arial';
+                console.log(item);
                 ctx.fillText("("+item.specialCount+")", item.currPos.x + Math.ceil(item.width/2), item.currPos.y + Math.ceil(item.height/2));
             }
             else{

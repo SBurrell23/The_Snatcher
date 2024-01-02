@@ -11,8 +11,7 @@ global.canvasHeight = 750;
 var gs = {
     type: "gs",
     state: 'lobby',
-    players:[],
-    items:[]
+    players:[]
 };
 
 var playerObject ={
@@ -32,20 +31,19 @@ var playerObject ={
     snatcherStats: undefined
 };
 
+var snatcherStats = {speedMod: 1.5};
+
 global.pointsForKeyAddedToDoor = 1;
 global.pointsForEscape = 2;
 
 global.pointsForSnatching = 2;
 global.pointsForSnatchingAllRunners = 3;
 
-var snatcherStats = {
-    speedMod: 1.5
-};
-
 var playTime = 0;
 var timeouts = [];
 var map = null;
 var solidObjects = null;
+global.items = []; //This is sent on room change since it's large
 
 var defaultGameState = JSON.parse(JSON.stringify(gs));
 
@@ -119,19 +117,19 @@ function startGame(){
     gs.state = 'playing';
 
     map = new MapBoard();
-    sendClients({type: "map", map: map.generateNewMap()});
+    sendAllClients({type: "map", map: map.generateNewMap()});
     map.spawnPlayers(gs.players);
     map.spawnItems(gs);
 
     solidObjects = new SolidObjects();
     solidObjects.createPerimeterWalls(gs, map.get());
     //solidObjects.createMazeWalls(gs, map.get());
-    sendClients({type: "solidObjects", solidObjects: solidObjects.get()});
+    sendAllClients({type: "solidObjects", solidObjects: solidObjects.get()});
 
 }
 
 //Last action can be 'escaped' or 'snatched
-global.checkForGameOver = function(gs,lastAction){
+global.checkForGameOver = function(lastAction){
     var alivePlayers = gs.players.filter(player => !player.isSnatcher && player.isAlive);
     if (alivePlayers.length == 0 && lastAction == 'snatched') {
         console.log("All players have been snatched! GAME OVER!");
@@ -139,6 +137,22 @@ global.checkForGameOver = function(gs,lastAction){
     else if (alivePlayers.length == 0 && lastAction == 'escaped') {
         console.log("All still alive players have escaped! GAME OVER!");
     }
+}
+
+global.sendItemsToClientsInRoom = function(roomX, roomY){
+    
+    //First compile a list of any items currently in the room
+    var itemsInRoom = [];
+    for (let item of global.items) {
+        if(item.currRoom.x == roomX && item.currRoom.y == roomY){
+            itemsInRoom.push(item);
+        }
+    }
+
+    //Next find any players in the room and send them the list of items
+    for (let player of gs.players) 
+        if(player.currRoom.x == roomX && player.currRoom.y == roomY)
+            sendClient(player,{type: "items", i: itemsInRoom});
 }
 
 function setSnatcher(){
@@ -167,6 +181,7 @@ function playerConnected(id){
     return false;
 }
 
+
 function resetGameState(){
     gs = JSON.parse(JSON.stringify(defaultGameState));
 }
@@ -187,18 +202,23 @@ function clearAllTimeouts() {
     timeouts = [];
 }
 
-function sendClients(object){
+function sendAllClients(object){
     wss.clients.forEach((client) => {
         if (client.readyState === WebSocket.OPEN)
             client.send(JSON.stringify(object));
     });
 
 }
+
+function sendClient(player,object){
+    wss.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN && users.get(client) == player.id)
+            client.send(JSON.stringify(object));
+    });
+}
+
 setInterval(function() {
     updatePlayTime();
-
-    wss.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN)
-            client.send(JSON.stringify(gs));
-    });
+    
+    sendAllClients(gs);
 }, 32);

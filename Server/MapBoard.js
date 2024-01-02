@@ -313,17 +313,17 @@ MapBoard.prototype.spawnPlayers = function(players) {
 MapBoard.prototype.spawnItems = function(gs) {
     console.log("Spawning Items");
 
-    gs.items = [];
+    global.items = [];
 
     //We MUST spawn the exit doors 1st so we don't accidentally spawn another item in the room first
-    this.createItems(gs,'exitdoor',2, 76,150); //2 exit doors, cannot be modified
-    this.createItems(gs,'key', 60, 30,20);
+    this.createItems('exitdoor',2, 76,150); //2 exit doors, cannot be modified
+    this.createItems('key', 60, 30,20);
     
 
-    for (let item of gs.items) {
+    for (let item of global.items) {
 
         if(item.type == 'exitdoor'){
-            var exitDoorRoom = this.findExitDoorRoom(gs.items);
+            var exitDoorRoom = this.findExitDoorRoom(global.items);
             item.currRoom.x = exitDoorRoom.x;
             item.currRoom.y = exitDoorRoom.y;
             console.log("Exit Door: " + JSON.stringify(item));
@@ -340,7 +340,7 @@ MapBoard.prototype.spawnItems = function(gs) {
             if (
                 this.gameMap[randomY][randomX] === 1 && 
                 !this.isPlayerInRoom(gs.players,randomX,randomY) &&
-                !this.isItemInRoom(gs.items,randomX,randomY)
+                !this.isItemInRoom(randomX,randomY)
                 //For now its probably fine if an items spawn near the center of the map
                 //!this.inMiddleOfMap(randomX, randomY)
                 ) {
@@ -353,11 +353,11 @@ MapBoard.prototype.spawnItems = function(gs) {
     }
 }
 
-MapBoard.prototype.createItems = function(gs,type,numItems,width,height) {
+MapBoard.prototype.createItems = function(type,numItems,width,height) {
     for (let i = 1; i <= numItems; i++) {
-        gs.items.push({
+        global.items.push({
             type: type,
-            id: type + (gs.items.length + 1),
+            id: type + (global.items.length + 1),
             currPos: {
                 x: (global.canvasWidth / 2) - Math.ceil(width / 2),
                 y: (global.canvasHeight / 2) - Math.ceil(height / 2)
@@ -378,7 +378,7 @@ MapBoard.prototype.createItems = function(gs,type,numItems,width,height) {
 MapBoard.prototype.findExitDoorRoom = function(items) {
     for (let y = 0; y < this.gameMap.length; y++) {
         for (let x = 0; x < this.gameMap[y].length; x++) {
-            if (this.gameMap[y][x] == 3 && !this.isItemInRoom(items, x, y)) {
+            if (this.gameMap[y][x] == 3 && !this.isItemInRoom(x, y)) {
                 return { x: x, y: y };
             }
         }
@@ -395,8 +395,8 @@ MapBoard.prototype.inMiddleOfMap = function(x, y) {
     return x >= middleGridStartX && x <= middleGridEndX && y >= middleGridStartY && y <= middleGridEndY;
 }
 
-MapBoard.prototype.isItemInRoom = function(items,x, y) {
-    for (let item of items) {
+MapBoard.prototype.isItemInRoom = function(x, y) {
+    for (let item of global.items) {
         if(item.currRoom.x == x && item.currRoom.y == y){
             return true;
         }

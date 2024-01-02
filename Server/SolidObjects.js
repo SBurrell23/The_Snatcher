@@ -297,8 +297,8 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
                 }
 
                 //Adjust the rooms with items in them and make sure they have space to spawn
-                for (let e = 0; e < gs.items.length; e++) {
-                    const item = gs.items[e];
+                for (let e = 0; e < global.items.length; e++) {
+                    const item = global.items[e];
                     if (item.currRoom.x == rX && item.currRoom.y == rY) {
                         if(this.isRoom(map,'north',rX,rY)){
                             this.createRandomPath(maze,'middle','north');

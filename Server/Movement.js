@@ -12,7 +12,7 @@ Movement.prototype.movePlayer = function(gs,map, id, direction,solidObjects) {
                     var destPosX = player.currPos.x;
                     if(!this.checkForWallCollision(player,destPosX,destPosY,solidObjects)){
                         player.currPos.y = destPosY;
-                        this.checkForItemCollision(gs,player);
+                        this.checkForItemCollision(player);
                         this.checkForPlayerCollision(gs,player);
                     }
                 } else {
@@ -26,7 +26,7 @@ Movement.prototype.movePlayer = function(gs,map, id, direction,solidObjects) {
                     var destPosX = player.currPos.x;
                     if(!this.checkForWallCollision(player,destPosX,destPosY,solidObjects)){
                         player.currPos.y = destPosY;
-                        this.checkForItemCollision(gs,player);
+                        this.checkForItemCollision(player);
                         this.checkForPlayerCollision(gs,player);
                     }
                 } else {
@@ -40,7 +40,7 @@ Movement.prototype.movePlayer = function(gs,map, id, direction,solidObjects) {
                     var destPosY = player.currPos.y;
                     if(!this.checkForWallCollision(player,destPosX,destPosY,solidObjects)){
                         player.currPos.x = destPosX;
-                        this.checkForItemCollision(gs,player);
+                        this.checkForItemCollision(player);
                         this.checkForPlayerCollision(gs,player);
                     }
                 } else {
@@ -54,7 +54,7 @@ Movement.prototype.movePlayer = function(gs,map, id, direction,solidObjects) {
                     var destPosY = player.currPos.y;
                     if(!this.checkForWallCollision(player,destPosX,destPosY,solidObjects)){
                         player.currPos.x = destPosX;
-                        this.checkForItemCollision(gs,player);
+                        this.checkForItemCollision(player);
                         this.checkForPlayerCollision(gs,player);
                     }
                 } else {
@@ -76,15 +76,19 @@ Movement.prototype.movePlayerToNewRoom = function(player,map, newXRoom, newYRoom
         switch (directionToSpawn) {
             case 'north':
                 player.currPos.y = 0;
+                global.sendItemsToClientsInRoom(player.currRoom.x,player.currRoom.y);
                 break;
             case 'south':
                 player.currPos.y = global.canvasHeight;
+                global.sendItemsToClientsInRoom(player.currRoom.x,player.currRoom.y);
                 break;
             case 'east':
                 player.currPos.x = global.canvasWidth;
+                global.sendItemsToClientsInRoom(player.currRoom.x,player.currRoom.y);
                 break;
             case 'west':
                 player.currPos.x = 0;
+                global.sendItemsToClientsInRoom(player.currRoom.x,player.currRoom.y);
                 break;
             default:
                 player.currPos.x = global.canvasWidth / 2;
@@ -127,8 +131,8 @@ Movement.prototype.checkForWallCollision = function(player, destPosX, destPosY, 
     return false; // No collision detected
 }
 
-Movement.prototype.checkForItemCollision = function(gs, player) {
-    var items = gs.items.filter(item => item.currRoom.x == player.currRoom.x && item.currRoom.y == player.currRoom.y);
+Movement.prototype.checkForItemCollision = function(player) {
+    var items = global.items.filter(item => item.currRoom.x == player.currRoom.x && item.currRoom.y == player.currRoom.y);
     items.forEach(item => {
         if (item.ownerId == -1) { //The item is -1 if it is on the ground
             if (
@@ -137,7 +141,7 @@ Movement.prototype.checkForItemCollision = function(gs, player) {
                 player.currPos.y + player.radius >= item.currPos.y &&
                 player.currPos.y - player.radius <= item.currPos.y + item.height
             ) {
-                this.pickupItemIfAllowed(gs,player,item);
+                this.pickupItemIfAllowed(player,item);
             }
         }
     });
@@ -161,25 +165,29 @@ Movement.prototype.checkForPlayerCollision = function(gs, player) {
             otherPlayer.isAlive = false;
             player.points += global.pointsForSnatching;
             console.log("The snatcher has SNATCHED " + otherPlayer.name + "!!! RIP!!!");
-            global.checkForGameOver(gs,'snatched');
+            global.checkForGameOver('snatched');
         }
     });
 }
 
-Movement.prototype.pickupItemIfAllowed = function(gs,player,item) {
+Movement.prototype.pickupItemIfAllowed = function(player,item) {
+
+    const pRoomX = player.currRoom.x;
+    const pRoomY = player.currRoom.y;
     
     if (item.type == "key" && !item.isConsumed && player.hasKeys.length < 2 && !player.isSnatcher){
-        item.ownerId = player.id;
+        this.putItemInPlayerInventory(player,item);
         player.hasKeys.push(true);
         console.log("Player " + player.name + " picked up item " + item.id);
+        global.sendItemsToClientsInRoom(pRoomX,pRoomY);
     }
 
     else if(item.type == "exitdoor"){
         if(player.hasKeys.length > 0 && item.specialCount < 3){
-            
+
             player.hasKeys = [];
             //Set the players inventory to 0 and go through and use each keyItem on the exit door
-            var keyItems = gs.items.filter(item => item.type == "key" && item.ownerId == player.id && item.isConsumed == false);
+            var keyItems = global.items.filter(item => item.type == "key" && item.ownerId == player.id && item.isConsumed == false);
             
             for(var i = 0; i < keyItems.length; i++){
                 var keyItem = keyItems[i];
@@ -188,6 +196,8 @@ Movement.prototype.pickupItemIfAllowed = function(gs,player,item) {
                 item.specialCount += 1;
                 player.points += global.pointsForKeyAddedToDoor;
                 console.log("Player added key to the exit door at " + item.currRoom.x + ", " + item.currRoom.y + "!");
+                console.log(JSON.stringify(item));
+                global.sendItemsToClientsInRoom(pRoomX,pRoomY);
                 if(item.specialCount >= 3)
                     break;
             }
@@ -201,12 +211,20 @@ Movement.prototype.pickupItemIfAllowed = function(gs,player,item) {
             player.points += global.pointsForEscape;
             player.rWins += 1;
             console.log("Player " + player.name + " has escaped through the exit door at " + item.currRoom.x + ", " + item.currRoom.y + "!");
-            global.checkForGameOver(gs,'escaped');
+            global.sendItemsToClientsInRoom(pRoomX,pRoomY);
+            global.checkForGameOver('escaped');
         }
     }
+
 }
 
-
+Movement.prototype.putItemInPlayerInventory = function(player,item) {
+    item.ownerId = player.id;
+    item.currRoom.x = -1;
+    item.currRoom.y = -1;
+    item.currPos.x = -1000;
+    item.currPos.y = -1000;
+}
 
 Movement.prototype.didPlayerTouchSnatcher = function(gs, id) {
     var player = gs.players.find(player => player.id == id);

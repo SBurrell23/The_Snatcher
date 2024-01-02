@@ -183,7 +183,7 @@ Movement.prototype.pickupItemIfAllowed = function(player,item) {
     }
 
     else if(item.type == "exitdoor"){
-        if(player.hasKeys.length > 0 && item.specialCount < 3){
+        if(player.hasKeys.length > 0 && item.specialCount < global.keysNeededToOpenDoor ){
 
             player.hasKeys = [];
             //Set the players inventory to 0 and go through and use each keyItem on the exit door
@@ -198,13 +198,13 @@ Movement.prototype.pickupItemIfAllowed = function(player,item) {
                 console.log("Player added key to the exit door at " + item.currRoom.x + ", " + item.currRoom.y + "!");
                 console.log(JSON.stringify(item));
                 global.sendItemsToClientsInRoom(pRoomX,pRoomY);
-                if(item.specialCount >= 3)
+                if(item.specialCount >= global.keysNeededToOpenDoor )
                     break;
             }
             
         }
 
-        if(item.specialCount >= 3 && player.isAlive){
+        if(item.specialCount >= global.keysNeededToOpenDoor  && player.isAlive){
             player.currPos.x = -1000;
             player.currPos.y = -1000;
             player.isAlive = false;

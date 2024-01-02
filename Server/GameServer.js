@@ -33,21 +33,26 @@ var playerObject ={
 
 var snatcherStats = {speedMod: 1.5};
 
+var playTime = 0;
+var timeouts = [];
+
+//POINTS
 global.pointsForKeyAddedToDoor = 1;
 global.pointsForEscape = 2;
 
 global.pointsForSnatching = 2;
 global.pointsForSnatchingAllRunners = 3;
 
-var playTime = 0;
-var timeouts = [];
+//GAME CONFIGS
+global.keysNeededToOpenDoor = 3;
+
 global.map = null // This is sent only at the start of the game since it's HUGE
 global.solidObjects = null; // This is sent only at the start of the game since it's HUGE
-global.items = []; //This is sent only room change since it's HUGE
+global.items = []; //This is sent on demand dependent on game actions since it's HUGE
 
 var defaultGameState = JSON.parse(JSON.stringify(gs));
 
-const users = new Map();
+const clients = new Map();
 
 wss.on('connection', (ws) => {
     
@@ -63,7 +68,7 @@ wss.on('connection', (ws) => {
                 newPlayer.name = message.name;
                 newPlayer.id = String(Date.now());
                 gs.players.push(newPlayer);
-                users.set(ws, newPlayer.id);
+                clients.set(ws, newPlayer.id);
 
                 console.log("Player joined: " + JSON.stringify(newPlayer));
                 // Send the player's ID back to the client
@@ -91,15 +96,15 @@ wss.on('connection', (ws) => {
 
     //A user has disconnected
     ws.on('close', function() {
-        console.log('User id ' + users.get(ws) + ' disconnected');
-        const disconnectedUserId = users.get(ws);
-        users.delete(ws);
+        console.log('User id ' + clients.get(ws) + ' disconnected');
+        const disconnectedUserId = clients.get(ws);
+        clients.delete(ws);
 
         // Remove the player from the gs.players array with the id of the disconnected user
         gs.players = gs.players.filter(player => player.id !== disconnectedUserId);
         
         //If nobody is left or the snatcher leaves, reset the game
-        if(users.size === 0 || isSnatcher(disconnectedUserId)) {
+        if(clients.size === 0 || isSnatcher(disconnectedUserId)) {
             console.log('All clients disconnected...');
             clearAllTimeouts();
             resetGameState();
@@ -121,7 +126,7 @@ function startGame(){
 
     global.solidObjects = new SolidObjects();
     global.solidObjects.createPerimeterWalls(gs, global.map.get());
-    solidObjects.createMazeWalls(gs, global.map.get());
+    //global.solidObjects.createMazeWalls(gs, global.map.get());
     sendAllClients({type: "solidObjects", solidObjects: global.solidObjects.get()});
 
     gs.state = 'playing';
@@ -180,7 +185,6 @@ function playerConnected(id){
     return false;
 }
 
-
 function resetGameState(){
     gs = JSON.parse(JSON.stringify(defaultGameState));
 }
@@ -211,7 +215,7 @@ function sendAllClients(object){
 
 function sendClient(player,object){
     wss.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN && users.get(client) == player.id)
+        if (client.readyState === WebSocket.OPEN && clients.get(client) == player.id)
             client.send(JSON.stringify(object));
     });
 }

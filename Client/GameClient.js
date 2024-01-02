@@ -55,7 +55,7 @@ function recievedServerMessage(message) {
         localState.map = message.map;
     }
     else if(message.type == "items"){
-        localState.items = message.i;
+        localState.items = message.items;
     }
     else if(message.type == "solidObjects"){
         localState.solidObjects = message.solidObjects;
@@ -320,7 +320,6 @@ function drawItems(ctx, currentRoomX, currentRoomY) {
                 ctx.fillRect(item.currPos.x, item.currPos.y, item.width, item.height);
                 ctx.fillStyle = colors.key
                 ctx.font = '18px Arial';
-                console.log(item);
                 ctx.fillText("("+item.specialCount+")", item.currPos.x + Math.ceil(item.width/2), item.currPos.y + Math.ceil(item.height/2));
             }
             else{

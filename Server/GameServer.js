@@ -41,9 +41,9 @@ global.pointsForSnatchingAllRunners = 3;
 
 var playTime = 0;
 var timeouts = [];
-var map = null;
-var solidObjects = null;
-global.items = []; //This is sent on room change since it's large
+global.map = null // This is sent only at the start of the game since it's HUGE
+global.solidObjects = null; // This is sent only at the start of the game since it's HUGE
+global.items = []; //This is sent only room change since it's HUGE
 
 var defaultGameState = JSON.parse(JSON.stringify(gs));
 
@@ -84,7 +84,7 @@ wss.on('connection', (ws) => {
         }
 
         if(message.type == "movePlayer"){
-            new Movement().movePlayer(gs,map.get(),message.id, message.direction,solidObjects.get());
+            new Movement().movePlayer(gs,global.map.get(),message.id, message.direction,global.solidObjects.get());
         }
 
     });
@@ -114,18 +114,17 @@ function startGame(){
     setSnatcher();
     setAllPlyersToAlive();
 
+    global.map = new MapBoard();
+    sendAllClients({type: "map", map: global.map.generateNewMap()});
+    global.map.spawnPlayers(gs.players);
+    global.map.spawnItems(gs);
+
+    global.solidObjects = new SolidObjects();
+    global.solidObjects.createPerimeterWalls(gs, global.map.get());
+    solidObjects.createMazeWalls(gs, global.map.get());
+    sendAllClients({type: "solidObjects", solidObjects: global.solidObjects.get()});
+
     gs.state = 'playing';
-
-    map = new MapBoard();
-    sendAllClients({type: "map", map: map.generateNewMap()});
-    map.spawnPlayers(gs.players);
-    map.spawnItems(gs);
-
-    solidObjects = new SolidObjects();
-    solidObjects.createPerimeterWalls(gs, map.get());
-    //solidObjects.createMazeWalls(gs, map.get());
-    sendAllClients({type: "solidObjects", solidObjects: solidObjects.get()});
-
 }
 
 //Last action can be 'escaped' or 'snatched
@@ -152,7 +151,7 @@ global.sendItemsToClientsInRoom = function(roomX, roomY){
     //Next find any players in the room and send them the list of items
     for (let player of gs.players) 
         if(player.currRoom.x == roomX && player.currRoom.y == roomY)
-            sendClient(player,{type: "items", i: itemsInRoom});
+            sendClient(player,{type: "items", items: itemsInRoom});
 }
 
 function setSnatcher(){

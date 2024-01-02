@@ -10,8 +10,10 @@ Movement.prototype.movePlayer = function(gs,map, id, direction,solidObjects) {
                 if((player.currPos.y - player.speed >= 0)){
                     var destPosY = player.currPos.y - player.speed;
                     var destPosX = player.currPos.x;
-                    if(!this.checkForCollision(player,destPosX,destPosY,solidObjects))
+                    if(!this.checkForCollision(player,destPosX,destPosY,solidObjects)){
                         player.currPos.y = destPosY;
+                        this.checkForItemPickup(gs,player);
+                    }
                 } else {
                     this.movePlayerToNewRoom(player,map,player.currRoom.x,player.currRoom.y-1,"south");
                 }
@@ -21,8 +23,10 @@ Movement.prototype.movePlayer = function(gs,map, id, direction,solidObjects) {
                 if((player.currPos.y + player.speed <= global.canvasHeight)){
                     var destPosY = player.currPos.y + player.speed;
                     var destPosX = player.currPos.x;
-                    if(!this.checkForCollision(player,destPosX,destPosY,solidObjects))
+                    if(!this.checkForCollision(player,destPosX,destPosY,solidObjects)){
                         player.currPos.y = destPosY;
+                        this.checkForItemPickup(gs,player);
+                    }
                 } else {
                     this.movePlayerToNewRoom(player,map,player.currRoom.x,player.currRoom.y+1,"north");
                 }
@@ -32,8 +36,10 @@ Movement.prototype.movePlayer = function(gs,map, id, direction,solidObjects) {
                 if((player.currPos.x - player.speed >= 0)){
                     var destPosX = player.currPos.x - player.speed;
                     var destPosY = player.currPos.y;
-                    if(!this.checkForCollision(player,destPosX,destPosY,solidObjects))
+                    if(!this.checkForCollision(player,destPosX,destPosY,solidObjects)){
                         player.currPos.x = destPosX;
+                        this.checkForItemPickup(gs,player);
+                    }
                 } else {
                     this.movePlayerToNewRoom(player,map,player.currRoom.x+1,player.currRoom.y,"east");
                 }
@@ -43,8 +49,10 @@ Movement.prototype.movePlayer = function(gs,map, id, direction,solidObjects) {
                 if((player.currPos.x + player.speed <= global.canvasWidth)){
                     var destPosX = player.currPos.x + player.speed
                     var destPosY = player.currPos.y;
-                    if(!this.checkForCollision(player,destPosX,destPosY,solidObjects))
+                    if(!this.checkForCollision(player,destPosX,destPosY,solidObjects)){
                         player.currPos.x = destPosX;
+                        this.checkForItemPickup(gs,player);
+                    }
                 } else {
                     this.movePlayerToNewRoom(player,map,player.currRoom.x-1,player.currRoom.y,"west");
                 }
@@ -113,6 +121,23 @@ Movement.prototype.checkForCollision = function(player, destPosX, destPosY, soli
     }
 
     return false; // No collision detected
+}
+
+Movement.prototype.checkForItemPickup = function(gs,player) {
+    var item = gs.items.find(item => item.currRoom.x == player.currRoom.x && item.currRoom.y == player.currRoom.y);
+    if(item && item.ownerId == -1){
+        if( 
+            player.currPos.x >= item.currPos.x - item.width && 
+            player.currPos.x <= item.currPos.x + item.width &&
+            player.currPos.y >= item.currPos.y - item.height &&
+            player.currPos.y <= item.currPos.y + item.height
+        ){
+            console.log("Player " + player.name + " picked up item " + item.id);
+            item.ownerId = player.id;
+            if(item.type == "key")
+                player.hasKey = true;
+        }
+    }
 }
 
 Movement.prototype.didPlayerTouchSnatcher = function(gs, id) {

@@ -112,8 +112,8 @@ function drawGameState(gs) {
         var currentRoomY = getMe(gs).currRoom.y;
     
         drawSolidObjects(ctx, currentRoomX, currentRoomY);  
-        drawPlayers(ctx, gs, currentRoomX, currentRoomY);
         drawItems(ctx, gs, currentRoomX, currentRoomY);
+        drawPlayers(ctx, gs, currentRoomX, currentRoomY);
         
         drawMap(ctx,gs,localState.map);
     }
@@ -254,17 +254,6 @@ function isAnyPlayerInThisRoom(gs, row, col) {
     return false;
 }
 
-function isPlayerInMyRoom(gs, friendX,friendY) {
-    if(gs.players.length > 0)
-        for (let i = 0; i < gs.players.length; i++) {
-            if (isMe(gs.players[i].id)) {
-                if (gs.players[i].currRoom.x == friendX && gs.players[i].currRoom.y == friendY)
-                    return true;
-            }
-        }
-    return false;
-}
-
 function getSnatcher(gs) {
     return gs.players.find(player => player.isSnatcher) || false;
 }
@@ -319,11 +308,11 @@ function drawItems(ctx, gs, currentRoomX, currentRoomY) {
             ) {
             if(item.type == 'key'){
                 ctx.fillStyle = colors.key;
-                ctx.font = '20px Arial';
+                ctx.font = '18px Arial';
                 ctx.fillText(item.type.toUpperCase(), item.currPos.x, item.currPos.y);
             }else{
                 ctx.fillStyle = 'magenta';
-                ctx.font = '20px Arial';
+                ctx.font = '18px Arial';
                 ctx.fillText(item.type.toUpperCase(), item.currPos.x, item.currPos.y);
             }
         }

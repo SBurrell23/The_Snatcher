@@ -316,8 +316,8 @@ MapBoard.prototype.spawnItems = function(gs) {
     gs.items = [];
 
     //First create the items before we go and spawn them.
-    this.createItems(gs,'key',gs.players.length * 3);
-    this.createItems(gs,'teleport',gs.players.length * 3);
+    this.createItems(gs,'key',gs.players.length * 150);
+    //this.createItems(gs,'teleport',gs.players.length * 3);
 
     for (let item of gs.items) {
 
@@ -348,7 +348,7 @@ MapBoard.prototype.createItems = function(gs,type,numItems) {
     for (let i = 1; i <= numItems; i++) {
         gs.items.push({
             type: type,
-            itemId: (gs.items.length + 1),
+            id: type + (gs.items.length + 1),
             currPos: {
                 x: global.canvasWidth / 2,
                 y: global.canvasHeight / 2
@@ -357,6 +357,8 @@ MapBoard.prototype.createItems = function(gs,type,numItems) {
                 x: -1,
                 y: -1
             },
+            width: 25,
+            height:25,
             ownerId: -1,
             isConsumed: false
         });

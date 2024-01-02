@@ -25,7 +25,7 @@ function connectWebSocket() {
 
     //wss://thesnatcher.onrender.com
     //ws://localhost:8080
-    socket = new WebSocket('ws://localhost:8080');  
+    socket = new WebSocket('wss://thesnatcher.onrender.com');  
     socket.addEventListener('open', function () {
         console.log('Server connection established!');
         $("#offlineMessage").css("display", "none");

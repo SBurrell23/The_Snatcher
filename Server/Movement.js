@@ -270,7 +270,7 @@ Movement.prototype.dropItem = function(gs, playerId, checkForSwap) {
                 item.ownerId = -1;
                 item.isConsumed = false;
                 item.currPos.x = player.currPos.x - player.radius;
-                item.currPos.y = player.currPos.y + Math.floor(player.radius/2);
+                item.currPos.y = player.currPos.y;
                 item.currRoom.x = player.currRoom.x;
                 item.currRoom.y = player.currRoom.y;
                 

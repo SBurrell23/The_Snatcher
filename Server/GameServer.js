@@ -134,7 +134,7 @@ function startGame(){
 
     global.solidObjects = new SolidObjects();
     global.solidObjects.createPerimeterWalls(gs, global.map.get());
-    //global.solidObjects.createMazeWalls(gs, global.map.get());
+    global.solidObjects.createMazeWalls(gs, global.map.get());
     sendAllClients({type: "solidObjects", solidObjects: global.solidObjects.get()});
 
     gs.state = 'playing';

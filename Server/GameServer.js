@@ -35,6 +35,9 @@ var playerObject ={
 global.pointsForKeyAddedToDoor = 1;
 global.pointsForEscape = 2;
 
+global.pointsForSnatching = 2;
+global.pointsForSnatchingAllRunners = 3;
+
 var snatcherStats = {
     speedMod: 1.5
 };
@@ -122,6 +125,17 @@ function startGame(){
     //solidObjects.createMazeWalls(gs, map.get());
     sendClients({type: "solidObjects", solidObjects: solidObjects.get()});
 
+}
+
+//Last action can be 'escaped' or 'snatched
+global.checkForGameOver = function(gs,lastAction){
+    var alivePlayers = gs.players.filter(player => !player.isSnatcher && player.isAlive);
+    if (alivePlayers.length == 0 && lastAction == 'snatched') {
+        console.log("All players have been snatched! GAME OVER!");
+    }
+    else if (alivePlayers.length == 0 && lastAction == 'escaped') {
+        console.log("All still alive players have escaped! GAME OVER!");
+    }
 }
 
 function setSnatcher(){

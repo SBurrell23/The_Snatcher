@@ -13,6 +13,7 @@ Movement.prototype.movePlayer = function(gs,map, id, direction,solidObjects) {
                     if(!this.checkForWallCollision(player,destPosX,destPosY,solidObjects)){
                         player.currPos.y = destPosY;
                         this.checkForItemCollision(gs,player);
+                        this.checkForPlayerCollision(gs,player);
                     }
                 } else {
                     this.movePlayerToNewRoom(player,map,player.currRoom.x,player.currRoom.y-1,"south");
@@ -26,6 +27,7 @@ Movement.prototype.movePlayer = function(gs,map, id, direction,solidObjects) {
                     if(!this.checkForWallCollision(player,destPosX,destPosY,solidObjects)){
                         player.currPos.y = destPosY;
                         this.checkForItemCollision(gs,player);
+                        this.checkForPlayerCollision(gs,player);
                     }
                 } else {
                     this.movePlayerToNewRoom(player,map,player.currRoom.x,player.currRoom.y+1,"north");
@@ -39,6 +41,7 @@ Movement.prototype.movePlayer = function(gs,map, id, direction,solidObjects) {
                     if(!this.checkForWallCollision(player,destPosX,destPosY,solidObjects)){
                         player.currPos.x = destPosX;
                         this.checkForItemCollision(gs,player);
+                        this.checkForPlayerCollision(gs,player);
                     }
                 } else {
                     this.movePlayerToNewRoom(player,map,player.currRoom.x+1,player.currRoom.y,"east");
@@ -52,6 +55,7 @@ Movement.prototype.movePlayer = function(gs,map, id, direction,solidObjects) {
                     if(!this.checkForWallCollision(player,destPosX,destPosY,solidObjects)){
                         player.currPos.x = destPosX;
                         this.checkForItemCollision(gs,player);
+                        this.checkForPlayerCollision(gs,player);
                     }
                 } else {
                     this.movePlayerToNewRoom(player,map,player.currRoom.x-1,player.currRoom.y,"west");
@@ -139,6 +143,29 @@ Movement.prototype.checkForItemCollision = function(gs, player) {
     });
 }
 
+Movement.prototype.checkForPlayerCollision = function(gs, player) {
+    //If the player is not the snatcher, we don't really care since friendly players CAN collide
+    if(player.isSnatcher == false)
+        return;
+
+    var otherPlayers = gs.players.filter(otherPlayer => otherPlayer.id != player.id && otherPlayer.currRoom.x == player.currRoom.x && otherPlayer.currRoom.y == player.currRoom.y);
+    otherPlayers.forEach(otherPlayer => {
+        if (
+            player.currPos.x + player.radius >= otherPlayer.currPos.x - otherPlayer.radius &&
+            player.currPos.x - player.radius <= otherPlayer.currPos.x + otherPlayer.radius &&
+            player.currPos.y + player.radius >= otherPlayer.currPos.y - otherPlayer.radius &&
+            player.currPos.y - player.radius <= otherPlayer.currPos.y + otherPlayer.radius
+        ) {
+            otherPlayer.currPos.x = -1000;
+            otherPlayer.currPos.y = -1000;
+            otherPlayer.isAlive = false;
+            player.points += global.pointsForSnatching;
+            console.log("The snatcher has SNATCHED " + otherPlayer.name + "!!! RIP!!!");
+            global.checkForGameOver(gs,'snatched');
+        }
+    });
+}
+
 Movement.prototype.pickupItemIfAllowed = function(gs,player,item) {
     
     if (item.type == "key" && !item.isConsumed && player.hasKey == false && !player.isSnatcher){
@@ -168,6 +195,7 @@ Movement.prototype.pickupItemIfAllowed = function(gs,player,item) {
             player.points += global.pointsForEscape;
             player.rWins += 1;
             console.log("Player " + player.name + " has escaped through the exit door at " + item.currRoom.x + ", " + item.currRoom.y + "!");
+            global.checkForGameOver(gs,'escaped');
         }
     }
 }

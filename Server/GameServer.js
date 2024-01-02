@@ -25,6 +25,7 @@ var playerObject ={
     currRoom:{x:-1,y:-1},
     currPos:{x:-100,y:-100},
     hasKeys: [],
+    hasItem: undefined,
     speed:3,
     radius:25,
     isSnatcher: false,
@@ -92,6 +93,13 @@ wss.on('connection', (ws) => {
             new Movement().movePlayer(gs,global.map.get(),message.id, message.direction,global.solidObjects.get());
         }
 
+        if(message.type == "pickupItem"){
+            new Movement().pickupItem(gs,message.id);
+        }
+
+        if(message.type == "dropItem"){
+            new Movement().dropItem(gs,message.id,true);
+        }
     });
 
     //A user has disconnected
@@ -117,7 +125,7 @@ function startGame(){
     console.log("Starting game...");
     
     setSnatcher();
-    setAllPlyersToAlive();
+    resetPlayerStats();
 
     global.map = new MapBoard();
     sendAllClients({type: "map", map: global.map.generateNewMap()});
@@ -166,9 +174,12 @@ function setSnatcher(){
     gs.players[0].snatcherStats = snatcherStats;
 }
 
-function setAllPlyersToAlive(){
-    for (let i = 0; i < gs.players.length; i++)
+function resetPlayerStats(){
+    for (let i = 0; i < gs.players.length; i++){
         gs.players[i].isAlive = true;
+        gs.players[i].hasKeys = [];
+        gs.players[i].hasItem = undefined;
+    }
 }
 
 function isSnatcher(id){

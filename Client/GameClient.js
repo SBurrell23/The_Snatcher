@@ -10,10 +10,10 @@ var localState = {
 };
 var keys = {};
 var colors = {
-    snatcher: '#000C66',
+    snatcher: '#3d67ff',
     me: '#FF8300',
     otherPlayer: '#81B622',
-    key: 'yellow'
+    key: '#f7d707'
 }
 
 function connectWebSocket() {
@@ -120,6 +120,7 @@ function drawGameState(gs) {
         drawPlayers(ctx, gs, currentRoomX, currentRoomY);
         
         drawMap(ctx,gs,localState.map);
+        drawPlayerInventory(ctx, gs);
     }
 
 }   
@@ -211,10 +212,9 @@ function drawMap(ctx, gs, map) {
     const walloffset = 20;
     if (map) {
         
-        const blankSpace = 'rgba(255, 255, 255, .75)';
-        const emptyRoom = 'red';
-        const snatcherSpawn = '#7EC8E3';
-        const exitDoor = '#350300';
+        const blankSpace = 'rgba(255, 255, 255, .65)';
+        const emptyRoom = 'rgba(255, 0, 0, .65)';
+        const exitDoor = 'rgba(64, 48, 22, .65)';
 
         for (let row = 0; row < map.length; row++) {
             for (let col = 0; col < map[row].length; col++) {
@@ -233,10 +233,8 @@ function drawMap(ctx, gs, map) {
                 }
                 else if(room === 0)
                     roomColor = blankSpace;
-                else if (room === 1) 
+                else if (room === 1 || room === 2) //Snatcher spawn not important anymore 
                     roomColor = emptyRoom;
-                else if (room === 2) 
-                    roomColor = snatcherSpawn;
                 else if (room === 3) 
                     roomColor = exitDoor;
 
@@ -246,6 +244,14 @@ function drawMap(ctx, gs, map) {
         }
     }
 }  
+
+function drawPlayerInventory(ctx, gs) {
+    var me = getMe(gs);
+    var myKeys = me.keys;
+
+    
+
+}
 
 function isAnyPlayerInThisRoom(gs, row, col) {
     if (gs.players) {
@@ -324,8 +330,12 @@ function drawItems(ctx, currentRoomX, currentRoomY) {
             }
             else{
                 ctx.fillStyle = 'magenta';
+                ctx.fillRect(item.currPos.x, item.currPos.y, item.width, item.height);
+                ctx.fillStyle = 'black';
                 ctx.font = '18px Arial';
-                ctx.fillText(item.type.toUpperCase(), item.currPos.x, item.currPos.y);
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(item.type.toUpperCase(), item.currPos.x + item.width / 2, item.currPos.y + item.height / 2);
             }
         }
     }  
@@ -373,12 +383,29 @@ function movePlayer(direction){
 }
 
 $(document).keydown(function(e) {
-    keys[e.key] = true;
-    if (e.which === 32) { // Space key
+    
+    if (e.which === 13) { // Enter key
         e.preventDefault();
         socket.send(JSON.stringify({
             type: "generateMap"
         }));
+    }else if (e.which === 32) { // Space to pickup or drop an item
+        e.preventDefault();
+        if(serverState && serverState.state == "playing" && getMe(serverState).isAlive){
+            if(getMe(serverState).hasItem == undefined){
+                socket.send(JSON.stringify({
+                    type: "pickupItem",
+                    id: localState.playerId
+                }));
+            }else{
+                socket.send(JSON.stringify({
+                    type: "dropItem",
+                    id: localState.playerId
+                }));
+            }
+        }
+    }else{
+        keys[e.key] = true;
     }
 });
 

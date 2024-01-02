@@ -315,9 +315,9 @@ function drawItems(ctx, gs, currentRoomX, currentRoomY) {
             else if(item.type == 'exitdoor'){
                 ctx.fillStyle = '#522a00';
                 ctx.fillRect(item.currPos.x, item.currPos.y, item.width, item.height);
-                ctx.fillStyle = 'white';
+                ctx.fillStyle = colors.key
                 ctx.font = '18px Arial';
-                ctx.fillText("DOOR (" +item.specialCount+")", item.currPos.x, item.currPos.y);
+                ctx.fillText("("+item.specialCount+")", item.currPos.x + Math.ceil(item.width/2), item.currPos.y + Math.ceil(item.height/2));
             }
             else{
                 ctx.fillStyle = 'magenta';

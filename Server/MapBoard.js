@@ -316,7 +316,7 @@ MapBoard.prototype.spawnItems = function(gs) {
     gs.items = [];
 
     //We MUST spawn the exit doors 1st so we don't accidentally spawn another item in the room first
-    this.createItems(gs,'exitdoor',2, 70,150); //2 exit doors, cannot be modified
+    this.createItems(gs,'exitdoor',2, 76,150); //2 exit doors, cannot be modified
     this.createItems(gs,'key', 40, 30,20);
     
 

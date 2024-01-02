@@ -19,7 +19,7 @@ var playerObject ={
     id: -1,
     name: "",
     isConnected: false,
-    isAlive: true,
+    isAlive: false,
     points:0,
     sWins:0,
     rWins:0,
@@ -112,8 +112,11 @@ wss.on('connection', (ws) => {
 
 function startGame(){
     console.log("Starting game...");
-    gs.state = 'playing';
+    
     setSnatcher();
+    setAllPlyersToAlive();
+
+    gs.state = 'playing';
 
     map = new MapBoard();
     sendClients({type: "map", map: map.generateNewMap()});
@@ -122,7 +125,7 @@ function startGame(){
 
     solidObjects = new SolidObjects();
     solidObjects.createPerimeterWalls(gs, map.get());
-    //solidObjects.createMazeWalls(gs, map.get());
+    solidObjects.createMazeWalls(gs, map.get());
     sendClients({type: "solidObjects", solidObjects: solidObjects.get()});
 
 }
@@ -143,6 +146,11 @@ function setSnatcher(){
         return;
     gs.players[0].isSnatcher = true;
     gs.players[0].snatcherStats = snatcherStats;
+}
+
+function setAllPlyersToAlive(){
+    for (let i = 0; i < gs.players.length; i++)
+        gs.players[i].isAlive = true;
 }
 
 function isSnatcher(id){

@@ -92,45 +92,55 @@ The snatcher has to catch all the runners before:
 THE MAP
 The map is a procedurally generated maze (20*20 ?)
 The map is 2D/2D Array
-Only the runners can see the map
-Each runner can only see the exit doors on the map once they come across them
+The runners can only see the rooms they have been in
 Each runner can see the snatchers location on the map always
-The snatcher CAN?? (not?) see the map, 
+The snatcher CAN SEE THE ENTIRE MAP, but not the players
     The snatcher has a "hint" on each door about how far away from any player they are
-The entire map + doors WILL be revealed to the snatcher once 1 door is opened
+The doors will be marked on snatchers map when the first one is opened.
 
 The snatcher catches the runners by touching them
 If a runner is caught, they are out and can spectate another player of their choosing
-If a runner had a key when they were caught, it is dropped on the ground
+If a runner had a key(s) when they were caught, it is dropped on the ground
 
-As the # of available runners decreases, the snatcher gets faster
+As the # of available runners decreases, the snatcher gets faster?
 
 The game ends when:
-    The snatcher catches all the runners
     All the runners are caught or escaped
     The snatcher ragequits
 
-    Runners get 1 Point for adding a key to the door
-    Runners get 1 Point for escaping
+    Runners get a Point for adding a key to the door
+    Runners get more points for escaping
 
-    The Snatcher gets 1 Point for catching a runner
-    The Snatcher gets 3 extra points for catching all the runners
+    The Snatcher gets a Point for catching a runner
+    The Snatcher gets an extra point for total runners caught on game over
 
 
 
-make the killer have limited room vision
-this way players can hide if they are in the same room
+The snatcher has very limited room visibility (but can see the entire minimap and is faster)
+This way players can hide if they are in the same room
+
+Players will also potentally not have FULL visibility of the rooms, but much more then the snatcher
+
+
+THERE NEEDS TO BE SOME KIND OF SKILLCHECK GAME WHEN PICKING UP A KEY/ITEM IN ORDER TO GET IT
+Maybe every item is a trunk, and you have to search it and then get either a key or item
+
+If any skillcheck game is failed, your loation is revealed on the map to the snatcher for X seconds
 
 
 MORE IDEAS
-Maybe add blue portals on the map for runners to use and red portals for the snatcher to use
+Maybe a magic fireplace or two that can be used to teleport from one side of the map to another
 
-Add a BOOTS powerup runners can find that makes them faster for a short period of time
-Add a PANDORAS BOX for runners, that randomly teleports them to a new room
- --When they choose to use it, they drop their key on the ground
+Add a PF FYERS powerup runners can find that makes them faster for a short period of time
+Add a THE BUTTON for runners, that randomly teleports them to a new room when activated
+    Using this powerup will cause you to drop any keys you are holding
+Add a MAGIC MONOCLE powerup for runners that lets them see the map + doors + (keys?) for a short period of time) 
 
-Add a BBQ powerup the snatcher can find that temporarily reveals the map & players to them
-Add a BOOTS powerup for the snatcher as well that makes them faster for a short period of time
+
+Add a CHILI BBQ powerup the snatcher can find that temporarily reveals the players on the map to them
+Add a EDWARDS EYEBALLS powerup that expands their vision for a moderate period of time
+Add a KILL THE POWER powerup that turns off all players maps for a moderate period of time
+
 
 
 

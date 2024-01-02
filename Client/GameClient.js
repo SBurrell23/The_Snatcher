@@ -247,10 +247,19 @@ function drawMap(ctx, gs, map) {
 
 function drawPlayerInventory(ctx, gs) {
     var me = getMe(gs);
-    var myKeys = me.keys;
 
-    
-
+    if (me.hasKeys.length > 0) {
+        for (let i = 1; i <= me.hasKeys.length; i++) {
+            ctx.font = '12px Arial';
+            ctx.fillStyle = colors.key;
+            ctx.fillText("KEY#" + i, me.currPos.x, me.currPos.y - ((me.radius-20 * i)));
+        }
+    }
+    if (me.hasItem) {
+        ctx.font = '12px Arial';
+        ctx.fillStyle = 'black';
+        ctx.fillText(me.hasItem.type, me.currPos.x, me.currPos.y + me.radius + 10);
+    }
 }
 
 function isAnyPlayerInThisRoom(gs, row, col) {

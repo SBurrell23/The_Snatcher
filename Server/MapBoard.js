@@ -318,10 +318,10 @@ MapBoard.prototype.spawnItems = function(gs) {
     //Name, number of items, width, height
     //We MUST spawn the exit doors 1st so we don't accidentally spawn another item in the room first
     this.createItems('exitdoor', 2, 76,150); //2 exit doors ONLY!
-    this.createItems('key', 60, 30,20);
-    this.createItems('pf_flyers', 1, 50,50);
-    this.createItems('the_button', 1, 50,50);
-    this.createItems('magic_monocle', 1, 50,50);
+    this.createItems('key', 30, 30,20);
+    this.createItems('pf_flyers', 10, 50,50);
+    this.createItems('the_button', 10, 50,50);
+    this.createItems('magic_monocle', 10, 50,50);
     
 
     for (let item of global.items) {

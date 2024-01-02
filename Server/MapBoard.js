@@ -1,11 +1,11 @@
 
 function MapBoard() {
     this.gameMap = [];
-    this.rows = 25;
-    this.cols = 25;
+    this.rows = 12;
+    this.cols = 12;
     this.totalRooms = Math.floor((this.rows*this.cols) * .65); //Should not be > then ~.85
     this.middleSize = 2; //Probably should stay as 2
-    //Room Types: 0 = empty, 1 = room, 2 = starting room, 3 = door
+    //Room Types: 0 = empty, 1 = room, 2 = starting room, 3 = exit door
 }
 
 MapBoard.prototype.generateNewMap = function() {
@@ -315,11 +315,20 @@ MapBoard.prototype.spawnItems = function(gs) {
 
     gs.items = [];
 
-    //First create the items before we go and spawn them.
-    this.createItems(gs,'key',gs.players.length * 150);
-    //this.createItems(gs,'teleport',gs.players.length * 3);
+    //We MUST spawn the exit doors 1st so we don't accidentally spawn another item in the room first
+    this.createItems(gs,'exitdoor',2, 70,150); //2 exit doors, cannot be modified
+    this.createItems(gs,'key', 40, 30,20);
+    
 
     for (let item of gs.items) {
+
+        if(item.type == 'exitdoor'){
+            var exitDoorRoom = this.findExitDoorRoom(gs.items);
+            item.currRoom.x = exitDoorRoom.x;
+            item.currRoom.y = exitDoorRoom.y;
+            console.log("Exit Door: " + JSON.stringify(item));
+            continue;
+        }
 
         let randomX, randomY;
         let roomFound = false;
@@ -344,25 +353,37 @@ MapBoard.prototype.spawnItems = function(gs) {
     }
 }
 
-MapBoard.prototype.createItems = function(gs,type,numItems) {
+MapBoard.prototype.createItems = function(gs,type,numItems,width,height) {
     for (let i = 1; i <= numItems; i++) {
         gs.items.push({
             type: type,
             id: type + (gs.items.length + 1),
             currPos: {
-                x: global.canvasWidth / 2,
-                y: global.canvasHeight / 2
+                x: (global.canvasWidth / 2) - Math.ceil(width / 2),
+                y: (global.canvasHeight / 2) - Math.ceil(height / 2)
             },
             currRoom: {
                 x: -1,
                 y: -1
             },
-            width: 25,
-            height:25,
+            width: width,
+            height:height,
             ownerId: -1,
-            isConsumed: false
+            isConsumed: false,
+            specialCount: 0
         });
     }
+}
+
+MapBoard.prototype.findExitDoorRoom = function(items) {
+    for (let y = 0; y < this.gameMap.length; y++) {
+        for (let x = 0; x < this.gameMap[y].length; x++) {
+            if (this.gameMap[y][x] == 3 && !this.isItemInRoom(items, x, y)) {
+                return { x: x, y: y };
+            }
+        }
+    }
+    return null; // Return null if no room with a value of 3 is found or if there is already an exit door item in the room
 }
 
 MapBoard.prototype.inMiddleOfMap = function(x, y) {

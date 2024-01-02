@@ -6,6 +6,7 @@ var localState = {
     playerId: -1,
     map: null,
     solidObjects: null
+    //Will want to add items to this as well.
 };
 var keys = {};
 var colors = {
@@ -82,8 +83,8 @@ function updateLobby(gs) {
         var row = $('<tr></tr>').appendTo(playerQueue);
         $('<td></td>').text(player.name).appendTo(row);
         $('<td></td>').text(player.points).appendTo(row);
-        $('<td></td>').text(player.sWins).appendTo(row);
         $('<td></td>').text(player.rWins).appendTo(row);
+        $('<td></td>').text(player.sWins).appendTo(row);
     }
 }
 
@@ -309,8 +310,16 @@ function drawItems(ctx, gs, currentRoomX, currentRoomY) {
             if(item.type == 'key'){
                 ctx.fillStyle = colors.key;
                 ctx.font = '18px Arial';
-                ctx.fillText(item.type.toUpperCase(), item.currPos.x, item.currPos.y);
-            }else{
+                ctx.fillRect(item.currPos.x, item.currPos.y, item.width, item.height);
+            }
+            else if(item.type == 'exitdoor'){
+                ctx.fillStyle = '#522a00';
+                ctx.fillRect(item.currPos.x, item.currPos.y, item.width, item.height);
+                ctx.fillStyle = 'white';
+                ctx.font = '18px Arial';
+                ctx.fillText("DOOR (" +item.specialCount+")", item.currPos.x, item.currPos.y);
+            }
+            else{
                 ctx.fillStyle = 'magenta';
                 ctx.font = '18px Arial';
                 ctx.fillText(item.type.toUpperCase(), item.currPos.x, item.currPos.y);
@@ -351,11 +360,13 @@ function handlePlayerMovement(){
 }
 
 function movePlayer(direction){
-    socket.send(JSON.stringify({
-        type:"movePlayer",
-        id:localState.playerId,
-        direction:direction
-    }));
+    if(serverState && serverState.state == "playing" && getMe(serverState).isAlive){
+        socket.send(JSON.stringify({
+            type:"movePlayer",
+            id:localState.playerId,
+            direction:direction
+        }));
+    }
 }
 
 $(document).keydown(function(e) {

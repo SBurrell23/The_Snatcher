@@ -19,6 +19,7 @@ var playerObject ={
     id: -1,
     name: "",
     isConnected: false,
+    isAlive: true,
     points:0,
     sWins:0,
     rWins:0,
@@ -30,6 +31,9 @@ var playerObject ={
     isSnatcher: false,
     snatcherStats: undefined
 };
+
+global.pointsForKeyAddedToDoor = 1;
+global.pointsForEscape = 2;
 
 var snatcherStats = {
     speedMod: 1.5
@@ -115,7 +119,7 @@ function startGame(){
 
     solidObjects = new SolidObjects();
     solidObjects.createPerimeterWalls(gs, map.get());
-    solidObjects.createMazeWalls(gs, map.get());
+    //solidObjects.createMazeWalls(gs, map.get());
     sendClients({type: "solidObjects", solidObjects: solidObjects.get()});
 
 }

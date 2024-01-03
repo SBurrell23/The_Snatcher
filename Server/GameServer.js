@@ -26,7 +26,7 @@ var playerObject ={
     currPos:{x:-1000,y:-1000},
     hasKeys: [],
     hasItem: undefined,
-    speed:450,
+    speed:400,
     radius:25,
     spotlight: 375,
     isSnatcher: false
@@ -187,14 +187,16 @@ global.sendItemsToClientsInRoom = function(roomX, roomY){
 }
 
 function setSnatcher(){
-    var snatcherSpeedMod = 1.1;
-    var snatcherSpotlight = 225; // :(
-
     if(gs.players.length == 0)
         return;
-    var snatcher = gs.players[0];
+
+    var snatcherSpeedMod = 1.12; // :)
+    var snatcherSpotlight = 225; // :(
+
+    var snatcher = gs.players[0]; //First player is the snatcher
+
     snatcher.isSnatcher = true;
-    snatcher.speed = gs.players[0].speed * snatcherSpeedMod;
+    snatcher.speed = snatcher.speed * snatcherSpeedMod;
     snatcher.spotlight = snatcherSpotlight;
 }
 

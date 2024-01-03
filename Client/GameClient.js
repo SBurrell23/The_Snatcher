@@ -339,7 +339,7 @@ function drawPlayerInventory(ctx, gs) {
     var me = getMe(gs);
 
     ctx.fillStyle = 'rgba(255, 255, 255, .65)';
-    ctx.fillRect(20, 20, 140, 150);
+    ctx.fillRect(20, 20, 140, 140);
 
     // Draw INVENTORY text
     ctx.font = '18px Arial';
@@ -349,7 +349,7 @@ function drawPlayerInventory(ctx, gs) {
 
     if (me.hasKeys.length > 0) {
         for (let i = 1; i <= me.hasKeys.length; i++) {
-            ctx.font = '18px Arial';
+            ctx.font = '16px Arial';
             ctx.fillStyle = colors.key;
             ctx.textAlign = 'center';
             ctx.fillText("KEY#" + i, 90, 45 + (i * 25));
@@ -359,7 +359,7 @@ function drawPlayerInventory(ctx, gs) {
         ctx.font = '14px Arial';
         ctx.textAlign = 'center';
         ctx.fillStyle = 'magenta';
-        ctx.fillText(me.hasItem.type.toUpperCase(), 90, 135);
+        ctx.fillText(me.hasItem.type.toUpperCase(), 90, 130);
     }
 }
 
@@ -403,6 +403,8 @@ function drawItems(ctx, currentRoomX, currentRoomY) {
                 ctx.fillRect(item.currPos.x, item.currPos.y, item.width, item.height);
                 ctx.fillStyle = colors.key
                 ctx.font = '18px Arial';
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
                 ctx.fillText("("+item.specialCount+")", item.currPos.x + Math.ceil(item.width/2), item.currPos.y + Math.ceil(item.height/2));
             }
             else{

@@ -1,14 +1,15 @@
 function Movement() {
 }
 
-Movement.prototype.movePlayer = function(gs,map, id, direction,solidObjects) {
+Movement.prototype.movePlayer = function(gs,map, id, direction,solidObjects,deltaTime) {
     var player = gs.players.find(player => player.id == id);
     if(player){
-        //console.log("Moving player " + player.name + " at speed " + player.speed);
-        switch(direction){
-            case "up":
-                if((player.currPos.y - player.speed >= 0)){
-                    var destPosY = player.currPos.y - player.speed;
+        let moveAmount = player.speed * deltaTime; // Units per second
+        //console.log("Moving player " + player.name + " at speed " + moveAmount);
+
+        if(direction == "u" || direction == "ul" || direction == "ur"){
+                if((player.currPos.y - moveAmount >= 0)){
+                    var destPosY = player.currPos.y - moveAmount;
                     var destPosX = player.currPos.x;
                     if(!this.checkForWallCollision(player,destPosX,destPosY,solidObjects)){
                         player.currPos.y = destPosY;
@@ -18,11 +19,10 @@ Movement.prototype.movePlayer = function(gs,map, id, direction,solidObjects) {
                 } else {
                     this.movePlayerToNewRoom(player,map,player.currRoom.x,player.currRoom.y-1,"south");
                 }
-                break;
-
-            case "down":
-                if((player.currPos.y + player.speed <= global.canvasHeight)){
-                    var destPosY = player.currPos.y + player.speed;
+        }
+        if(direction == "d" || direction == "dl" || direction == "dr"){
+                if((player.currPos.y + moveAmount <= global.canvasHeight)){
+                    var destPosY = player.currPos.y + moveAmount;
                     var destPosX = player.currPos.x;
                     if(!this.checkForWallCollision(player,destPosX,destPosY,solidObjects)){
                         player.currPos.y = destPosY;
@@ -32,11 +32,10 @@ Movement.prototype.movePlayer = function(gs,map, id, direction,solidObjects) {
                 } else {
                     this.movePlayerToNewRoom(player,map,player.currRoom.x,player.currRoom.y+1,"north");
                 }
-                break;
-
-            case "left":
-                if((player.currPos.x - player.speed >= 0)){
-                    var destPosX = player.currPos.x - player.speed;
+        }
+        if(direction == "l" || direction == "ul" || direction == "dl"){
+                if((player.currPos.x - moveAmount >= 0)){
+                    var destPosX = player.currPos.x - moveAmount;
                     var destPosY = player.currPos.y;
                     if(!this.checkForWallCollision(player,destPosX,destPosY,solidObjects)){
                         player.currPos.x = destPosX;
@@ -46,11 +45,10 @@ Movement.prototype.movePlayer = function(gs,map, id, direction,solidObjects) {
                 } else {
                     this.movePlayerToNewRoom(player,map,player.currRoom.x+1,player.currRoom.y,"east");
                 }
-                break;
-
-            case "right":
-                if((player.currPos.x + player.speed <= global.canvasWidth)){
-                    var destPosX = player.currPos.x + player.speed
+        }
+        if(direction == "r" || direction == "ur" || direction == "dr"){
+                if((player.currPos.x + moveAmount <= global.canvasWidth)){
+                    var destPosX = player.currPos.x + moveAmount
                     var destPosY = player.currPos.y;
                     if(!this.checkForWallCollision(player,destPosX,destPosY,solidObjects)){
                         player.currPos.x = destPosX;
@@ -60,8 +58,8 @@ Movement.prototype.movePlayer = function(gs,map, id, direction,solidObjects) {
                 } else {
                     this.movePlayerToNewRoom(player,map,player.currRoom.x-1,player.currRoom.y,"west");
                 }
-                break;
         }
+        
     }
 }
 

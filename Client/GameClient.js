@@ -406,24 +406,37 @@ function isMe(id){
 }
 
 function handlePlayerMovement(){
-    if(keys['a'] || keys['ArrowLeft']){
-        movePlayer("left");
+    if(keys['w'] && keys['a']){
+        movePlayer("ul");
     }
-    else if(keys['w'] || keys['ArrowUp']){
-        movePlayer("up");
+    else if(keys['w'] && keys['d']){
+        movePlayer("ur");
     }
-    else if(keys['d'] || keys['ArrowRight']){
-        movePlayer("right");
+    else if(keys['s'] && keys['a']){
+        movePlayer("dl");
     }
-    else if(keys['s'] || keys['ArrowDown']){
-        movePlayer("down");
+    else if(keys['s'] && keys['d']){
+        movePlayer("dr");
     }
+    else if(keys['w']){
+        movePlayer("u");
+    }
+    else if(keys['s']){
+        movePlayer("d");
+    }
+    else if(keys['a']){
+        movePlayer("l");
+    }
+    else if(keys['d'] ){
+        movePlayer("r");
+    }
+
 }
 
 function movePlayer(direction){
     if(serverState && serverState.state == "playing" && getMe(serverState).isAlive){
         socket.send(JSON.stringify({
-            type:"movePlayer",
+            type:"mp",
             id:localState.playerId,
             direction:direction
         }));
@@ -525,13 +538,21 @@ function create(){
 
 function update(){
     if (cursors.up.isDown && cursors.left.isDown) {
+        movePlayer("ul");
     } else if (cursors.up.isDown && cursors.right.isDown) {
+        movePlayer("ur");
     } else if (cursors.down.isDown && cursors.left.isDown) {
+        movePlayer("dl");
     } else if (cursors.down.isDown && cursors.right.isDown) {
+        movePlayer("dr");
     } else if (cursors.up.isDown) {
+        movePlayer("u");
     } else if (cursors.down.isDown) {
+        movePlayer("d");
     } else if (cursors.left.isDown) {
+        movePlayer("l");
     } else if (cursors.right.isDown) {
+        movePlayer("r");
     }
 }
 

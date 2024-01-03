@@ -26,7 +26,7 @@ var playerObject ={
     currPos:{x:-100,y:-100},
     hasKeys: [],
     hasItem: undefined,
-    speed:3,
+    speed:500,
     radius:25,
     isSnatcher: false,
     snatcherStats: undefined
@@ -34,7 +34,6 @@ var playerObject ={
 
 var snatcherStats = {speedMod: 1.5};
 
-var playTime = 0;
 var timeouts = [];
 
 //POINTS
@@ -54,6 +53,7 @@ global.items = []; //This is sent on demand dependent on game actions since it's
 var defaultGameState = JSON.parse(JSON.stringify(gs));
 
 const clients = new Map();
+const movementQueue = new Map();
 
 wss.on('connection', (ws) => {
     
@@ -89,8 +89,8 @@ wss.on('connection', (ws) => {
             startGame();
         }
 
-        if(message.type == "movePlayer"){
-            new Movement().movePlayer(gs,global.map.get(),message.id, message.direction,global.solidObjects.get());
+        if(message.type == "mp"){
+            movementQueue.set(message.id, message.direction);
         }
 
         if(message.type == "pickupItem"){
@@ -134,7 +134,7 @@ function startGame(){
 
     global.solidObjects = new SolidObjects();
     global.solidObjects.createPerimeterWalls(gs, global.map.get());
-    //global.solidObjects.createMazeWalls(gs, global.map.get());
+    global.solidObjects.createMazeWalls(gs, global.map.get());
     sendAllClients({type: "solidObjects", solidObjects: global.solidObjects.get()});
 
     gs.state = 'playing';
@@ -216,10 +216,6 @@ function resetGameState(){
     gs = JSON.parse(JSON.stringify(defaultGameState));
 }
 
-function updatePlayTime(){
-    playTime += 1;
-}
-
 function createTimeout(fn, delay) {
     let timeoutId = setTimeout(fn, delay);
     timeouts.push(timeoutId);
@@ -247,8 +243,22 @@ function sendClient(player,object){
     });
 }
 
-setInterval(function() {
-    updatePlayTime();
-    
+function updateMovements(deltaTime){
+    movementQueue.forEach((direction, id) => {
+        new Movement().movePlayer(gs,global.map.get(),id, direction,global.solidObjects.get(),deltaTime);
+    });
+    movementQueue.clear();
+}
+
+let lastUpdateTime = Date.now();
+function gameLoop() {
+    let now = Date.now();
+    let deltaTime = (now - lastUpdateTime) / 1000; // Time since last update in seconds
+
+    updateMovements(deltaTime);
     sendAllClients(gs);
-}, 32);
+
+    lastUpdateTime = now;
+    setTimeout(gameLoop, 1000 / 60); // Run the game loop 60 times per second
+}
+gameLoop();

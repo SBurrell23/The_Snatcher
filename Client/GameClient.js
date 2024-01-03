@@ -1,5 +1,6 @@
 var socket = null;
 var reConnectInterval = null;
+var pingInterval = null;
 
 var serverState = null;
 var localState = {
@@ -7,14 +8,16 @@ var localState = {
     map: null,
     solidObjects: null,
     items: [],
-    roomsIveBeenIn: []
+    roomsIveBeenIn: [],
+    ping : 0
 };
 var keys = {};
 var colors = {
     snatcher: '#3d67ff',
     me: '#FF8300',
     otherPlayer: '#81B622',
-    key: '#f7d707'
+    key: '#f7d707',
+    spotlight: 'rgba(0, 0, 0, .988)'
 }
 
 function connectWebSocket() {
@@ -23,17 +26,22 @@ function connectWebSocket() {
     localState.playerId = -1;
     
     clearInterval(reConnectInterval);
+    clearInterval(pingInterval);
 
     //wss://the-snatcher.onrender.com
     //ws://localhost:8080
-    socket = new WebSocket('wss://the-snatcher.onrender.com');  
+    socket = new WebSocket('ws://localhost:8080');  
     socket.addEventListener('open', function () {
         console.log('Server connection established!');
         $("#offlineMessage").css("display", "none");
+        pingInterval = setInterval(function() {
+            sendPing();
+        }, 200);
         socket.addEventListener('message', function (event) {
             recievedServerMessage(event.data);
         });
         requestAnimationFrame(gameLoop);
+
     });
 
     socket.addEventListener('close', function(event) {
@@ -41,7 +49,7 @@ function connectWebSocket() {
         $("#offlineMessage").css("display", "flex");
         reConnectInterval = setInterval(function() {
             connectWebSocket();
-        }, 1000) //On disconnect, try to reconnect every second
+        }, 1000); //On disconnect, try to reconnect every second
     });
 }
 connectWebSocket();
@@ -67,6 +75,8 @@ function recievedServerMessage(message) {
         serverState = message;
         updateLobby(serverState);
         updateInput(serverState,localState.playerId);
+    }else if(message.type == "pong"){
+        localState.ping = Date.now() - localState.ping;
     }
 }
 
@@ -97,6 +107,11 @@ function updateInput(gs, id) {
     }
 }
 
+function sendPing() {
+    localState.ping = Date.now();
+    socket.send(JSON.stringify({ type: 'ping', id: localState.playerId }));
+}
+
 function gameLoop() {
     if (serverState){
         drawGameState(serverState);
@@ -109,29 +124,77 @@ function drawGameState(gs) {
     
     var ctx = document.getElementById('canvas').getContext('2d');
     
-    drawBackground(ctx);
+    //Draw the lobby
+    drawLobbyScene(ctx,gs);
 
 
     if(gs.state == "playing" && getMe(gs).currRoom != undefined){
         var currentRoomX = getMe(gs).currRoom.x;
         var currentRoomY = getMe(gs).currRoom.y;
     
+        drawBackground(ctx);
+        
         drawSolidObjects(ctx, currentRoomX, currentRoomY);  
         drawItems(ctx,currentRoomX, currentRoomY);
         drawPlayers(ctx, gs, currentRoomX, currentRoomY);
+
+        //This needs to be here
+        drawSpotLights(ctx, gs, currentRoomX, currentRoomY);
         
         drawMap(ctx,gs,localState.map);
         drawPlayerInventory(ctx, gs);
+
+        drawPing(ctx);
+        
     }
 
 }   
 
+function drawLobbyScene(ctx,gs){
+        // Fill the canvas with black
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    
+        // Draw red text in the center
+        ctx.fillStyle = '#FF0000';
+        ctx.font = 'bold 55px Nunito';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('THE SNATCHER', ctx.canvas.width / 2, (ctx.canvas.height / 2)-25);
+}
+
+function drawSpotLights(ctx, gs, currentRoomX, currentRoomY) {
+    ctx.fillStyle = colors.spotlight;
+
+    var snatcherSpotLightRadius = 225;
+    var playerSpotLightRadius = 375;
+
+    for (let i = 0, len = gs.players.length; i < len; i++) {
+        var player = gs.players[i];
+        if (player.currRoom.x == currentRoomX && player.currRoom.y == currentRoomY) {
+            if (isSnatcher(gs, player.id) && isMe(player.id)){
+                ctx.beginPath();
+                ctx.rect(0, 0, canvas.width, canvas.height);
+                ctx.arc(player.currPos.x, player.currPos.y, snatcherSpotLightRadius, 0, Math.PI * 2, true);
+                ctx.fill('evenodd');
+                return;
+            }else if(isMe(player.id)){
+                ctx.beginPath();
+                ctx.rect(0, 0, canvas.width, canvas.height);
+                ctx.arc(player.currPos.x, player.currPos.y, playerSpotLightRadius, 0, Math.PI * 2, true);
+                ctx.fill('evenodd');
+                return;
+            }
+        }
+    }
+}
+
 function drawBackground(ctx) {
-    ctx.fillStyle = '#B8BADC';
+    ctx.fillStyle = '#98ABC7';
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    var lineWidth = 2;
-    ctx.fillStyle = 'black';
+    var lineWidth = 5;
+    ctx.fillStyle = '#4F3100';
     ctx.fillRect(0, 0, ctx.canvas.width, lineWidth);
     ctx.fillRect(0, 0, lineWidth, ctx.canvas.height);
     ctx.fillRect(ctx.canvas.width - lineWidth, 0, lineWidth, ctx.canvas.height);
@@ -308,10 +371,12 @@ function drawPlayers(ctx, gs, currentRoomX, currentRoomY) {
         if (player.currRoom.x == currentRoomX && player.currRoom.y == currentRoomY) {
             var color = colors.otherPlayer;
             
-            if (isSnatcher(gs, player.id))
+            if (isSnatcher(gs, player.id)){
                 color = colors.snatcher;
-            else if (isMe(player.id))
+            }
+            else if (isMe(player.id)){
                 color = colors.me;
+            }
 
             if(isMe(player.id)){
                 // Draw currRoom.x and currRoom.y in the middle of the screen
@@ -377,6 +442,18 @@ function drawSolidObjects(ctx,currentRoomX, currentRoomY) {
             }
         }
     }
+}
+
+function drawPing(ctx){
+    ctx.fillStyle = '#1cfc03';
+    ctx.font = 'bold 15px Arial';
+    ctx.textAlign = 'left';
+
+    if(localState.ping > 10000){
+        ctx.fillText("Ping: ?", 20, canvas.height - 20);
+        return;
+    }
+    ctx.fillText("Ping: "+Math.ceil(localState.ping), 20, canvas.height - 20);
 }
 
 function isAnyPlayerInThisRoom(gs, row, col) {

@@ -1,6 +1,7 @@
 
 function SolidObjects() {
     this.solidObjects = [];
+    this.color = "#141633";
 }
 
 SolidObjects.prototype.get = function() {
@@ -36,7 +37,7 @@ SolidObjects.prototype.createPerimeterWalls = function(gs,map) {
                 y: 0,
                 width: (canvasWidth - doorSize) / 2,
                 height: wallWidth,
-                color: 'black',
+                color: this.color,
                 roomXY: [roomX, roomY],
                 type:"wall"
             });
@@ -45,7 +46,7 @@ SolidObjects.prototype.createPerimeterWalls = function(gs,map) {
                 y: 0,
                 width: (canvasWidth- doorSize) / 2,
                 height: wallWidth,
-                color: 'black',
+                color: this.color,
                 roomXY: [roomX, roomY],
                 type:"wall"
             });
@@ -61,7 +62,7 @@ SolidObjects.prototype.createPerimeterWalls = function(gs,map) {
                 y: canvasHeight - wallWidth,
                 width: (canvasWidth - doorSize) / 2,
                 height: wallWidth,
-                color: 'black',
+                color: this.color,
                 roomXY: [roomX, roomY],
                 type:"wall"
             });
@@ -70,7 +71,7 @@ SolidObjects.prototype.createPerimeterWalls = function(gs,map) {
                 y: canvasHeight - wallWidth,
                 width: (canvasWidth - doorSize) / 2,
                 height: wallWidth,
-                color: 'black',
+                color: this.color,
                 roomXY: [roomX, roomY],
                 type:"wall"
             });
@@ -85,7 +86,7 @@ SolidObjects.prototype.createPerimeterWalls = function(gs,map) {
                 y: wallWidth,
                 width: wallWidth,
                 height: (canvasHeight - (2 * wallWidth) - doorSize) / 2,
-                color: 'black',
+                color: this.color,
                 roomXY: [roomX, roomY],
                 type:"wall"
             });
@@ -94,7 +95,7 @@ SolidObjects.prototype.createPerimeterWalls = function(gs,map) {
                 y: (canvasHeight + doorSize) / 2,
                 width: wallWidth,
                 height: (canvasHeight - (2 * wallWidth) - doorSize) / 2,
-                color: 'black',
+                color: this.color,
                 roomXY: [roomX, roomY],
                 type:"wall"
             });
@@ -109,7 +110,7 @@ SolidObjects.prototype.createPerimeterWalls = function(gs,map) {
                 y: wallWidth,
                 width: wallWidth,
                 height: (canvasHeight - (2 * wallWidth) - doorSize) / 2,
-                color: 'black',
+                color: this.color,
                 roomXY: [roomX, roomY],
                 type:"wall"
             });
@@ -118,7 +119,7 @@ SolidObjects.prototype.createPerimeterWalls = function(gs,map) {
                 y: (canvasHeight + doorSize) / 2,
                 width: wallWidth,
                 height: (canvasHeight - (2 * wallWidth) - doorSize) / 2,
-                color: 'black',
+                color: this.color,
                 roomXY: [roomX, roomY],
                 type:"wall"
             });
@@ -344,7 +345,7 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
                             y: (k * blockSize),
                             width: blockSize,
                             height: blockSize,
-                            color: 'black',
+                            color: this.color,
                             roomXY: [rX, rY],
                             type:"mazeWall"
                         });

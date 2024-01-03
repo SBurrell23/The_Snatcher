@@ -100,6 +100,10 @@ wss.on('connection', (ws) => {
         if(message.type == "dropItem"){
             new Movement().dropItem(gs,message.id,true);
         }
+
+        if(message.type == "ping"){
+            sendClient(message.id,{type: "pong"});
+        }
     });
 
     //A user has disconnected
@@ -175,9 +179,9 @@ global.sendItemsToClientsInRoom = function(roomX, roomY){
     for (let player of gs.players) {
         if(player.currRoom.x == roomX && player.currRoom.y == roomY){
             if(player.isSnatcher)
-                sendClient(player,{type: "items", items: snatcherItems});
+                sendClient(player.id,{type: "items", items: snatcherItems});
             else
-                sendClient(player,{type: "items", items: runnerItems});
+                sendClient(player.id,{type: "items", items: runnerItems});
         }
     }
             
@@ -236,9 +240,9 @@ function sendAllClients(object){
 
 }
 
-function sendClient(player,object){
+function sendClient(id,object){
     wss.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN && clients.get(client) == player.id)
+        if (client.readyState === WebSocket.OPEN && clients.get(client) == id)
             client.send(JSON.stringify(object));
     });
 }

@@ -1,7 +1,7 @@
 
 function MapBoard() {
     this.gameMap = [];
-    this.rows = 12;
+    this.rows = 15;
     this.cols = 12;
     this.totalRooms = Math.floor((this.rows*this.cols) * .65); //Should not be > then ~.85
     this.middleSize = 2; //Probably should stay as 2
@@ -317,11 +317,16 @@ MapBoard.prototype.spawnItems = function(gs) {
 
     //Name, number of items, width, height
     //We MUST spawn the exit doors 1st so we don't accidentally spawn another item in the room first
-    this.createItems('exitdoor', 2, 76,150); //2 exit doors ONLY!
-    this.createItems('key', 20, 30,20);
-    this.createItems('pf_flyers', 10, 50,50);
-    this.createItems('the_button', 10, 50,50);
-    this.createItems('magic_monocle', 10, 50,50);
+    this.createItems('exitdoor','all', 2, 76,150); //2 exit doors ONLY!
+    this.createItems('key','all', 20, 30,20);
+
+    this.createItems('pf_flyers','runner', 9, 50,50);
+    this.createItems('the_button','runner', 9, 50,50);
+    this.createItems('magic_monocle','runner', 9, 50,50);
+
+    this.createItems('bbq_chili','snatcher', 2, 50,50);
+    this.createItems('spare_eyeballs','snatcher', 2, 50,50);
+    this.createItems('kill_the_power','snatcher', 2, 50,50);
     
 
     for (let item of global.items) {
@@ -357,7 +362,7 @@ MapBoard.prototype.spawnItems = function(gs) {
     }
 }
 
-MapBoard.prototype.createItems = function(type,numItems,width,height) {
+MapBoard.prototype.createItems = function(type,whoIsFor,numItems,width,height) {
     for (let i = 1; i <= numItems; i++) {
         global.items.push({
             type: type,
@@ -374,7 +379,8 @@ MapBoard.prototype.createItems = function(type,numItems,width,height) {
             height:height,
             ownerId: -1,
             isConsumed: false,
-            specialCount: 0
+            specialCount: 0,
+            whoIsFor:whoIsFor
         });
     }
 }

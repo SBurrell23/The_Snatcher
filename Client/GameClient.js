@@ -6,7 +6,8 @@ var localState = {
     playerId: -1,
     map: null,
     solidObjects: null,
-    items: []
+    items: [],
+    roomsIveBeenIn: []
 };
 var keys = {};
 var colors = {
@@ -23,9 +24,9 @@ function connectWebSocket() {
     
     clearInterval(reConnectInterval);
 
-    //wss://the-snatcher.onrender.com
+    //wss://thesnatcher.onrender.com
     //ws://localhost:8080
-    socket = new WebSocket('wss://the-snatcher.onrender.com');  
+    socket = new WebSocket('ws://localhost:8080');  
     socket.addEventListener('open', function () {
         console.log('Server connection established!');
         $("#offlineMessage").css("display", "none");
@@ -53,6 +54,7 @@ function recievedServerMessage(message) {
     }
     else if(message.type == "map"){
         localState.map = message.map;
+        roomsIveBeenIn = [];
     }
     else if(message.type == "items"){
         localState.items = message.items;
@@ -67,15 +69,6 @@ function recievedServerMessage(message) {
         updateInput(serverState,localState.playerId);
     }
 }
-
-function gameLoop() {
-    if (serverState){
-        drawGameState(serverState);
-        handlePlayerMovement();
-    }
-    requestAnimationFrame(gameLoop); // schedule next game loop
-}
-
 
 function updateLobby(gs) {
     var playerQueue = $('#playerQueue tbody');
@@ -102,6 +95,14 @@ function updateInput(gs, id) {
         input.prop('disabled', false);
         joinButton.prop('disabled', false);
     }
+}
+
+function gameLoop() {
+    if (serverState){
+        drawGameState(serverState);
+        handlePlayerMovement();
+    }
+    requestAnimationFrame(gameLoop); // schedule next game loop
 }
 
 function drawGameState(gs) {
@@ -212,9 +213,16 @@ function drawMap(ctx, gs, map) {
     const walloffset = 20;
     if (map) {
         
-        const blankSpace = 'rgba(255, 255, 255, .65)';
+        ctx.fillStyle = 'rgba(0, 0, 0, .65)';
+        ctx.fillRect(
+            ctx.canvas.width - (map[0].length * roomSize) - walloffset, 
+            walloffset, 
+            roomSize * map[0].length, 
+            roomSize * map.length
+        );
+
         const emptyRoom = 'rgba(255, 0, 0, .65)';
-        const exitDoor = 'rgba(64, 48, 22, .65)';
+        const exitDoor = 'rgba(182, 129, 0, .65)';
 
         for (let row = 0; row < map.length; row++) {
             for (let col = 0; col < map[row].length; col++) {
@@ -226,67 +234,72 @@ function drawMap(ctx, gs, map) {
                 if(isAnyPlayerInThisRoom(gs,row,col)){
                     if(getSnatcher(gs).currRoom.x == col && getSnatcher(gs).currRoom.y == row)
                         roomColor = colors.snatcher;
-                    else if(getMe(gs).currRoom.x == col && getMe(gs).currRoom.y == row)
+                    else if(getMe(gs).currRoom.x == col && getMe(gs).currRoom.y == row){
                         roomColor = colors.me;
+                        if(!localState.roomsIveBeenIn.some(room => room[0] == row && room[1] == col))
+                            localState.roomsIveBeenIn.push([row,col]);
+                    }
                     else
                         roomColor = colors.otherPlayer;
                 }
                 else if(room === 0)
-                    roomColor = blankSpace;
+                    continue;
                 else if (room === 1 || room === 2) //Snatcher spawn not important anymore 
                     roomColor = emptyRoom;
                 else if (room === 3) 
                     roomColor = exitDoor;
 
                 ctx.fillStyle = roomColor;
-                ctx.fillRect(roomX - walloffset, roomY + walloffset, roomSize, roomSize);
+
+                if (!getMe(gs).isSnatcher && (haveIBeenInThisRoom(row,col) || (roomColor == colors.snatcher))){
+                    ctx.fillRect(roomX - walloffset, roomY + walloffset, roomSize, roomSize);
+                }
+                else if(getMe(gs).isSnatcher){
+                    //If the snatcher, override me,players, and door rooms as empty
+                    if(roomColor != colors.snatcher)
+                        ctx.fillStyle = emptyRoom;
+                    ctx.fillRect(roomX - walloffset, roomY + walloffset, roomSize, roomSize);
+                }
             }
         }
     }
 }  
 
-function drawPlayerInventory(ctx, gs) {
-    var me = getMe(gs);
-
-    if (me.hasKeys.length > 0) {
-        for (let i = 1; i <= me.hasKeys.length; i++) {
-            ctx.font = '12px Arial';
-            ctx.fillStyle = colors.key;
-            ctx.fillText("KEY#" + i, me.currPos.x, me.currPos.y - ((me.radius-20 * i)));
-        }
-    }
-    if (me.hasItem) {
-        ctx.font = '12px Arial';
-        ctx.fillStyle = 'black';
-        ctx.fillText(me.hasItem.type, me.currPos.x, me.currPos.y + me.radius + 10);
-    }
-}
-
-function isAnyPlayerInThisRoom(gs, row, col) {
-    if (gs.players) {
-        for (let i = 0; i < gs.players.length; i++) {
-            const player = gs.players[i];
-            if (player.currRoom.x == col && player.currRoom.y == row)
-                return true;
-        }
+function haveIBeenInThisRoom(row,col){
+    for (let i = 0; i < localState.roomsIveBeenIn.length; i++) {
+        const room = localState.roomsIveBeenIn[i];
+        if(room[0] == row && room[1] == col)
+            return true;
     }
     return false;
 }
 
-function getSnatcher(gs) {
-    return gs.players.find(player => player.isSnatcher) || false;
-}
+function drawPlayerInventory(ctx, gs) {
+    var me = getMe(gs);
 
-function isSnatcher(gs,id){
-    return id == getSnatcher(gs).id;
-}
+    ctx.fillStyle = 'rgba(0, 0, 0, .65)';
+    ctx.fillRect(20, 20, 140, 170);
 
-function getMe(gs) {
-    return gs.players.find(player => isMe(player.id)) || false;
-}
+    // Draw INVENTORY text
+    ctx.font = '20px Arial';
+    ctx.fillStyle = 'white';
+    ctx.textAlign = 'center';
+    ctx.fillText("INVENTORY", 90, 50);
 
-function isMe(id){
-    return id == localState.playerId;
+    if (me.hasKeys.length > 0) {
+        for (let i = 1; i <= me.hasKeys.length; i++) {
+            ctx.font = '18px Arial';
+            ctx.fillStyle = colors.key;
+            ctx.textAlign = 'center';
+            ctx.fillText("KEY#" + i, 90, 55 + (i * 30));
+        }
+    }
+    if (me.hasItem) {
+        ctx.font = '18px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = 'magenta';
+        ctx.fillText(me.hasItem.type.toUpperCase(), 90, 155);
+    }
 }
 
 function drawPlayers(ctx, gs, currentRoomX, currentRoomY) {
@@ -364,6 +377,33 @@ function drawSolidObjects(ctx,currentRoomX, currentRoomY) {
             }
         }
     }
+}
+
+function isAnyPlayerInThisRoom(gs, row, col) {
+    if (gs.players) {
+        for (let i = 0; i < gs.players.length; i++) {
+            const player = gs.players[i];
+            if (player.currRoom.x == col && player.currRoom.y == row)
+                return true;
+        }
+    }
+    return false;
+}
+
+function getSnatcher(gs) {
+    return gs.players.find(player => player.isSnatcher) || false;
+}
+
+function isSnatcher(gs,id){
+    return id == getSnatcher(gs).id;
+}
+
+function getMe(gs) {
+    return gs.players.find(player => isMe(player.id)) || false;
+}
+
+function isMe(id){
+    return id == localState.playerId;
 }
 
 function handlePlayerMovement(){

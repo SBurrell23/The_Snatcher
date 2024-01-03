@@ -134,7 +134,7 @@ function startGame(){
 
     global.solidObjects = new SolidObjects();
     global.solidObjects.createPerimeterWalls(gs, global.map.get());
-    global.solidObjects.createMazeWalls(gs, global.map.get());
+    //global.solidObjects.createMazeWalls(gs, global.map.get());
     sendAllClients({type: "solidObjects", solidObjects: global.solidObjects.get()});
 
     gs.state = 'playing';
@@ -154,17 +154,33 @@ global.checkForGameOver = function(lastAction){
 global.sendItemsToClientsInRoom = function(roomX, roomY){
     
     //First compile a list of any items currently in the room
-    var itemsInRoom = [];
+    var snatcherItems = [];
+    var runnerItems = [];
     for (let item of global.items) {
         if(item.currRoom.x == roomX && item.currRoom.y == roomY){
-            itemsInRoom.push(item);
+
+            if(item.whoIsFor == 'snatcher')
+                snatcherItems.push(item);
+            else if(item.whoIsFor == 'runner')
+                runnerItems.push(item);
+            
+            if(item.whoIsFor == 'all'){
+                snatcherItems.push(item);
+                runnerItems.push(item);
+            }
         }
     }
 
-    //Next find any players in the room and send them the list of items
-    for (let player of gs.players) 
-        if(player.currRoom.x == roomX && player.currRoom.y == roomY)
-            sendClient(player,{type: "items", items: itemsInRoom});
+    //Next find any players in the room and send them the list of appropriate items
+    for (let player of gs.players) {
+        if(player.currRoom.x == roomX && player.currRoom.y == roomY){
+            if(player.isSnatcher)
+                sendClient(player,{type: "items", items: snatcherItems});
+            else
+                sendClient(player,{type: "items", items: runnerItems});
+        }
+    }
+            
 }
 
 function setSnatcher(){

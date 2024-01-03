@@ -219,11 +219,22 @@ Movement.prototype.pickupItemIfAllowed = function(player, item, pickupRequested)
         }
     }
     else if (
-        (item.type == 'pf_flyers' || item.type == "the_button" || item.type == "magic_monocle") &&
+        (item.whoIsFor == 'runner') &&
         !player.hasItem && 
         pickupRequested && 
         !item.isConsumed && 
         !player.isSnatcher
+        ){
+        this.putItemInPlayerInventory(player,item);
+        console.log("Player " + player.name + " picked up item " + item.id);
+        global.sendItemsToClientsInRoom(pRoomX,pRoomY);
+    }
+    else if (
+        (item.whoIsFor == 'snatcher') &&
+        !player.hasItem && 
+        pickupRequested && 
+        !item.isConsumed && 
+        player.isSnatcher
         ){
         this.putItemInPlayerInventory(player,item);
         console.log("Player " + player.name + " picked up item " + item.id);

@@ -102,7 +102,7 @@ The exit doors will be marked on snatchers map when the first one is opened.
 
 The snatcher catches the runners by touching them
 If a runner is caught, they are out and can spectate another player of their choosing
-If a runner had a key(s) when they were caught, it is dropped on the ground
+If a runner had a key(s)/item when they were caught, it is dropped on the ground
 
 As the # of available runners decreases, the snatcher gets faster?
 
@@ -122,7 +122,6 @@ The snatcher has very limited room visibility (but can see the entire minimap an
 This way players can hide if they are in the same room
 
 Players will also potentally not have FULL visibility of the rooms, but much more then the snatcher
-
 
 THERE NEEDS TO BE SOME KIND OF SKILLCHECK GAME WHEN PICKING UP A KEY/ITEM IN ORDER TO GET IT
 Maybe every item is a trunk, and you have to search it and then get either a key or item
@@ -153,14 +152,14 @@ TODO NEXT:
 DONE - Make players only able to see rooms they have been to + the killer location
 DONE - Make killer not able to see survivors or doors on map
 
- Fix movement speed bug
---need to only send movment update on tick cycle
-when movment request comes in, it should get added to a new map spot for that player
-and only emptied on the next tick cycle when the movment is complete
+DONE - Fix movement speed bug
+DONE - need to only send movment update on tick cycle
+DONE - when movment request comes in, it should get added to a new map spot for that player
+DONE - and only emptied on the next tick cycle when the movment is complete
 
- Fix movement to make diagonal movement allowed
- this can probably be solved by listening for all key downs and sending each of the 8 posible directions
- then in on the next tick during movment make 2 reqeusts if the player is trying to move diagonal
+ DONE - Fix movement to make diagonal movement allowed
+ DONE - this can probably be solved by listening for all key downs and sending each of the 8 posible directions
+ DONE - then in on the next tick during movment make 2 reqeusts if the player is trying to move diagonal
 
  Limit killer vision & maybe player vision slightly
 

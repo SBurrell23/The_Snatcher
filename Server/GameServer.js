@@ -90,7 +90,7 @@ wss.on('connection', (ws) => {
         }
 
         if(message.type == "mp"){
-            movementQueue.set(message.id, message.direction);
+            movementQueue.set(message.id, message.dir);
         }
 
         if(message.type == "pickupItem"){
@@ -244,8 +244,8 @@ function sendClient(player,object){
 }
 
 function updateMovements(deltaTime){
-    movementQueue.forEach((direction, id) => {
-        new Movement().movePlayer(gs,global.map.get(),id, direction,global.solidObjects.get(),deltaTime);
+    movementQueue.forEach((dir, id) => {
+        new Movement().movePlayer(gs,global.map.get(),id, dir,global.solidObjects.get(),deltaTime);
     });
     movementQueue.clear();
 }
@@ -260,5 +260,6 @@ function gameLoop() {
 
     lastUpdateTime = now;
     setTimeout(gameLoop, 1000 / 60); // Run the game loop 60 times per second
+    //This ends up being 16.6ms per frame (not counting deltaTime)
 }
 gameLoop();

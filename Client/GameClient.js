@@ -26,7 +26,7 @@ function connectWebSocket() {
 
     //wss://thesnatcher.onrender.com
     //ws://localhost:8080
-    socket = new WebSocket('ws://localhost:8080');  
+    socket = new WebSocket('wss://thesnatcher.onrender.com');  
     socket.addEventListener('open', function () {
         console.log('Server connection established!');
         $("#offlineMessage").css("display", "none");
@@ -44,6 +44,7 @@ function connectWebSocket() {
         }, 1000) //On disconnect, try to reconnect every second
     });
 }
+connectWebSocket();
 
 function recievedServerMessage(message) {
     var message = JSON.parse(message);
@@ -430,7 +431,6 @@ function handlePlayerMovement(){
     else if(keys['d'] ){
         movePlayer("r");
     }
-
 }
 
 function movePlayer(direction){
@@ -438,7 +438,7 @@ function movePlayer(direction){
         socket.send(JSON.stringify({
             type:"mp",
             id:localState.playerId,
-            direction:direction
+            dir:direction
         }));
     }
 }
@@ -504,56 +504,56 @@ $(document).ready(function() {
 
 });
 
-let config = {
-    type: Phaser.AUTO,
-    width: 1050,
-    height: 750,
-    parent: 'gameContainer',
-    fps: {
-        target: 60,
-        forceSetTimeOut: true
-    },
-    scene: {
-        preload: preload,
-        create: create,
-        update: update
-    }
-};
+// let config = {
+//     type: Phaser.AUTO,
+//     width: 1050,
+//     height: 750,
+//     parent: 'gameContainer',
+//     fps: {
+//         target: 60,
+//         forceSetTimeOut: true
+//     },
+//     scene: {
+//         preload: preload,
+//         create: create,
+//         update: update
+//     }
+// };
 
-let game = new Phaser.Game(config);
+// let game = new Phaser.Game(config);
 
 
-function preload(){
-    connectWebSocket();
-}
+// function preload(){
+    
+// }
 
-function create(){
-    cursors = this.input.keyboard.addKeys({
-        up: Phaser.Input.Keyboard.KeyCodes.W,
-        down: Phaser.Input.Keyboard.KeyCodes.S,
-        left: Phaser.Input.Keyboard.KeyCodes.A,
-        right: Phaser.Input.Keyboard.KeyCodes.D
-    });
-}
+// function create(){
+//     cursors = this.input.keyboard.addKeys({
+//         up: Phaser.Input.Keyboard.KeyCodes.W,
+//         down: Phaser.Input.Keyboard.KeyCodes.S,
+//         left: Phaser.Input.Keyboard.KeyCodes.A,
+//         right: Phaser.Input.Keyboard.KeyCodes.D
+//     });
+// }
 
-function update(){
-    if (cursors.up.isDown && cursors.left.isDown) {
-        movePlayer("ul");
-    } else if (cursors.up.isDown && cursors.right.isDown) {
-        movePlayer("ur");
-    } else if (cursors.down.isDown && cursors.left.isDown) {
-        movePlayer("dl");
-    } else if (cursors.down.isDown && cursors.right.isDown) {
-        movePlayer("dr");
-    } else if (cursors.up.isDown) {
-        movePlayer("u");
-    } else if (cursors.down.isDown) {
-        movePlayer("d");
-    } else if (cursors.left.isDown) {
-        movePlayer("l");
-    } else if (cursors.right.isDown) {
-        movePlayer("r");
-    }
-}
+// function update(){
+//     if (cursors.up.isDown && cursors.left.isDown) {
+//         movePlayer("ul");
+//     } else if (cursors.up.isDown && cursors.right.isDown) {
+//         movePlayer("ur");
+//     } else if (cursors.down.isDown && cursors.left.isDown) {
+//         movePlayer("dl");
+//     } else if (cursors.down.isDown && cursors.right.isDown) {
+//         movePlayer("dr");
+//     } else if (cursors.up.isDown) {
+//         movePlayer("u");
+//     } else if (cursors.down.isDown) {
+//         movePlayer("d");
+//     } else if (cursors.left.isDown) {
+//         movePlayer("l");
+//     } else if (cursors.right.isDown) {
+//         movePlayer("r");
+//     }
+// }
 
 

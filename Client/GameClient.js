@@ -125,9 +125,10 @@ function drawGameState(gs) {
     var ctx = document.getElementById('canvas').getContext('2d');
     
     //Draw the lobby
-    drawLobbyScene(ctx,gs);
+    if(gs.state == "lobby")
+        drawLobbyScene(ctx,gs);
 
-
+    //Draw the game
     if(gs.state == "playing" && getMe(gs).currRoom != undefined){
         var currentRoomX = getMe(gs).currRoom.x;
         var currentRoomY = getMe(gs).currRoom.y;
@@ -139,7 +140,7 @@ function drawGameState(gs) {
         drawPlayers(ctx, gs, currentRoomX, currentRoomY);
 
         //This needs to be here
-        drawSpotLights(ctx, gs, currentRoomX, currentRoomY);
+        drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
         
         drawMap(ctx,gs,localState.map);
         drawPlayerInventory(ctx, gs);
@@ -163,11 +164,8 @@ function drawLobbyScene(ctx,gs){
         ctx.fillText('THE SNATCHER', ctx.canvas.width / 2, (ctx.canvas.height / 2)-25);
 }
 
-function drawSpotLights(ctx, gs, currentRoomX, currentRoomY) {
+function drawSpotlights(ctx, gs, currentRoomX, currentRoomY) {
     ctx.fillStyle = colors.spotlight;
-
-    var snatcherSpotLightRadius = 225;
-    var playerSpotLightRadius = 375;
 
     for (let i = 0, len = gs.players.length; i < len; i++) {
         var player = gs.players[i];
@@ -175,13 +173,13 @@ function drawSpotLights(ctx, gs, currentRoomX, currentRoomY) {
             if (isSnatcher(gs, player.id) && isMe(player.id)){
                 ctx.beginPath();
                 ctx.rect(0, 0, canvas.width, canvas.height);
-                ctx.arc(player.currPos.x, player.currPos.y, snatcherSpotLightRadius, 0, Math.PI * 2, true);
+                ctx.arc(player.currPos.x, player.currPos.y, player.spotlight, 0, Math.PI * 2, true);
                 ctx.fill('evenodd');
                 return;
             }else if(isMe(player.id)){
                 ctx.beginPath();
                 ctx.rect(0, 0, canvas.width, canvas.height);
-                ctx.arc(player.currPos.x, player.currPos.y, playerSpotLightRadius, 0, Math.PI * 2, true);
+                ctx.arc(player.currPos.x, player.currPos.y, player.spotlight, 0, Math.PI * 2, true);
                 ctx.fill('evenodd');
                 return;
             }

@@ -23,16 +23,14 @@ var playerObject ={
     sWins:0,
     rWins:0,
     currRoom:{x:-1,y:-1},
-    currPos:{x:-100,y:-100},
+    currPos:{x:-1000,y:-1000},
     hasKeys: [],
     hasItem: undefined,
-    speed:500,
+    speed:450,
     radius:25,
-    isSnatcher: false,
-    snatcherStats: undefined
+    spotlight: 375,
+    isSnatcher: false
 };
-
-var snatcherStats = {speedMod: 1.5};
 
 var timeouts = [];
 
@@ -133,6 +131,7 @@ function startGame(){
 
     global.map = new MapBoard();
     sendAllClients({type: "map", map: global.map.generateNewMap()});
+
     global.map.spawnPlayers(gs.players);
     global.map.spawnItems(gs);
 
@@ -188,10 +187,15 @@ global.sendItemsToClientsInRoom = function(roomX, roomY){
 }
 
 function setSnatcher(){
+    var snatcherSpeedMod = 1.1;
+    var snatcherSpotlight = 225; // :(
+
     if(gs.players.length == 0)
         return;
-    gs.players[0].isSnatcher = true;
-    gs.players[0].snatcherStats = snatcherStats;
+    var snatcher = gs.players[0];
+    snatcher.isSnatcher = true;
+    snatcher.speed = gs.players[0].speed * snatcherSpeedMod;
+    snatcher.spotlight = snatcherSpotlight;
 }
 
 function resetPlayerStats(){

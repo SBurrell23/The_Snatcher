@@ -276,7 +276,7 @@ function drawMap(ctx, gs, map) {
     const walloffset = 20;
     if (map) {
         
-        ctx.fillStyle = 'rgba(0, 0, 0, .65)';
+        ctx.fillStyle = 'rgba(255, 255, 255, .65)';
         ctx.fillRect(
             ctx.canvas.width - (map[0].length * roomSize) - walloffset, 
             walloffset, 
@@ -340,28 +340,28 @@ function haveIBeenInThisRoom(row,col){
 function drawPlayerInventory(ctx, gs) {
     var me = getMe(gs);
 
-    ctx.fillStyle = 'rgba(0, 0, 0, .65)';
-    ctx.fillRect(20, 20, 140, 170);
+    ctx.fillStyle = 'rgba(255, 255, 255, .65)';
+    ctx.fillRect(20, 20, 140, 150);
 
     // Draw INVENTORY text
-    ctx.font = '20px Arial';
-    ctx.fillStyle = 'white';
+    ctx.font = '18px Arial';
+    ctx.fillStyle = 'black';
     ctx.textAlign = 'center';
-    ctx.fillText("INVENTORY", 90, 50);
+    ctx.fillText("INVENTORY", 90, 40);
 
     if (me.hasKeys.length > 0) {
         for (let i = 1; i <= me.hasKeys.length; i++) {
             ctx.font = '18px Arial';
             ctx.fillStyle = colors.key;
             ctx.textAlign = 'center';
-            ctx.fillText("KEY#" + i, 90, 55 + (i * 30));
+            ctx.fillText("KEY#" + i, 90, 45 + (i * 25));
         }
     }
     if (me.hasItem) {
-        ctx.font = '18px Arial';
+        ctx.font = '14px Arial';
         ctx.textAlign = 'center';
         ctx.fillStyle = 'magenta';
-        ctx.fillText(me.hasItem.type.toUpperCase(), 90, 155);
+        ctx.fillText(me.hasItem.type.toUpperCase(), 90, 135);
     }
 }
 
@@ -378,14 +378,6 @@ function drawPlayers(ctx, gs, currentRoomX, currentRoomY) {
                 color = colors.me;
             }
 
-            if(isMe(player.id)){
-                // Draw currRoom.x and currRoom.y in the middle of the screen
-                ctx.fillStyle = color;
-                ctx.font = '20px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText(`X: ${player.currRoom.x}, Y: ${player.currRoom.y}`, (canvas.width / 2)-300, (canvas.height / 2)-100);
-            }
-            
             ctx.fillStyle = color;
             ctx.beginPath();
             ctx.arc(player.currPos.x, player.currPos.y, player.radius, 0, 2 * Math.PI);
@@ -445,6 +437,12 @@ function drawSolidObjects(ctx,currentRoomX, currentRoomY) {
 }
 
 function drawPing(ctx){
+    var player = getMe(serverState);
+    ctx.fillStyle = 'white';
+    ctx.font = '15px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText(`X: ${player.currRoom.x}, Y: ${player.currRoom.y}`, 20, canvas.height-50);
+
     ctx.fillStyle = '#1cfc03';
     ctx.font = 'bold 15px Arial';
     ctx.textAlign = 'left';

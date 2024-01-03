@@ -1,8 +1,8 @@
 
 function MapBoard() {
     this.gameMap = [];
-    this.rows = 15;
-    this.cols = 12;
+    this.rows = 14;
+    this.cols = 14;
     this.totalRooms = Math.floor((this.rows*this.cols) * .65); //Should not be > then ~.85
     this.middleSize = 2; //Probably should stay as 2
     //Room Types: 0 = empty, 1 = room, 2 = starting room, 3 = exit door

@@ -44,7 +44,6 @@ function connectWebSocket() {
         }, 1000) //On disconnect, try to reconnect every second
     });
 }
-connectWebSocket();
 
 function recievedServerMessage(message) {
     var message = JSON.parse(message);
@@ -491,5 +490,49 @@ $(document).ready(function() {
     });
 
 });
+
+let config = {
+    type: Phaser.AUTO,
+    width: 1050,
+    height: 750,
+    parent: 'gameContainer',
+    fps: {
+        target: 60,
+        forceSetTimeOut: true
+    },
+    scene: {
+        preload: preload,
+        create: create,
+        update: update
+    }
+};
+
+let game = new Phaser.Game(config);
+
+
+function preload(){
+    connectWebSocket();
+}
+
+function create(){
+    cursors = this.input.keyboard.addKeys({
+        up: Phaser.Input.Keyboard.KeyCodes.W,
+        down: Phaser.Input.Keyboard.KeyCodes.S,
+        left: Phaser.Input.Keyboard.KeyCodes.A,
+        right: Phaser.Input.Keyboard.KeyCodes.D
+    });
+}
+
+function update(){
+    if (cursors.up.isDown && cursors.left.isDown) {
+    } else if (cursors.up.isDown && cursors.right.isDown) {
+    } else if (cursors.down.isDown && cursors.left.isDown) {
+    } else if (cursors.down.isDown && cursors.right.isDown) {
+    } else if (cursors.up.isDown) {
+    } else if (cursors.down.isDown) {
+    } else if (cursors.left.isDown) {
+    } else if (cursors.right.isDown) {
+    }
+}
 
 

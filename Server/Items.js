@@ -12,7 +12,7 @@ Items.prototype.spawnItems = function(gs) {
     //Name, number of items, width, height
     //We MUST spawn the exit doors 1st so we don't accidentally spawn another item in the room first
     this.createItems('exitdoor','all', 2, 76,150); //2 exit doors ONLY!
-    this.createItems('key','all', 20, 30,20);
+    this.createItems('key','all', 30, 30,20);
 
     this.createItems('pf_flyers','runner', 9, 50,50);
     this.createItems('the_button','runner', 9, 50,50);
@@ -54,7 +54,11 @@ Items.prototype.spawnItems = function(gs) {
 }
 
 Items.prototype.createItems = function(type,whoIsFor,numItems,width,height) {
+    var doesItemStartInChest = true;
+
     for (let i = 1; i <= numItems; i++) {
+        if(whoIsFor == 'snatcher' || type == 'exitdoor')
+            doesItemStartInChest = false;
         global.items.push({
             type: type,
             id: type + (global.items.length + 1),
@@ -71,7 +75,8 @@ Items.prototype.createItems = function(type,whoIsFor,numItems,width,height) {
             ownerId: -1,
             isConsumed: false,
             specialCount: 0,
-            whoIsFor:whoIsFor
+            whoIsFor:whoIsFor,
+            inChest:true
         });
     }
 }

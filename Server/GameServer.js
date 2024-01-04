@@ -27,11 +27,12 @@ var playerObject ={
     currPos:{x:-1000,y:-1000},
     hasKeys: [],
     hasItem: undefined,
-    speed:400,
+    speed: "?",
     radius:25,
     spotlight: 375,
     isSnatcher: false
 };
+global.baseSpeed = JSON.stringify(400);
 
 var timeouts = [];
 
@@ -66,6 +67,7 @@ wss.on('connection', (ws) => {
                 var newPlayer = JSON.parse(JSON.stringify(playerObject));
                 newPlayer.isConnected = true;
                 newPlayer.name = message.name;
+                newPlayer.speed = JSON.parse(global.baseSpeed);
                 newPlayer.id = String(Date.now());
                 gs.players.push(newPlayer);
                 clients.set(ws, newPlayer.id);
@@ -144,7 +146,7 @@ function startGame(){
     gs.state = 'playing';
     sendAllClients(gs);
 
-    global.map.getSnatcherDoorInfo(gs);
+    global.map.sendSnatcherDoorInfo(gs);
 }
 
 //Last action can be 'escaped' or 'snatched
@@ -201,14 +203,18 @@ function setSnatcher(){
     if(gs.players.length == 0)
         return;
 
+    
     var snatcherSpeedMod = 1.12; // :)
     var snatcherSpotlight = 225; // :(
 
     var snatcher = gs.players[0]; //First player is the snatcher
 
+    
     snatcher.isSnatcher = true;
-    snatcher.speed = snatcher.speed * snatcherSpeedMod;
     snatcher.spotlight = snatcherSpotlight;
+    //make sure to reset this on game restart
+    snatcher.speed = JSON.parse(global.baseSpeed) * snatcherSpeedMod;
+    
 }
 
 function resetPlayerStats(){

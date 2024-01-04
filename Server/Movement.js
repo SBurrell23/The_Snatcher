@@ -70,9 +70,8 @@ Movement.prototype.movePlayerToNewRoom = function(gs,player,map, newXRoom, newYR
         player.currRoom.x = newXRoom;
         player.currRoom.y = newYRoom;
 
-        if(player.isSnatcher){
-            global.map.getSnatcherDoorInfo(gs);
-        }
+
+        global.map.sendSnatcherDoorInfo(gs);
 
         // Set player's current position near the directionToSpawn
         switch (directionToSpawn) {
@@ -152,9 +151,12 @@ Movement.prototype.checkForPlayerCollision = function(gs, player) {
                 this.dropItem(gs,snatchedPlayer.id,false);
             snatchedPlayer.currPos.x = -1000;
             snatchedPlayer.currPos.y = -1000;
+            snatchedPlayer.currRoom.x = -1000;
+            snatchedPlayer.currRoom.y = -1000;
             snatchedPlayer.isAlive = false;
             player.points += global.pointsForSnatching;
             console.log("The snatcher has SNATCHED " + snatchedPlayer.name + "!!! RIP!!!");
+            global.map.sendSnatcherDoorInfo(gs);
             global.checkForGameOver('snatched');
         }
     });

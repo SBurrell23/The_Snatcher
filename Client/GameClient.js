@@ -145,8 +145,8 @@ function drawGameState(gs) {
             drawSnatcherDoorInfo(ctx,gs,localState.doorInfo);
         drawPlayers(ctx, gs, currentRoomX, currentRoomY);
 
-        //This needs to be here
-        drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
+        //This needs to come after objects that are under the spotlight and before things over it
+        //drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
         
         drawMap(ctx,gs,localState.map);
         drawPlayerInventory(ctx, gs);
@@ -193,11 +193,41 @@ function drawSpotlights(ctx, gs, currentRoomX, currentRoomY) {
     }
 }
 
-function drawSnatcherDoorInfo(ctx,gs,doorInfo){
-    //Closer to 0 is HOT
-    //A 1 is ICE COLD
-    //Next we need to draw centered near each door a red blob
-    //The color should be more red the closer it is 0 and blue the closer it is to 1
+function drawSnatcherDoorInfo(ctx, gs, doorInfo) {
+    // Closer to 0 is HOT
+    // A 1 is ICE COLD
+    // Next we need to draw centered near each door a red blob
+    // The color should be more red the closer it is 0 and blue the closer it is to 1
+    
+    const canvasWidth = ctx.canvas.width;
+    const canvasHeight = ctx.canvas.height;
+    const rectWidth = 30;
+    const rectHeight = 150;
+    const rectOffset = 5;
+    
+    // Draw red rectangle on the north side
+    if(doorInfo.north){
+        ctx.fillStyle ='rgba(255, 0, 0, '+doorInfo.north+')';
+        ctx.fillRect((canvasWidth - rectHeight) / 2, rectOffset, rectHeight, rectWidth);
+    }
+    
+    // Draw red rectangle on the south side
+    if(doorInfo.south){
+        ctx.fillStyle ='rgba(255, 0, 0, '+doorInfo.south+')';
+        ctx.fillRect((canvasWidth - rectHeight) / 2, canvasHeight - rectWidth - rectOffset, rectHeight, rectWidth);
+    }
+    
+    // Draw red rectangle on the east side
+    if(doorInfo.east){
+        ctx.fillStyle ='rgba(255, 0, 0, '+doorInfo.east+')';
+        ctx.fillRect(canvasWidth - rectWidth - rectOffset, (canvasHeight - rectHeight) / 2, rectWidth, rectHeight);
+    }
+    
+    // Draw red rectangle on the west side
+    if(doorInfo.west){
+        ctx.fillStyle ='rgba(255, 0, 0, '+doorInfo.west+')';
+        ctx.fillRect(rectOffset, (canvasHeight - rectHeight) / 2, rectWidth, rectHeight);
+    }
     
     console.log(doorInfo);
 }

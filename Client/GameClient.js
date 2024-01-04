@@ -9,7 +9,8 @@ var localState = {
     solidObjects: null,
     items: [],
     roomsIveBeenIn: [],
-    ping : 0
+    ping : 0,
+    doorInfo:null
 };
 var keys = {};
 var colors = {
@@ -66,6 +67,9 @@ function recievedServerMessage(message) {
     }
     else if(message.type == "items"){
         localState.items = message.items;
+    }
+    else if(message.type == "doorInfo"){
+        localState.doorInfo = message.doorInfo;
     }
     else if(message.type == "solidObjects"){
         localState.solidObjects = message.solidObjects;
@@ -137,6 +141,8 @@ function drawGameState(gs) {
         
         drawSolidObjects(ctx, currentRoomX, currentRoomY);  
         drawItems(ctx,currentRoomX, currentRoomY);
+        if(getMe(gs).isSnatcher)
+            drawSnatcherDoorInfo(ctx,gs,localState.doorInfo);
         drawPlayers(ctx, gs, currentRoomX, currentRoomY);
 
         //This needs to be here
@@ -185,6 +191,15 @@ function drawSpotlights(ctx, gs, currentRoomX, currentRoomY) {
             }
         }
     }
+}
+
+function drawSnatcherDoorInfo(ctx,gs,doorInfo){
+    //Closer to 0 is HOT
+    //A 1 is ICE COLD
+    //Next we need to draw centered near each door a red blob
+    //The color should be more red the closer it is 0 and blue the closer it is to 1
+    
+    console.log(doorInfo);
 }
 
 function drawBackground(ctx) {
@@ -317,8 +332,8 @@ function drawMap(ctx, gs, map) {
                 }
                 else if(getMe(gs).isSnatcher){
                     //If the snatcher, override me,players, and door rooms as empty
-                    if(roomColor != colors.snatcher)
-                        ctx.fillStyle = emptyRoom;
+                    // if(roomColor != colors.snatcher)
+                    //     ctx.fillStyle = emptyRoom;
                     ctx.fillRect(roomX - walloffset, roomY + walloffset, roomSize, roomSize);
                 }
             }

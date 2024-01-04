@@ -17,7 +17,7 @@ Movement.prototype.movePlayer = function(gs,map, id, direction,solidObjects,delt
                         this.checkForPlayerCollision(gs,player);
                     }
                 } else {
-                    this.movePlayerToNewRoom(player,map,player.currRoom.x,player.currRoom.y-1,"south");
+                    this.movePlayerToNewRoom(gs,player,map,player.currRoom.x,player.currRoom.y-1,"south");
                 }
         }
         if(direction == "d" || direction == "dl" || direction == "dr"){
@@ -30,7 +30,7 @@ Movement.prototype.movePlayer = function(gs,map, id, direction,solidObjects,delt
                         this.checkForPlayerCollision(gs,player);
                     }
                 } else {
-                    this.movePlayerToNewRoom(player,map,player.currRoom.x,player.currRoom.y+1,"north");
+                    this.movePlayerToNewRoom(gs,player,map,player.currRoom.x,player.currRoom.y+1,"north");
                 }
         }
         if(direction == "l" || direction == "ul" || direction == "dl"){
@@ -43,7 +43,7 @@ Movement.prototype.movePlayer = function(gs,map, id, direction,solidObjects,delt
                         this.checkForPlayerCollision(gs,player);
                     }
                 } else {
-                    this.movePlayerToNewRoom(player,map,player.currRoom.x+1,player.currRoom.y,"east");
+                    this.movePlayerToNewRoom(gs,player,map,player.currRoom.x+1,player.currRoom.y,"east");
                 }
         }
         if(direction == "r" || direction == "ur" || direction == "dr"){
@@ -56,19 +56,23 @@ Movement.prototype.movePlayer = function(gs,map, id, direction,solidObjects,delt
                         this.checkForPlayerCollision(gs,player);
                     }
                 } else {
-                    this.movePlayerToNewRoom(player,map,player.currRoom.x-1,player.currRoom.y,"west");
+                    this.movePlayerToNewRoom(gs,player,map,player.currRoom.x-1,player.currRoom.y,"west");
                 }
         }
         
     }
 }
 
-Movement.prototype.movePlayerToNewRoom = function(player,map, newXRoom, newYRoom, directionToSpawn) {
+Movement.prototype.movePlayerToNewRoom = function(gs,player,map, newXRoom, newYRoom, directionToSpawn) {
 
     if (map[newYRoom][newXRoom] > 0) { // Room is not empty.
         //console.log("Player " + player.name + " moved to " + newYRoom + ", " + newXRoom);
         player.currRoom.x = newXRoom;
         player.currRoom.y = newYRoom;
+
+        if(player.isSnatcher){
+            global.map.getSnatcherDoorInfo(gs);
+        }
 
         // Set player's current position near the directionToSpawn
         switch (directionToSpawn) {

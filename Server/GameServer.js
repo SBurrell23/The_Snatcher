@@ -142,6 +142,9 @@ function startGame(){
     sendAllClients({type: "solidObjects", solidObjects: global.solidObjects.get()});
 
     gs.state = 'playing';
+    sendAllClients(gs);
+
+    global.map.getSnatcherDoorInfo(gs);
 }
 
 //Last action can be 'escaped' or 'snatched
@@ -185,6 +188,13 @@ global.sendItemsToClientsInRoom = function(roomX, roomY){
         }
     }
             
+}
+
+global.sendSnatcherDoorInfo = function(doorInfoObject){
+    for (let player of gs.players) 
+            if(player.isSnatcher)
+                sendClient(player.id,{type: "doorInfo", doorInfo: doorInfoObject});
+
 }
 
 function setSnatcher(){
@@ -268,7 +278,7 @@ function gameLoop() {
 
     updateMovements(deltaTime);
     sendAllClients(gs);
-
+    
     lastUpdateTime = now;
     setTimeout(gameLoop, 1000 / 60); // Run the game loop 60 times per second
     //This ends up being 16.6ms per frame (not counting deltaTime)

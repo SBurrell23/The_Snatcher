@@ -328,6 +328,66 @@ MapBoard.prototype.isPlayerInRoom = function(players,x, y) {
     return false;
 }
 
+MapBoard.prototype.getSnatcherDoorInfo = function(gs) {
+    const snatcher = gs.players.find(player => player.isSnatcher);
+    const snatcherRoomX = snatcher.currRoom.x;
+    const snatcherRoomY = snatcher.currRoom.y;
+
+
+    let nearestNorth = this.rows;
+    let nearestSouth = this.rows;
+    let nearestEast = this.cols;
+    let nearestWest = this.cols;
+
+    for (let player of gs.players) {
+        if (!player.isSnatcher && player.currRoom.y < snatcherRoomY) {
+            const distance = snatcherRoomY - player.currRoom.y;
+            if (distance < nearestNorth) {
+                nearestNorth = distance;
+            }
+        }
+        if (!player.isSnatcher && player.currRoom.y > snatcherRoomY) {
+            const distance = player.currRoom.y - snatcherRoomY;
+            if (distance < nearestSouth) {
+                nearestSouth = distance;
+            }
+        }
+        if (!player.isSnatcher && player.currRoom.x > snatcherRoomX) {
+            const distance = player.currRoom.x - snatcherRoomX;
+            if (distance < nearestWest) {
+                nearestWest = distance;
+            }
+        }
+        if (!player.isSnatcher && player.currRoom.x < snatcherRoomX) {
+            const distance = snatcherRoomX - player.currRoom.x;
+            if (distance < nearestEast) {
+                nearestEast = distance;
+            }
+        }
+    }
+
+    nearestNorth = (nearestNorth/this.rows).toFixed(2);
+    nearestSouth = (nearestSouth/this.rows).toFixed(2);
+    nearestEast = (nearestEast/this.cols).toFixed(2);
+    nearestWest = (nearestWest/this.cols).toFixed(2);
+
+    var doorInfo = {
+        north: nearestNorth,
+        south: nearestSouth,
+        east: nearestEast,
+        west: nearestWest
+    };
+
+    global.sendSnatcherDoorInfo(doorInfo);
+
+    // console.log("Nearest North: " + nearestNorth);
+    // console.log("Nearest South: " + nearestSouth);
+    // console.log("Nearest East: " + nearestEast);
+    // console.log("Nearest West: " + nearestWest);
+    // console.log("-----Lower means closer-----");
+
+}
+
 MapBoard.prototype.get = function() {
     return this.gameMap;
 }

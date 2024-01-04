@@ -2,6 +2,7 @@ const WebSocket = require('ws');
 const MapBoard = require('./MapBoard.js');
 const Movement = require('./Movement.js');
 const SolidObjects = require('./SolidObjects.js');
+const Items = require('./Items.js');
 
 const wss = new WebSocket.Server({ port: 8080 });
 
@@ -133,7 +134,7 @@ function startGame(){
     sendAllClients({type: "map", map: global.map.generateNewMap()});
 
     global.map.spawnPlayers(gs.players);
-    global.map.spawnItems(gs);
+    new Items().spawnItems(gs);
 
     global.solidObjects = new SolidObjects();
     global.solidObjects.createPerimeterWalls(gs, global.map.get());

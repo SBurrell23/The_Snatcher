@@ -12,11 +12,11 @@ Items.prototype.spawnItems = function(gs) {
     //Name, number of items, width, height
     //We MUST spawn the exit doors 1st so we don't accidentally spawn another item in the room first
     this.createItems('exitdoor','all', 2, 76,150); //2 exit doors ONLY!
-    this.createItems('key','all', 30, 30,20);
+    this.createItems('key','all', 20, 30,20);
 
-    this.createItems('pf_flyers','runner', 9, 50,50);
-    this.createItems('the_button','runner', 9, 50,50);
-    this.createItems('magic_monocle','runner', 9, 50,50);
+    this.createItems('pf_flyers','runner', 14, 50,50);
+    this.createItems('the_button','runner', 14, 50,50);
+    this.createItems('magic_monocle','runner', 14, 50,50);
 
     this.createItems('bbq_chili','snatcher', 2, 50,50);
     this.createItems('spare_eyeballs','snatcher', 2, 50,50);
@@ -76,9 +76,183 @@ Items.prototype.createItems = function(type,whoIsFor,numItems,width,height) {
             isConsumed: false,
             specialCount: 0,
             whoIsFor:whoIsFor,
-            inChest:true
+            inChest:doesItemStartInChest,
+            skillCheckInProgress:false
         });
     }
+}
+
+Items.prototype.pickupItemIfAllowed = function(player, item, pickupRequested) {
+
+    const pRoomX = player.currRoom.x;
+    const pRoomY = player.currRoom.y;
+    
+    if (item.type == "key" && player.hasKeys.length < 2 && !item.isConsumed && !player.isSnatcher){
+        this.putItemInPlayerInventory(player,item);
+        
+        console.log("Player " + player.name + " picked up item " + item.id);
+        global.sendItemsToClientsInRoom(pRoomX,pRoomY);
+    }
+    else if(item.type == "exitdoor"){
+        if(player.hasKeys.length > 0 && item.specialCount < global.keysNeededToOpenDoor ){
+
+            player.hasKeys = [];
+            //Set the players inventory to 0 and go through and use each keyItem on the exit door
+            var keyItems = global.items.filter(item => item.type == "key" && item.ownerId == player.id && item.isConsumed == false);
+            
+            for(var i = 0; i < keyItems.length; i++){
+                var keyItem = keyItems[i];
+                keyItem.isConsumed = true;
+                keyItem.ownerId = -1;
+                item.specialCount += 1;
+                player.points += global.pointsForKeyAddedToDoor;
+                console.log("Player added key to the exit door at " + item.currRoom.x + ", " + item.currRoom.y + "!");
+                console.log(JSON.stringify(item));
+                global.sendItemsToClientsInRoom(pRoomX,pRoomY);
+                if(item.specialCount >= global.keysNeededToOpenDoor )
+                    break;
+            }
+            
+        }
+
+        if(item.specialCount >= global.keysNeededToOpenDoor  && player.isAlive){
+            player.currPos.x = -1000;
+            player.currPos.y = -1000;
+            player.isAlive = false;
+            player.points += global.pointsForEscape;
+            player.rWins += 1;
+            console.log("Player " + player.name + " has escaped through the exit door at " + item.currRoom.x + ", " + item.currRoom.y + "!");
+            global.sendItemsToClientsInRoom(pRoomX,pRoomY);
+            global.checkForGameOver('escaped');
+        }
+    }
+    else if (item.whoIsFor == 'runner'){
+        if(item.inChest){
+            if(item.skillCheckInProgress == false){
+                item.skillCheckInProgress = true;
+                global.sendSkillCheckToClient(player.id,item.id);
+            }
+        }
+        else if(!player.hasItem && pickupRequested && !item.isConsumed && !player.isSnatcher){
+            this.putItemInPlayerInventory(player,item);
+            console.log("Player " + player.name + " picked up item " + item.id);
+            global.sendItemsToClientsInRoom(pRoomX,pRoomY);
+        }
+    }
+    else if (
+        (item.whoIsFor == 'snatcher') &&
+        !player.hasItem && 
+        pickupRequested && 
+        !item.isConsumed && 
+        player.isSnatcher
+        ){
+        this.putItemInPlayerInventory(player,item);
+        console.log("Player " + player.name + " picked up item " + item.id);
+        global.sendItemsToClientsInRoom(pRoomX,pRoomY);
+    }
+
+}
+
+Items.prototype.skillCheckResult = function(playerId,itemId,result){
+    var item = global.items.find(item => item.id == itemId);
+    const pRoomX = player.currRoom.x;
+    const pRoomY = player.currRoom.y;
+
+    if(result == 'success'){
+        item.inChest = false;
+        item.skillCheckInProgress = false;
+    }else{
+        item.skillCheckInProgress = false;
+        //TODO: Add a penalty for failing a skill check
+    }
+    global.sendItemsToClientsInRoom(pRoomX,pRoomY);
+}
+
+Items.prototype.putItemInPlayerInventory = function(player,item) {
+    item.ownerId = player.id;
+    item.currRoom.x = -1;
+    item.currRoom.y = -1;
+    item.currPos.x = -1000;
+    item.currPos.y = -1000;
+
+    if(item.type == "key")
+        player.hasKeys.push(true);
+    else{
+        player.hasItem = {
+            type: item.type,
+            id: item.id
+        };
+    }
+}
+
+Items.prototype.pickupItem = function(gs, playerId) {
+    var player = gs.players.find(player => player.id == playerId);
+    this.checkForItemCollision(player,true);
+}
+
+Items.prototype.dropItem = function(gs, playerId, checkForSwap) {
+    var player = gs.players.find(player => player.id === playerId);
+    player.hasItem = undefined;
+
+    for (let item of global.items) {
+        if(item.type != "key" && item.type != "door"){
+            if(item.ownerId == playerId){
+                console.log("Player " + player.name + " dropped item " + item.id);
+
+                //A quick sneaky check to see if a player is currently on another item
+                //If yes, we pick it up before resetting the old item (A HOT SWAP!)
+                if(checkForSwap)
+                    this.checkForItemCollision(player,true);
+                item.ownerId = -1;
+                item.isConsumed = false;
+                item.currPos.x = player.currPos.x - player.radius;
+                item.currPos.y = player.currPos.y;
+                item.currRoom.x = player.currRoom.x;
+                item.currRoom.y = player.currRoom.y;
+                
+                global.sendItemsToClientsInRoom(player.currRoom.x,player.currRoom.y);
+                return;
+            }
+        }
+    }
+}
+
+Items.prototype.dropKeys = function(gs, playerId) {
+    var player = gs.players.find(player => player.id === playerId);
+    player.hasKeys = [];
+
+    var keyNum = -20;
+    var additionalOffset = -15
+    for (let item of global.items) {
+        if(item.type == "key" && item.ownerId == playerId){
+            console.log("Player " + player.name + " dropped item " + item.id);
+            item.ownerId = -1;
+            item.isConsumed = false;
+            item.currPos.x = player.currPos.x - player.radius + keyNum;
+            item.currPos.y = player.currPos.y + additionalOffset;
+            item.currRoom.x = player.currRoom.x;
+            item.currRoom.y = player.currRoom.y;
+            keyNum += 50;
+            additionalOffset += 15;
+        }
+    }
+    global.sendItemsToClientsInRoom(player.currRoom.x,player.currRoom.y);
+}
+
+Items.prototype.checkForItemCollision = function(player, pickupRequested) {
+    var items = global.items.filter(item => item.currRoom.x == player.currRoom.x && item.currRoom.y == player.currRoom.y);
+    items.forEach(item => {
+        if (item.ownerId == -1) { //The item is -1 if it is on the ground
+            if (
+                player.currPos.x + player.radius >= item.currPos.x &&
+                player.currPos.x - player.radius <= item.currPos.x + item.width &&
+                player.currPos.y + player.radius >= item.currPos.y &&
+                player.currPos.y - player.radius <= item.currPos.y + item.height
+            ) {
+                new Items().pickupItemIfAllowed(player,item,pickupRequested);
+            }
+        }
+    });
 }
 
 Items.prototype.findExitDoorRoom = function() {

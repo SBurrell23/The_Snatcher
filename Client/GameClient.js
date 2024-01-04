@@ -10,7 +10,8 @@ var localState = {
     items: [],
     roomsIveBeenIn: [],
     ping : 0,
-    doorInfo:null
+    doorInfo:null,
+    skillCheck:null
 };
 var keys = {};
 var colors = {
@@ -71,6 +72,9 @@ function recievedServerMessage(message) {
     else if(message.type == "doorInfo"){
         localState.doorInfo = message.doorInfo;
     }
+    else if(message.type == "skillCheck"){
+        runSkillCheck(message.itemId);
+    }
     else if(message.type == "solidObjects"){
         localState.solidObjects = message.solidObjects;
         console.log(localState.solidObjects);
@@ -122,6 +126,11 @@ function gameLoop() {
         handlePlayerMovement();
     }
     requestAnimationFrame(gameLoop); // schedule next game loop
+}
+
+function runSkillCheck(itemId){
+    console.log("Running skill check for item " + itemId);
+    //LOCK THE PLAYER IN PLACE UNTIL THEY ARE DONE...
 }
 
 function drawGameState(gs) {
@@ -194,11 +203,7 @@ function drawSpotlights(ctx, gs, currentRoomX, currentRoomY) {
 }
 
 function drawSnatcherDoorInfo(ctx, gs, doorInfo) {
-    // Closer to 0 is HOT
-    // A 1 is ICE COLD
-    // Next we need to draw centered near each door a red blob
-    // The color should be more red the closer it is 0 and blue the closer it is to 1
-    
+
     const canvasWidth = ctx.canvas.width;
     const canvasHeight = ctx.canvas.height;
     const rectWidth = 30;
@@ -229,7 +234,7 @@ function drawSnatcherDoorInfo(ctx, gs, doorInfo) {
         ctx.fillRect(rectOffset, (canvasHeight - rectHeight) / 2, rectWidth, rectHeight);
     }
     
-    console.log(doorInfo);
+    //console.log(doorInfo);
 }
 
 function drawBackground(ctx) {

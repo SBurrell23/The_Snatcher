@@ -95,11 +95,15 @@ wss.on('connection', (ws) => {
         }
 
         if(message.type == "pickupItem"){
-            new Movement().pickupItem(gs,message.id);
+            new Items().pickupItem(gs,message.id);
         }
 
         if(message.type == "dropItem"){
-            new Movement().dropItem(gs,message.id,true);
+            new Items().dropItem(gs,message.id,true);
+        }
+
+        if(message.type == "skillCheckResult"){
+            new Items().skillCheckResult(message.id,message.itemId,message.result);
         }
 
         if(message.type == "ping"){
@@ -140,7 +144,7 @@ function startGame(){
 
     global.solidObjects = new SolidObjects();
     global.solidObjects.createPerimeterWalls(gs, global.map.get());
-    global.solidObjects.createMazeWalls(gs, global.map.get());
+    //global.solidObjects.createMazeWalls(gs, global.map.get());
     sendAllClients({type: "solidObjects", solidObjects: global.solidObjects.get()});
 
     gs.state = 'playing';
@@ -190,6 +194,10 @@ global.sendItemsToClientsInRoom = function(roomX, roomY){
         }
     }
             
+}
+
+global.sendSkillCheckToClient = function(playerId,itemId){
+    sendClient(playerId,{type: "skillCheck", itemId: itemId});
 }
 
 global.sendSnatcherDoorInfo = function(doorInfoObject){

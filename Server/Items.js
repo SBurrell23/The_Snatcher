@@ -127,7 +127,7 @@ Items.prototype.pickupItemIfAllowed = function(player, item, pickupRequested) {
         }
     }
     else if (item.whoIsFor == 'runner'){
-        if(item.inChest){
+        if(item.inChest && pickupRequested){
             if(item.skillCheckInProgress == false){
                 item.skillCheckInProgress = true;
                 global.sendSkillCheckToClient(player.id,item.id);

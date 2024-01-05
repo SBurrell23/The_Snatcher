@@ -14,7 +14,7 @@ Items.prototype.spawnItems = function(gs) {
     this.createItems('exitdoor','all', 2, 76,150); //2 exit doors ONLY!
     this.createItems('key','all', 2, 30,20);
 
-    this.createItems('pf_flyers','runner', 21, 50,50);
+    this.createItems('pf_flyers','runner', 31, 50,50);
     this.createItems('the_button','runner', 11, 50,50);
     this.createItems('magic_monocle','runner', 11, 50,50);
 
@@ -80,6 +80,10 @@ Items.prototype.createItems = function(type,whoIsFor,numItems,width,height) {
             skillCheckInProgress:false
         });
     }
+}
+
+Items.prototype.useItem = function(gs, playerId) {
+    console.log("Player " + playerId + " used their item!");
 }
 
 Items.prototype.pickupItemIfAllowed = function(player, item, pickupRequested) {

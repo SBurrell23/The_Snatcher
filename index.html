@@ -165,9 +165,9 @@ DONE - and only emptied on the next tick cycle when the movment is complete
 
 DONE - Make number show on door for killer based on how many rooms N/S/E/W they are from the nearest player
 
-Create skill check when picking up an item or key...
-items that have never been picked up will have state inCHEST
+DONE - Create skill check when picking up an item
 
+ALL DONE
 if item requested to pickup but is inCHEST
 , send player back minigame challenge with item id in request
 minigame will trigger client side..
@@ -175,12 +175,14 @@ if player succeeds, send back success, item id
 the server will then set the item to outCHEST
 and the item will replace the chest so the player can pick it up if they want
 
+???
 IF THEY FAIL, send failuer back and the item stays in chest AND
 a new function triggers that reveals that players state to the snatcher
 
 *** all of the snatchers items start in outcheststate
 
 
+Implement failed skill check reveal to killer for x seconds
 Implement power up abilites to work.
 
 

@@ -105,6 +105,9 @@ wss.on('connection', (ws) => {
         if(message.type == "skillCheckResult"){
             new Items().skillCheckResult(gs,message.id,message.itemId,message.result);
         }
+        if(message.type == "useItem"){
+            new Items().useItem(gs,message.id);
+        }
 
         if(message.type == "ping"){
             sendClient(message.id,{type: "pong"});
@@ -144,7 +147,7 @@ function startGame(){
 
     global.solidObjects = new SolidObjects();
     global.solidObjects.createPerimeterWalls(gs, global.map.get());
-    //global.solidObjects.createMazeWalls(gs, global.map.get());
+    global.solidObjects.createMazeWalls(gs, global.map.get());
     sendAllClients({type: "solidObjects", solidObjects: global.solidObjects.get()});
 
     gs.state = 'playing';

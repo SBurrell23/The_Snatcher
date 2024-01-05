@@ -11,7 +11,8 @@ var localState = {
     roomsIveBeenIn: [],
     ping : 0,
     doorInfo:null,
-    skillCheck:null
+    skillCheck:false,
+    skillCheckItemId: -1
 };
 var keys = {};
 var colors = {
@@ -21,6 +22,19 @@ var colors = {
     key: '#f7d707',
     spotlight: 'rgba(0, 0, 0, .988)'
 }
+
+var sc = { //Skill Check Variables
+    barMoveAmount : 0,
+    barFillSpeed : 1,
+    successAreaStart : 0,
+    successWidth : 20,
+    successAreaX : 0,
+    lineX : 0,
+    lineWidth: 3,
+    barWidth : 150,
+    barHeight : 20
+}
+const scReset = JSON.parse(JSON.stringify(sc));
 
 function connectWebSocket() {
     console.log("Attempting to connect to server...");
@@ -73,7 +87,12 @@ function recievedServerMessage(message) {
         localState.doorInfo = message.doorInfo;
     }
     else if(message.type == "skillCheck"){
-        runSkillCheck(message.itemId);
+        if(localState.skillCheck == false){
+            sc = JSON.parse(JSON.stringify(scReset));
+            sc.successAreaStart = Math.floor(Math.random() * 141) - 70;
+            localState.skillCheckItemId = message.itemId;
+            localState.skillCheck = true;
+        }
     }
     else if(message.type == "solidObjects"){
         localState.solidObjects = message.solidObjects;
@@ -128,11 +147,6 @@ function gameLoop() {
     requestAnimationFrame(gameLoop); // schedule next game loop
 }
 
-function runSkillCheck(itemId){
-    console.log("Running skill check for item " + itemId);
-    //LOCK THE PLAYER IN PLACE UNTIL THEY ARE DONE...
-}
-
 function drawGameState(gs) {
     
     var ctx = document.getElementById('canvas').getContext('2d');
@@ -153,6 +167,7 @@ function drawGameState(gs) {
         if(getMe(gs).isSnatcher)
             drawSnatcherDoorInfo(ctx,gs,localState.doorInfo);
         drawPlayers(ctx, gs, currentRoomX, currentRoomY);
+        drawSkillCheck(ctx,getMe(gs));
 
         //This needs to come after objects that are under the spotlight and before things over it
         //drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
@@ -165,6 +180,39 @@ function drawGameState(gs) {
     }
 
 }   
+
+function drawSkillCheck(ctx,player){
+    if(localState.skillCheck == false)
+        return;
+
+    var skillCheckY = player.currPos.y - sc.barHeight - player.radius - 10;
+
+    ctx.clearRect(player.currPos.x - sc.barWidth / 2, skillCheckY, sc.barWidth, sc.barHeight);
+
+    // Draw the bar outline
+    ctx.fillStyle = '#000';
+    ctx.fillRect(player.currPos.x - sc.barWidth / 2, skillCheckY, sc.barWidth, sc.barHeight);
+
+    // Draw the success area
+    ctx.fillStyle = '#0f0';
+    sc.successAreaX = player.currPos.x + sc.successAreaStart;
+    ctx.fillRect(sc.successAreaX , skillCheckY, sc.successWidth, sc.barHeight);
+
+    // Draw the moving red line
+    ctx.fillStyle = '#f00';
+    sc.lineX = (player.currPos.x - sc.barWidth / 2) + sc.barMoveAmount;
+    ctx.fillRect(sc.lineX, skillCheckY, sc.lineWidth, sc.barHeight);
+    
+
+    sc.barMoveAmount += sc.barFillSpeed;
+    
+    if (sc.barMoveAmount >= sc.barWidth) {
+        sc.barFillSpeed = sc.barFillSpeed * -1;
+    } else if (sc.barMoveAmount <= 0) {
+        sc.barFillSpeed = sc.barFillSpeed * -1;
+    }   
+
+}
 
 function drawLobbyScene(ctx,gs){
         // Fill the canvas with black
@@ -458,13 +506,23 @@ function drawItems(ctx, currentRoomX, currentRoomY) {
                 ctx.fillText("("+item.specialCount+")", item.currPos.x + Math.ceil(item.width/2), item.currPos.y + Math.ceil(item.height/2));
             }
             else{
-                ctx.fillStyle = 'magenta';
-                ctx.fillRect(item.currPos.x, item.currPos.y, item.width, item.height);
-                ctx.fillStyle = 'black';
-                ctx.font = '18px Arial';
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                ctx.fillText(item.type.toUpperCase(), item.currPos.x + item.width / 2, item.currPos.y + item.height / 2);
+                if(item.inChest){
+                    ctx.fillStyle = '#4F3100';
+                    ctx.fillRect(item.currPos.x, item.currPos.y, item.width, item.height);
+                    ctx.fillStyle = 'magenta';
+                    ctx.font = '12px Arial';
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.fillText("CHEST", item.currPos.x + item.width / 2, item.currPos.y + item.height / 2);
+                }else{
+                    ctx.fillStyle = 'magenta';
+                    ctx.fillRect(item.currPos.x, item.currPos.y, item.width, item.height);
+                    ctx.fillStyle = 'black';
+                    ctx.font = '14px Arial';
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.fillText(item.type.toUpperCase(), item.currPos.x + item.width / 2, item.currPos.y + item.height / 2);
+                }
             }
         }
     }  
@@ -532,6 +590,9 @@ function isMe(id){
 }
 
 function handlePlayerMovement(){
+    if(localState.skillCheck)
+        return;
+
     if(keys['w'] && keys['a']){
         movePlayer("ul");
     }
@@ -575,9 +636,35 @@ $(document).keydown(function(e) {
         socket.send(JSON.stringify({
             type: "generateMap"
         }));
-    }else if (e.which === 32) { // Space to pickup or drop an item
+    }else if (e.which === 32) { // Space to pickup or drop an item or do a skill check
         e.preventDefault();
-        if(serverState && serverState.state == "playing" && getMe(serverState).isAlive){
+        if(serverState && serverState.state == "playing" && getMe(serverState).isAlive && localState.skillCheck && sc.barFillSpeed != 0){
+            //This is used to stop the bar from moving, but we want to wait a sec
+            //so the player can see their result before formally ending the skill check and sending the rsponse
+            sc.barFillSpeed = 0;
+            setTimeout(function() {
+                if(sc.lineX >= sc.successAreaX && (sc.lineX+sc.lineWidth) <= sc.successAreaX + sc.successWidth){
+                    console.log("Skillcheck success!");
+                    socket.send(JSON.stringify({
+                        type: "skillCheckResult",
+                        id: localState.playerId,
+                        itemId: localState.skillCheckItemId,
+                        result: 'success'
+                    }));
+                }else{
+                    console.log("Skillcheck failure!");
+                    socket.send(JSON.stringify({
+                        type: "skillCheckResult",
+                        id: localState.playerId,
+                        itemId: localState.skillCheckItemId,
+                        result: 'failure'
+                    }));
+                }
+                localState.skillCheck = false;
+            }, 1500);
+
+        }
+        else if(serverState && serverState.state == "playing" && getMe(serverState).isAlive){
             if(getMe(serverState).hasItem == undefined){
                 socket.send(JSON.stringify({
                     type: "pickupItem",

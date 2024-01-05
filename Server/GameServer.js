@@ -103,7 +103,7 @@ wss.on('connection', (ws) => {
         }
 
         if(message.type == "skillCheckResult"){
-            new Items().skillCheckResult(message.id,message.itemId,message.result);
+            new Items().skillCheckResult(gs,message.id,message.itemId,message.result);
         }
 
         if(message.type == "ping"){

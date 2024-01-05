@@ -12,11 +12,11 @@ Items.prototype.spawnItems = function(gs) {
     //Name, number of items, width, height
     //We MUST spawn the exit doors 1st so we don't accidentally spawn another item in the room first
     this.createItems('exitdoor','all', 2, 76,150); //2 exit doors ONLY!
-    this.createItems('key','all', 20, 30,20);
+    this.createItems('key','all', 2, 30,20);
 
-    this.createItems('pf_flyers','runner', 14, 50,50);
-    this.createItems('the_button','runner', 14, 50,50);
-    this.createItems('magic_monocle','runner', 14, 50,50);
+    this.createItems('pf_flyers','runner', 21, 50,50);
+    this.createItems('the_button','runner', 11, 50,50);
+    this.createItems('magic_monocle','runner', 11, 50,50);
 
     this.createItems('bbq_chili','snatcher', 2, 50,50);
     this.createItems('spare_eyeballs','snatcher', 2, 50,50);
@@ -126,18 +126,10 @@ Items.prototype.pickupItemIfAllowed = function(player, item, pickupRequested) {
             global.checkForGameOver('escaped');
         }
     }
-    else if (item.whoIsFor == 'runner'){
-        if(item.inChest && pickupRequested){
-            if(item.skillCheckInProgress == false){
-                item.skillCheckInProgress = true;
-                global.sendSkillCheckToClient(player.id,item.id);
-            }
-        }
-        else if(!player.hasItem && pickupRequested && !item.isConsumed && !player.isSnatcher){
-            this.putItemInPlayerInventory(player,item);
-            console.log("Player " + player.name + " picked up item " + item.id);
-            global.sendItemsToClientsInRoom(pRoomX,pRoomY);
-        }
+    else if (item.whoIsFor == 'runner' && !player.hasItem && pickupRequested && !item.isConsumed && !player.isSnatcher){
+        this.putItemInPlayerInventory(player,item);
+        console.log("Player " + player.name + " picked up item " + item.id);
+        global.sendItemsToClientsInRoom(pRoomX,pRoomY);
     }
     else if (
         (item.whoIsFor == 'snatcher') &&
@@ -153,7 +145,8 @@ Items.prototype.pickupItemIfAllowed = function(player, item, pickupRequested) {
 
 }
 
-Items.prototype.skillCheckResult = function(playerId,itemId,result){
+Items.prototype.skillCheckResult = function(gs,playerId,itemId,result){
+    var player = gs.players.find(player => player.id == playerId);
     var item = global.items.find(item => item.id == itemId);
     const pRoomX = player.currRoom.x;
     const pRoomY = player.currRoom.y;
@@ -161,9 +154,10 @@ Items.prototype.skillCheckResult = function(playerId,itemId,result){
     if(result == 'success'){
         item.inChest = false;
         item.skillCheckInProgress = false;
+        console.log("Player succeeded skillcheck!");
     }else{
         item.skillCheckInProgress = false;
-        //TODO: Add a penalty for failing a skill check
+        console.log("Player failed skillcheck!");
     }
     global.sendItemsToClientsInRoom(pRoomX,pRoomY);
 }
@@ -185,13 +179,45 @@ Items.prototype.putItemInPlayerInventory = function(player,item) {
     }
 }
 
+Items.prototype.isItemStillInChest = function(player){
+    var items = global.items.filter(item => item.currRoom.x == player.currRoom.x && item.currRoom.y == player.currRoom.y);
+    var wellIsItBuddy = false;
+    items.forEach(item => {
+        if (item.ownerId == -1 && item.inChest) { //The item is -1 if it is on the ground
+            if (
+                player.currPos.x + player.radius >= item.currPos.x &&
+                player.currPos.x - player.radius <= item.currPos.x + item.width &&
+                player.currPos.y + player.radius >= item.currPos.y &&
+                player.currPos.y - player.radius <= item.currPos.y + item.height
+            ) {
+                if(item.skillCheckInProgress == false){
+                    console.log("Player " + player.name + " started skillcheck for item " + item.id);
+                    wellIsItBuddy = true;
+                    item.skillCheckInProgress = true;
+                    global.sendSkillCheckToClient(player.id,item.id);
+                }
+                
+            }
+        }
+    });
+    return wellIsItBuddy;
+}
+
 Items.prototype.pickupItem = function(gs, playerId) {
     var player = gs.players.find(player => player.id == playerId);
+
+    if(this.isItemStillInChest(player)) //We start the skillcheck here
+        return;
+
     this.checkForItemCollision(player,true);
 }
 
 Items.prototype.dropItem = function(gs, playerId, checkForSwap) {
     var player = gs.players.find(player => player.id === playerId);
+
+    if(this.isItemStillInChest(player)) //We start the skillcheck here
+        return;
+
     player.hasItem = undefined;
 
     for (let item of global.items) {

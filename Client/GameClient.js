@@ -1,6 +1,7 @@
 var socket = null;
 var reConnectInterval = null;
 var pingInterval = null;
+var keys = {};
 
 var serverState = null;
 var localState = {
@@ -12,9 +13,12 @@ var localState = {
     ping : 0,
     doorInfo:null,
     skillCheck:false,
-    skillCheckItemId: -1
+    skillCheckItemId: -1,
+    events:{
+        failedSkillCheck:[]
+    }
 };
-var keys = {};
+
 var colors = {
     snatcher: '#3d67ff',
     me: '#FF8300',
@@ -72,40 +76,45 @@ function connectWebSocket() {
 connectWebSocket();
 
 function recievedServerMessage(message) {
-    var message = JSON.parse(message);
+    var m = JSON.parse(message);
 
-    if(message.type == "playerId"){
-        localState.playerId = message.id
+    if(m.type == "playerId"){
+        localState.playerId = m.id
     }
-    else if(message.type == "map"){
-        localState.map = message.map;
+    else if(m.type == "map"){
+        localState.map = m.map;
         roomsIveBeenIn = [];
     }
-    else if(message.type == "items"){
-        localState.items = message.items;
+    else if(m.type == "items"){
+        localState.items = m.items;
     }
-    else if(message.type == "doorInfo"){
-        localState.doorInfo = message.doorInfo;
+    else if(m.type == "doorInfo"){
+        localState.doorInfo = m.doorInfo;
     }
-    else if(message.type == "skillCheck"){
+    else if(m.type == "solidObjects"){
+        localState.solidObjects = m.solidObjects;
+        console.log(localState.solidObjects);
+    }
+    else if(m.type == "gs"){
+        serverState = m;
+        updateLobby(serverState);
+        updateInput(serverState,localState.playerId);
+    }else if(m.type == "pong"){
+        localState.ping = Date.now() - localState.ping;
+    }
+    else if(m.type == "skillCheck"){
         if(localState.skillCheck == false){
             sc = JSON.parse(JSON.stringify(scReset));
             sc.successAreaStart = Math.floor(Math.random() * 121) - 60;
-            localState.skillCheckItemId = message.itemId;
+            localState.skillCheckItemId = m.data;
             localState.skillCheck = true;
         }
+    }else if(m.type == "failedSkillCheck"){
+        var failedPlayerId = m.data;
+        localState.events['failedSkillCheck'].push(failedPlayerId);
+        console.log("Revealing failed player: " + failedPlayerId);
     }
-    else if(message.type == "solidObjects"){
-        localState.solidObjects = message.solidObjects;
-        console.log(localState.solidObjects);
-    }
-    else if(message.type == "gs"){
-        serverState = message;
-        updateLobby(serverState);
-        updateInput(serverState,localState.playerId);
-    }else if(message.type == "pong"){
-        localState.ping = Date.now() - localState.ping;
-    }
+
 }
 
 function updateLobby(gs) {
@@ -181,6 +190,66 @@ function drawGameState(gs) {
     }
 
 }   
+
+function drawMap(ctx, gs, map) {
+    const roomSize = 9;
+    const walloffset = 20;
+    if (map) {
+        
+        ctx.fillStyle = 'rgba(255, 255, 255, .65)';
+        ctx.fillRect(
+            ctx.canvas.width - (map[0].length * roomSize) - walloffset, 
+            walloffset, 
+            roomSize * map[0].length, 
+            roomSize * map.length
+        );
+
+        const emptyRoom = 'rgba(255, 0, 0, .65)';
+        const exitDoor = 'rgba(182, 129, 0, .65)';
+
+        for (let row = 0; row < map.length; row++) {
+            for (let col = 0; col < map[row].length; col++) {
+                const room = map[row][col];
+                const roomX = ctx.canvas.width - (roomSize * (col + 1));
+                const roomY = roomSize * row;
+
+                var roomColor = 'gray';
+                var playerInRoom = null;
+                if(isAnyPlayerInThisRoom(gs,row,col)){
+                    if(getSnatcher(gs).currRoom.x == col && getSnatcher(gs).currRoom.y == row)
+                        roomColor = colors.snatcher;
+                    else if(getMe(gs).currRoom.x == col && getMe(gs).currRoom.y == row){
+                        roomColor = colors.me;
+                        if(!localState.roomsIveBeenIn.some(room => room[0] == row && room[1] == col))
+                            localState.roomsIveBeenIn.push([row,col]);
+                    }
+                    else
+                        roomColor = colors.otherPlayer;
+                }
+                else if(room === 0)
+                    continue;
+                else if (room === 1 || room === 2) //Snatcher spawn not important anymore 
+                    roomColor = emptyRoom;
+                else if (room === 3) 
+                    roomColor = exitDoor;
+
+                ctx.fillStyle = roomColor;
+
+                if (!getMe(gs).isSnatcher && (haveIBeenInThisRoom(row,col) || (roomColor == colors.snatcher))){
+                    ctx.fillRect(roomX - walloffset, roomY + walloffset, roomSize, roomSize);
+                }
+                else if(getMe(gs).isSnatcher){
+                    //If a player is in the room and has a failed skill check, draw them.
+                    if(localState.events['failedSkillCheck'].length > 0 && localState.events['failedSkillCheck'].includes(getPlayerInRoom(gs,row,col)))
+                        ctx.fillStyle = colors.otherPlayer;
+                    else if(roomColor != colors.snatcher) //Else override any other room color to just be empty
+                        ctx.fillStyle = emptyRoom;
+                    ctx.fillRect(roomX - walloffset, roomY + walloffset, roomSize, roomSize);
+                }
+            }
+        }
+    }
+}  
 
 function drawSkillCheck(ctx,player){
     if(localState.skillCheck == false)
@@ -368,63 +437,6 @@ function isRoom(gs, map, location) {
     return false;
 }
 
-function drawMap(ctx, gs, map) {
-    const roomSize = 9;
-    const walloffset = 20;
-    if (map) {
-        
-        ctx.fillStyle = 'rgba(255, 255, 255, .65)';
-        ctx.fillRect(
-            ctx.canvas.width - (map[0].length * roomSize) - walloffset, 
-            walloffset, 
-            roomSize * map[0].length, 
-            roomSize * map.length
-        );
-
-        const emptyRoom = 'rgba(255, 0, 0, .65)';
-        const exitDoor = 'rgba(182, 129, 0, .65)';
-
-        for (let row = 0; row < map.length; row++) {
-            for (let col = 0; col < map[row].length; col++) {
-                const room = map[row][col];
-                const roomX = ctx.canvas.width - (roomSize * (col + 1));
-                const roomY = roomSize * row;
-
-                var roomColor = 'gray';
-                if(isAnyPlayerInThisRoom(gs,row,col)){
-                    if(getSnatcher(gs).currRoom.x == col && getSnatcher(gs).currRoom.y == row)
-                        roomColor = colors.snatcher;
-                    else if(getMe(gs).currRoom.x == col && getMe(gs).currRoom.y == row){
-                        roomColor = colors.me;
-                        if(!localState.roomsIveBeenIn.some(room => room[0] == row && room[1] == col))
-                            localState.roomsIveBeenIn.push([row,col]);
-                    }
-                    else
-                        roomColor = colors.otherPlayer;
-                }
-                else if(room === 0)
-                    continue;
-                else if (room === 1 || room === 2) //Snatcher spawn not important anymore 
-                    roomColor = emptyRoom;
-                else if (room === 3) 
-                    roomColor = exitDoor;
-
-                ctx.fillStyle = roomColor;
-
-                if (!getMe(gs).isSnatcher && (haveIBeenInThisRoom(row,col) || (roomColor == colors.snatcher))){
-                    ctx.fillRect(roomX - walloffset, roomY + walloffset, roomSize, roomSize);
-                }
-                else if(getMe(gs).isSnatcher){
-                    //If the snatcher, override me,players, and door rooms as empty
-                    if(roomColor != colors.snatcher)
-                        ctx.fillStyle = emptyRoom;
-                    ctx.fillRect(roomX - walloffset, roomY + walloffset, roomSize, roomSize);
-                }
-            }
-        }
-    }
-}  
-
 function haveIBeenInThisRoom(row,col){
     for (let i = 0; i < localState.roomsIveBeenIn.length; i++) {
         const room = localState.roomsIveBeenIn[i];
@@ -574,6 +586,17 @@ function isAnyPlayerInThisRoom(gs, row, col) {
     return false;
 }
 
+function getPlayerInRoom(gs, row, col) {
+    if (gs.players) {
+        for (let i = 0; i < gs.players.length; i++) {
+            const player = gs.players[i];
+            if (player.currRoom.x == col && player.currRoom.y == row)
+                return player.id;
+        }
+    }
+    return -1;
+}
+
 function getSnatcher(gs) {
     return gs.players.find(player => player.isSnatcher) || false;
 }
@@ -584,6 +607,10 @@ function isSnatcher(gs,id){
 
 function getMe(gs) {
     return gs.players.find(player => isMe(player.id)) || false;
+}
+
+function getPlayer(playerId) {
+    return gs.players.find(player => player.id == playerId) || false;
 }
 
 function isMe(id){
@@ -685,7 +712,7 @@ $(document).keydown(function(e) {
                 }
             }
         }
-    }else if(e.which === 69){ // E to use an item
+    }else if(e.which === 69 || e.which === 82){ // E or R to use an item
         e.preventDefault();
         if(serverState && serverState.state == "playing" && getMe(serverState).isAlive){
             if(getMe(serverState).hasItem != undefined){

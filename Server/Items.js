@@ -1,4 +1,6 @@
 
+const Event = require('./Event.js');
+
 function Items() {
 }
 
@@ -15,7 +17,7 @@ Items.prototype.spawnItems = function(gs) {
     this.createItems('key','all', 2, 30,20);
 
     this.createItems('pf_flyers','runner', 31, 50,50);
-    this.createItems('the_button','runner', 11, 50,50);
+    this.createItems('the_button','runner', 21, 50,50);
     this.createItems('magic_monocle','runner', 11, 50,50);
 
     this.createItems('bbq_chili','snatcher', 2, 50,50);
@@ -83,7 +85,9 @@ Items.prototype.createItems = function(type,whoIsFor,numItems,width,height) {
 }
 
 Items.prototype.useItem = function(gs, playerId) {
-    console.log("Player " + playerId + " used their item!");
+    var player = gs.players.find(player => player.id == playerId);
+    var item = global.items.find(item => item.ownerId == player.id);
+    console.log("Player " + player.name + " used item " + item.id);
 }
 
 Items.prototype.pickupItemIfAllowed = function(player, item, pickupRequested) {
@@ -161,6 +165,7 @@ Items.prototype.skillCheckResult = function(gs,playerId,itemId,result){
         console.log("Player succeeded skillcheck!");
     }else{
         item.skillCheckInProgress = false;
+        new Event().triggerFailedSkillCheck(gs,player);
         console.log("Player failed skillcheck!");
     }
     global.sendItemsToClientsInRoom(pRoomX,pRoomY);
@@ -198,7 +203,7 @@ Items.prototype.isItemStillInChest = function(player){
                     console.log("Player " + player.name + " started skillcheck for item " + item.id);
                     wellIsItBuddy = true;
                     item.skillCheckInProgress = true;
-                    global.sendSkillCheckToClient(player.id,item.id);
+                    new Event().triggerSkillCheck(player,item);
                 }
                 
             }

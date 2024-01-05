@@ -3,6 +3,7 @@ const MapBoard = require('./MapBoard.js');
 const Movement = require('./Movement.js');
 const SolidObjects = require('./SolidObjects.js');
 const Items = require('./Items.js');
+const Event = require('./Event.js');
 
 const wss = new WebSocket.Server({ port: 8080 });
 
@@ -147,7 +148,7 @@ function startGame(){
 
     global.solidObjects = new SolidObjects();
     global.solidObjects.createPerimeterWalls(gs, global.map.get());
-    global.solidObjects.createMazeWalls(gs, global.map.get());
+    //global.solidObjects.createMazeWalls(gs, global.map.get());
     sendAllClients({type: "solidObjects", solidObjects: global.solidObjects.get()});
 
     gs.state = 'playing';
@@ -199,8 +200,9 @@ global.sendItemsToClientsInRoom = function(roomX, roomY){
             
 }
 
-global.sendSkillCheckToClient = function(playerId,itemId){
-    sendClient(playerId,{type: "skillCheck", itemId: itemId});
+//Data can change depenging on the event type
+global.sendEventToClient = function(type,playerId, data){
+    sendClient(playerId,{type: type, data: data});
 }
 
 global.sendSnatcherDoorInfo = function(doorInfoObject){

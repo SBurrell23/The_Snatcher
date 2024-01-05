@@ -34,6 +34,7 @@ var playerObject ={
     isSnatcher: false
 };
 global.baseSpeed = JSON.stringify(400);
+global.killerBaseSpotlight = JSON.stringify(225);
 
 var timeouts = [];
 
@@ -148,7 +149,7 @@ function startGame(){
 
     global.solidObjects = new SolidObjects();
     global.solidObjects.createPerimeterWalls(gs, global.map.get());
-    //global.solidObjects.createMazeWalls(gs, global.map.get());
+    global.solidObjects.createMazeWalls(gs, global.map.get());
     sendAllClients({type: "solidObjects", solidObjects: global.solidObjects.get()});
 
     gs.state = 'playing';
@@ -205,6 +206,10 @@ global.sendEventToClient = function(type,playerId, data){
     sendClient(playerId,{type: type, data: data});
 }
 
+global.sendEventToAllClients = function(type, data){
+    sendAllClients({type: type, data: data});
+}
+
 global.sendSnatcherDoorInfo = function(doorInfoObject){
     for (let player of gs.players) 
             if(player.isSnatcher)
@@ -218,13 +223,10 @@ function setSnatcher(){
 
     
     var snatcherSpeedMod = 1.12; // :)
-    var snatcherSpotlight = 225; // :(
-
     var snatcher = gs.players[0]; //First player is the snatcher
 
-    
     snatcher.isSnatcher = true;
-    snatcher.spotlight = snatcherSpotlight;
+    snatcher.spotlight = JSON.parse(global.killerBaseSpotlight);
     //make sure to reset this on game restart
     snatcher.speed = JSON.parse(global.baseSpeed) * snatcherSpeedMod;
     

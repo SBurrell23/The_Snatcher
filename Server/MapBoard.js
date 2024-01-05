@@ -1,10 +1,11 @@
 
 function MapBoard() {
     this.gameMap = [];
-    this.rows = 14;
+    this.rows = 34;
     this.cols = 14;
     this.totalRooms = Math.floor((this.rows*this.cols) * .65); //Should not be > then ~.85
     this.middleSize = 2; //Probably should stay as 2
+    this.spotSize = 100; //The square area open needed to spawn things in
     //Room Types: 0 = empty, 1 = room, 2 = starting room, 3 = exit door
 }
 
@@ -447,6 +448,58 @@ MapBoard.prototype.isRoom = function(map,location,col,row){
         }
     }
     return false;
+}
+
+MapBoard.prototype.findOpenSpotInRoom = function(roomX, roomY) {
+
+    var spot = {
+        x: 0,
+        y: 0,
+        width: this.spotSize,
+        height: this.spotSize
+    };
+
+    let spotFound = false;
+
+    const solidObjectsInRoom = this.getSolidObjectsInRoom(roomX, roomY);
+
+    var totalTrys = 1000;//If something DOES go wrong, we would rather the server crash then hang.
+    while (!spotFound && totalTrys > 0) {
+        spot.x = Math.floor(Math.random() * (global.canvasWidth - this.spotSize)) + Math.floor((this.spotSize/2));
+        spot.y = Math.floor(Math.random() * (global.canvasHeight - this.spotSize)) + Math.floor((this.spotSize/2));
+
+        // Check if the spot intersects with any solid object
+        let intersects = false;
+        for (let solidObject of solidObjectsInRoom) {
+            if (spot.x < solidObject.x + solidObject.width &&
+                spot.x + spot.width > solidObject.x &&
+                spot.y < solidObject.y + solidObject.height &&
+                spot.y + spot.height > solidObject.y) {
+                intersects = true;
+                break;
+            }
+        }
+        if (!intersects) {
+            spotFound = true;
+        }
+        totalTrys--;
+        console.log("Looking for spot in room " + roomX + ", " + roomY + "...");
+    }
+    //Adjust the x,y to be in the middle of the spot instead of the top left corner
+    spot.x = spot.x + spot.width / 2;
+    spot.y = spot.y + spot.height / 2;
+    console.log("Found spot at " + spot.x + ", " + spot.y);
+
+    return spot;
+}
+
+MapBoard.prototype.getSolidObjectsInRoom = function(x,y) {
+    var solidObjects = global.solidObjects.get();
+    var inRoom = [];
+    for (let solidObject of solidObjects)
+        if(solidObject.roomXY[0] == x && solidObject.roomXY[1] == y)
+            inRoom.push(solidObject);
+    return inRoom;
 }
 
 MapBoard.prototype.get = function() {

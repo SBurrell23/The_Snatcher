@@ -14,15 +14,15 @@ Items.prototype.spawnItems = function(gs) {
     //Name, number of items, width, height
     //We MUST spawn the exit doors 1st so we don't accidentally spawn another item in the room first
     this.createItems('exitdoor','all', 2, 76,150); //2 exit doors ONLY!
-    this.createItems('key','all', 2, 30,20);
+    this.createItems('key','all', 1, 30,20);
 
-    this.createItems('pf_flyers','runner', 31, 50,50);
-    this.createItems('the_button','runner', 21, 50,50);
-    this.createItems('magic_monocle','runner', 11, 50,50);
+    this.createItems('pf_flyers','runner', 1, 50,50);
+    this.createItems('the_button','runner', 71, 50,50);
+    this.createItems('magic_monocle','runner', 1, 50,50);
 
-    this.createItems('bbq_chili','snatcher', 2, 50,50);
-    this.createItems('spare_eyeballs','snatcher', 2, 50,50);
-    this.createItems('kill_the_power','snatcher', 2, 50,50);
+    this.createItems('bbq_chili','snatcher', 1, 50,50);
+    this.createItems('spare_eyeballs','snatcher', 1, 50,50);
+    this.createItems('kill_the_power','snatcher', 1, 50,50);
     
 
     for (let item of global.items) {
@@ -31,7 +31,7 @@ Items.prototype.spawnItems = function(gs) {
             var exitDoorRoom = this.findExitDoorRoom();
             item.currRoom.x = exitDoorRoom.x;
             item.currRoom.y = exitDoorRoom.y;
-            console.log("Exit Door: " + JSON.stringify(item));
+            //console.log("Exit Door: " + JSON.stringify(item));
             continue;
         }
 
@@ -86,8 +86,9 @@ Items.prototype.createItems = function(type,whoIsFor,numItems,width,height) {
 
 Items.prototype.useItem = function(gs, playerId) {
     var player = gs.players.find(player => player.id == playerId);
-    var item = global.items.find(item => item.ownerId == player.id);
-    console.log("Player " + player.name + " used item " + item.id);
+    var item = global.items.find(item => (item.ownerId == player.id && item.type != "key" && item.type != "door"));
+    if(item)
+        new Event().triggerItemEvent(gs,player,item);
 }
 
 Items.prototype.pickupItemIfAllowed = function(player, item, pickupRequested) {
@@ -175,8 +176,8 @@ Items.prototype.putItemInPlayerInventory = function(player,item) {
     item.ownerId = player.id;
     item.currRoom.x = -1;
     item.currRoom.y = -1;
-    item.currPos.x = -1000;
-    item.currPos.y = -1000;
+    item.currPos.x = -2000;
+    item.currPos.y = -2000;
 
     if(item.type == "key")
         player.hasKeys.push(true);

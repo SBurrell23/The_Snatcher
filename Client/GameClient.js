@@ -15,7 +15,10 @@ var localState = {
     skillCheck:false,
     skillCheckItemId: -1,
     events:{
-        failedSkillCheck:[]
+        failedSkillCheck:[],
+        magic_monocle:false,
+        bbq_chili:false,
+        kill_the_power:false
     }
 };
 
@@ -117,6 +120,21 @@ function recievedServerMessage(message) {
             if (index > -1) 
                 localState.events['failedSkillCheck'].splice(index, 1);
         }, m.data.revealTime);
+    }else if(m.type == 'magic_monocle'){
+        localState.events['magic_monocle'] = true;
+        setTimeout(function() {
+            localState.events['magic_monocle'] = false;
+        }, m.data.revealTime);
+    }else if(m.type == 'bbq_chili'){
+        localState.events['bbq_chili'] = true;
+        setTimeout(function() {
+            localState.events['bbq_chili'] = false;
+        }, m.data.revealTime);
+    }else if(m.type == 'kill_the_power'){
+        localState.events['kill_the_power'] = true;
+        setTimeout(function() {
+            localState.events['kill_the_power'] = false;
+        }, m.data.unrevealTime);
     }
 
 }
@@ -199,8 +217,9 @@ function drawMap(ctx, gs, map) {
     const roomSize = 9;
     const walloffset = 20;
     if (map) {
-        
-        ctx.fillStyle = 'rgba(255, 255, 255, .65)';
+
+        var noRoom = 'rgba(0, 0, 0, .65)';
+        ctx.fillStyle = noRoom;
         ctx.fillRect(
             ctx.canvas.width - (map[0].length * roomSize) - walloffset, 
             walloffset, 
@@ -218,7 +237,6 @@ function drawMap(ctx, gs, map) {
                 const roomY = roomSize * row;
 
                 var roomColor = 'gray';
-                var playerInRoom = null;
                 if(isAnyPlayerInThisRoom(gs,row,col)){
                     if(getSnatcher(gs).currRoom.x == col && getSnatcher(gs).currRoom.y == row)
                         roomColor = colors.snatcher;
@@ -239,15 +257,30 @@ function drawMap(ctx, gs, map) {
 
                 ctx.fillStyle = roomColor;
 
-                if (!getMe(gs).isSnatcher && (haveIBeenInThisRoom(row,col) || (roomColor == colors.snatcher))){
-                    ctx.fillRect(roomX - walloffset, roomY + walloffset, roomSize, roomSize);
+                if (!getMe(gs).isSnatcher){
+                    if(localState.events['kill_the_power']){
+                        ctx.fillStyle = 'rgba(0, 0, 0, 0)';
+                        ctx.fillRect(roomX - walloffset, roomY + walloffset, roomSize, roomSize);
+                    }
+                    else if(localState.events['magic_monocle'])
+                        ctx.fillRect(roomX - walloffset, roomY + walloffset, roomSize, roomSize);
+                    else if(haveIBeenInThisRoom(row,col) || (roomColor == colors.snatcher)){
+                        if(roomColor = colors.otherPlayer) //We don't show other players on the map unless magic monocle.
+                            roomColor = emptyRoom;
+                        ctx.fillRect(roomX - walloffset, roomY + walloffset, roomSize, roomSize);
+                    }
                 }
                 else if(getMe(gs).isSnatcher){
-                    //If a player is in the room and has a failed skill check, draw them.
-                    if(localState.events['failedSkillCheck'].length > 0 && localState.events['failedSkillCheck'].includes(getPlayerInRoom(gs,row,col)))
+
+                    if(localState.events['bbq_chili']){
+                        //We do nothing here because the default state will show doors and players
+                        //The following blocks will hide players & doors
+                    }else if(localState.events['failedSkillCheck'].length > 0 && localState.events['failedSkillCheck'].includes(getPlayerInRoom(gs,row,col))){
+                        //If a player is in the room and has failed a skill check, draw them
                         ctx.fillStyle = colors.otherPlayer;
-                    else if(roomColor != colors.snatcher) //Else override any other room color to just be empty
+                    }else if(roomColor != colors.snatcher){ //Else override any other room color to just be empty (doors included)
                         ctx.fillStyle = emptyRoom;
+                    }
                     ctx.fillRect(roomX - walloffset, roomY + walloffset, roomSize, roomSize);
                 }
             }

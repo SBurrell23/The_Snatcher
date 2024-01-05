@@ -9,9 +9,9 @@ function Event() {
     this.bbqChiliRevealTime = 3000;
 
     this.spareEyeballsSpotlight = 400;
-    this.spareEyeballsTime = 5000;
+    this.spareEyeballsTime = 8000;
 
-    this.killThePowerUnrevealTime = 10000;
+    this.killThePowerUnrevealTime = 12000;
 }
 
 let spare_eyeballsTimeoutId;
@@ -92,21 +92,21 @@ Event.prototype.teleportPlayerToRandomRoom = function(gs,player) {
         //Room is a valid room
         //Room is not the player's current room
         if (map[randomY][randomX] === 1 &&  randomX != player.currRoom.x && randomY != player.currRoom.y) {
-            roomFound = true;
-            player.currRoom.x = randomX;
-            player.currRoom.y = randomY;
+
+            var spot = global.map.findOpenSpotInRoom(randomX,randomY);
+            if(spot != null){
+                roomFound = true;
+                player.currRoom.x = randomX;
+                player.currRoom.y = randomY;
+                player.currPos.x = spot.x; // need to adjust player since x,y is in middle and not top left
+                player.currPos.y = spot.y; // need to adjust player since x,y is in middle and not top left
+                global.sendItemsToClientsInRoom(player.currRoom.x,player.currRoom.y);
+            }
         }
     }
     
-    var spot = global.map.findOpenSpotInRoom(player.currRoom.x,player.currRoom.y);
-
-    player.currPos.x = spot.x;
-    player.currPos.y = spot.y;
-
     console.log("Player teleported to : " + player.currRoom.x + ", " + player.currRoom.y);
 }
-
-
 
 
 

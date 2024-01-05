@@ -9,7 +9,7 @@ Items.prototype.spawnItems = function(gs) {
 
     global.items = [];
     var gameMap = global.map.get();
-    console.log(gameMap);
+    //console.log(gameMap);
 
     //Name, number of items, width, height
     //We MUST spawn the exit doors 1st so we don't accidentally spawn another item in the room first
@@ -17,7 +17,7 @@ Items.prototype.spawnItems = function(gs) {
     this.createItems('key','all', 1, 30,20);
 
     this.createItems('pf_flyers','runner', 1, 50,50);
-    this.createItems('the_button','runner', 71, 50,50);
+    this.createItems('the_button','runner', 75, 50,50);
     this.createItems('magic_monocle','runner', 1, 50,50);
 
     this.createItems('bbq_chili','snatcher', 1, 50,50);
@@ -37,8 +37,8 @@ Items.prototype.spawnItems = function(gs) {
 
         let randomX, randomY;
         let roomFound = false;
-
-        while (!roomFound) {
+        
+        while (!roomFound) { //We can't give up spanwing 
             randomX = Math.floor(Math.random() * gameMap[0].length);
             randomY = Math.floor(Math.random() * gameMap.length);
             if (
@@ -46,13 +46,24 @@ Items.prototype.spawnItems = function(gs) {
                 !this.isPlayerInRoom(gs.players,randomX,randomY) &&
                 !this.isItemInRoom(randomX,randomY)
                 ) {
-                roomFound = true;
-                item.currRoom.x = randomX;
-                item.currRoom.y = randomY;
-                console.log("Item Spawned: " + JSON.stringify(item));
+
+                var spot = global.map.findOpenSpotInRoom(randomX,randomY);
+                if(spot == null){
+                    console.log("Couldn't find an open spot in room " + randomX + ", " + randomY + " for item " + item.id + " trying new room..");
+                }else{
+                    roomFound = true;
+
+                    item.currPos.x = spot.x;
+                    item.currPos.y = spot.y;
+    
+                    item.currRoom.x = randomX;
+                    item.currRoom.y = randomY;
+                    console.log("Item Spawned: " + JSON.stringify(item));
+                }
             }
         }
     }
+    console.log("Finished Spawning Items");
 }
 
 Items.prototype.createItems = function(type,whoIsFor,numItems,width,height) {
@@ -65,8 +76,8 @@ Items.prototype.createItems = function(type,whoIsFor,numItems,width,height) {
             type: type,
             id: type + (global.items.length + 1),
             currPos: {
-                x: (global.canvasWidth / 2) - Math.ceil(width / 2),
-                y: (global.canvasHeight / 2) - Math.ceil(height / 2)
+                x: -1,
+                y: -1
             },
             currRoom: {
                 x: -1,

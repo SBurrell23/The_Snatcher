@@ -1,11 +1,11 @@
 
 function MapBoard() {
     this.gameMap = [];
-    this.rows = 34;
+    this.rows = 14;
     this.cols = 14;
     this.totalRooms = Math.floor((this.rows*this.cols) * .65); //Should not be > then ~.85
-    this.middleSize = 2; //Probably should stay as 2
-    this.spotSize = 100; //The square area open needed to spawn things in
+    this.middleSize = 4; //Probably should stay as 4
+    this.spotSize = 60; //The square area open needed to spawn things in
     //Room Types: 0 = empty, 1 = room, 2 = starting room, 3 = exit door
 }
 
@@ -463,10 +463,10 @@ MapBoard.prototype.findOpenSpotInRoom = function(roomX, roomY) {
 
     const solidObjectsInRoom = this.getSolidObjectsInRoom(roomX, roomY);
 
-    var totalTrys = 1000;//If something DOES go wrong, we would rather the server crash then hang.
+    var totalTrys = 1000; //If something DOES go wrong, we would rather the server crash then hang.
     while (!spotFound && totalTrys > 0) {
-        spot.x = Math.floor(Math.random() * (global.canvasWidth - this.spotSize)) + Math.floor((this.spotSize/2));
-        spot.y = Math.floor(Math.random() * (global.canvasHeight - this.spotSize)) + Math.floor((this.spotSize/2));
+        spot.x = Math.floor(Math.random() * (global.canvasWidth - 500) + 250);
+        spot.y = Math.floor(Math.random() * (global.canvasHeight - 500) + 250);
 
         // Check if the spot intersects with any solid object
         let intersects = false;
@@ -483,13 +483,18 @@ MapBoard.prototype.findOpenSpotInRoom = function(roomX, roomY) {
             spotFound = true;
         }
         totalTrys--;
-        console.log("Looking for spot in room " + roomX + ", " + roomY + "...");
+        //console.log("Looking for spot in room " + roomX + ", " + roomY + "...");
     }
-    //Adjust the x,y to be in the middle of the spot instead of the top left corner
-    spot.x = spot.x + spot.width / 2;
-    spot.y = spot.y + spot.height / 2;
-    console.log("Found spot at " + spot.x + ", " + spot.y);
 
+    if(totalTrys == 0){
+        console.log("ERROR: Could not find a spot in room " + roomX + ", " + roomY + "!");
+        //This is rare but can happen if the room is too full of solid objects
+        return null;//This needs to be handled in any calling function
+    }
+    
+    //Adjust the x,y to be in the middle of the spot instead of the top left corner
+    spot.x = spot.x;
+    spot.y = spot.y;
     return spot;
 }
 

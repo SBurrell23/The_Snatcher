@@ -96,7 +96,7 @@ function recievedServerMessage(message) {
     }
     else if(m.type == "solidObjects"){
         localState.solidObjects = m.solidObjects;
-        console.log(localState.solidObjects);
+        //console.log(localState.solidObjects);
     }
     else if(m.type == "gs"){
         serverState = m;
@@ -202,7 +202,7 @@ function drawGameState(gs) {
         drawSkillCheck(ctx,getMe(gs));
 
         //This needs to come after objects that are under the spotlight and before things over it
-        drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
+        //drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
         
         drawMap(ctx,gs,localState.map);
         drawPlayerInventory(ctx, gs);

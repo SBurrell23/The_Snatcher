@@ -248,22 +248,22 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
                 //North
                 else if(this.isRoom(map,'north',rX,rY)){
                     this.createRandomPath(maze,'north','middle');
-                    this.openDoors(maze,['north']);
+                    this.openDoors(maze,['north','middle']);
                 }
                 //South
                 else if(this.isRoom(map,'south',rX,rY)){
                     this.createRandomPath(maze,'south','middle');
-                    this.openDoors(maze,['south']);
+                    this.openDoors(maze,['south','middle']);
                 }
                 //East
                 else if(this.isRoom(map,'east',rX,rY)){
                     this.createRandomPath(maze,'east','middle');
-                    this.openDoors(maze,['east']);
+                    this.openDoors(maze,['east','middle']);
                 }
                 //West
                 else if(this.isRoom(map,'west',rX,rY)){
                     this.createRandomPath(maze,'west','middle');
-                    this.openDoors(maze,['west']);
+                    this.openDoors(maze,['west','middle']);
                 }
 
                 //Adjust the killer starting room and make sure he has space to spawn
@@ -271,6 +271,8 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
                     //no need to check east and north because these are guaranteed to be rooms based on the map generation
                     this.createRandomPath(maze,'middle','east');
                     this.createRandomPath(maze,'middle','north');
+                    this.createRandomPath(maze,'middle','south');
+                    this.createRandomPath(maze,'middle','west');
                     this.openDoors(maze,['middle']);
                 }
 
@@ -278,29 +280,6 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
                 for (let p = 0; p < gs.players.length; p++) {
                     const player = gs.players[p];
                     if (player.currRoom.x == rX && player.currRoom.y == rY) {
-                        if(this.isRoom(map,'north',rX,rY)){
-                            this.createRandomPath(maze,'middle','north');
-                            this.openDoors(maze,['middle']); 
-                        }
-                        else if(this.isRoom(map,'south',rX,rY)){
-                            this.createRandomPath(maze,'middle','south');
-                            this.openDoors(maze,['middle']);
-                        }
-                        else if(this.isRoom(map,'east',rX,rY)){
-                            this.createRandomPath(maze,'middle','east');
-                            this.openDoors(maze,['middle']);
-                        }
-                        else if(this.isRoom(map,'west',rX,rY)){
-                            this.createRandomPath(maze,'middle','west');
-                            this.openDoors(maze,['middle']);
-                        }
-                    }
-                }
-
-                //Adjust the rooms with items in them and make sure they have space to spawn
-                for (let e = 0; e < global.items.length; e++) {
-                    const item = global.items[e];
-                    if (item.currRoom.x == rX && item.currRoom.y == rY) {
                         if(this.isRoom(map,'north',rX,rY)){
                             this.createRandomPath(maze,'middle','north');
                             this.openDoors(maze,['middle']); 
@@ -452,15 +431,23 @@ SolidObjects.prototype.openDoors = function(maze, directions) {
         if (direction === 'north') {
             maze[0][6] = ' ';
             maze[0][7] = ' ';
+            maze[1][6] = ' ';
+            maze[1][7] = ' ';
         } else if (direction === 'south') {
             maze[9][6] = ' ';
             maze[9][7] = ' ';
+            maze[8][6] = ' ';
+            maze[8][7] = ' ';
         } else if (direction === 'west') {
             maze[4][0] = ' ';
             maze[5][0] = ' ';
+            maze[4][1] = ' ';
+            maze[5][1] = ' ';
         } else if (direction === 'east') {
             maze[5][13] = ' ';
             maze[4][13] = ' ';
+            maze[5][12] = ' ';
+            maze[4][12] = ' ';
         }else if (direction === 'middle') {
             maze[4][6] = ' ';
             maze[4][7] = ' ';

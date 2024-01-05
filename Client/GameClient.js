@@ -110,9 +110,13 @@ function recievedServerMessage(message) {
             localState.skillCheck = true;
         }
     }else if(m.type == "failedSkillCheck"){
-        var failedPlayerId = m.data;
+        var failedPlayerId = m.data.playerId;
         localState.events['failedSkillCheck'].push(failedPlayerId);
-        console.log("Revealing failed player: " + failedPlayerId);
+        setTimeout(function() {
+            var index = localState.events['failedSkillCheck'].indexOf(failedPlayerId);
+            if (index > -1) 
+                localState.events['failedSkillCheck'].splice(index, 1);
+        }, m.data.revealTime);
     }
 
 }

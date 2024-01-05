@@ -1,5 +1,6 @@
 
 function Event() {
+    this.failedSkillCheckRevealTime = 5000;
 }
 
 
@@ -13,7 +14,11 @@ Event.prototype.triggerSkillCheck = function(player,item) {
 
 Event.prototype.triggerFailedSkillCheck = function(gs,player) {
     var snatcher = gs.players.find(player => player.isSnatcher == true);
-    global.sendEventToClient("failedSkillCheck",snatcher.id,player.id);
+    var data = {
+        playerId: player.id,
+        revealTime: this.failedSkillCheckRevealTime
+    };
+    global.sendEventToClient("failedSkillCheck",snatcher.id,data);
 }
 
 

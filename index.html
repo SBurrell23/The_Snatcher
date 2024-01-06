@@ -55,30 +55,14 @@
 
 IDEAS
 
-The Snatcher (2+ Players)
-One player is the snatcher, the rest are runners.
-A procedurally generated maze is created.
-The snatcher spawns in the middle of the maze, the runners spawn on the outside.
 
-The snatcher has to catch all the runners before:
-    the runners escape by finding X keys hidden on the map and bringing them to the (2) doors
-    (players can only hold 2 keys at a time)
-    (doors will require something like {numPlayers * 3} keys to open)
-    (The keys are MAYBE??? visible to everyone but not on anybodys map)
-    (the number of keys that spawn should be something like ({numPlayers*3} * 2) + 2)
+(doors will require something like {numPlayers * 3} keys to open)
 
-THE MAP
-The map is a procedurally generated maze (20*20 ?)
-The map is 2D/2D Array
-The runners can only see the rooms they have been in
-Each runner can see the snatchers location on the map always
-The snatcher CAN SEE THE ENTIRE MAP, but not the players
-    The snatcher has a "hint" on each door about how far away from any player they are
 The exit doors will be marked on snatchers map when the first one is opened.
 
-The snatcher catches the runners by touching them
+
 If a runner is caught, they are out and can spectate another player of their choosing
-If a runner had a key(s)/item when they were caught, it is dropped on the ground
+
 
 As the # of available runners decreases, the snatcher gets faster?
 
@@ -86,68 +70,20 @@ The game ends when:
     All the runners are caught or escaped
     The snatcher ragequits
 
-    Runners get a Point for adding a key to the door
-    Runners get more points for escaping
-
-    The Snatcher gets a Point for catching a runner
-    The Snatcher gets an extra point for total runners caught on game over
-
-
-
-The snatcher has very limited room visibility (but can see the entire minimap and is faster)
-This way players can hide if they are in the same room
-
-Players will also potentally not have FULL visibility of the rooms, but much more then the snatcher
-
-THERE NEEDS TO BE SOME KIND OF SKILLCHECK GAME WHEN PICKING UP A KEY/ITEM IN ORDER TO GET IT
-Maybe every item is a trunk, and you have to search it and then get either a key or item
-
-If any skillcheck game is failed, your loation is revealed on the map to the snatcher for X seconds
 
 
 MORE IDEAS
 Maybe a magic fireplace or two that can be used to teleport from one side of the map to another
 
-Add a PF FLYERS powerup runners can find that makes them faster for a short period of time
-Add a MAGIC MONOCLE powerup for runners that lets them see the map + players + doors for a short period of time) 
-Add a THE BUTTON for runners, that randomly teleports them to a new room when activated
+PF FLYERS powerup runners can find that makes them faster for a short period of time
+MAGIC MONOCLE powerup for runners that lets them see the map + players + doors for a short period of time) 
+THE BUTTON for runners, that randomly teleports them to a new room when activated
     Using this powerup will cause you to drop any keys you are holding
     
 
-Add a BBQ CHILI powerup the snatcher can find that temporarily reveals the locations of all players on the map
-Add a SPARE EYEBALLS powerup that increases their room vision for a moderate period of time
-Add a KILL THE POWER powerup that turns off all players maps for a moderate period of time
-
-
-TODO NEXT:
-
- DONE - Get killer items in the game only shown to killer
- DONE - Make survivor items only visible to survirors
- DONE - Create inventroy on on some side of screen to show keys + item + points + clock?
-
-DONE - Make players only able to see rooms they have been to + the killer location
-DONE - Make killer not able to see survivors or doors on map
-
-DONE - Fix movement speed bug
-DONE - need to only send movment update on tick cycle
-DONE - when movment request comes in, it should get added to a new map spot for that player
-DONE - and only emptied on the next tick cycle when the movment is complete
-
- DONE - Fix movement to make diagonal movement allowed
- DONE - this can probably be solved by listening for all key downs and sending each of the 8 posible directions
- DONE - then in on the next tick during movment make 2 reqeusts if the player is trying to move diagonal
-
- DONE - Limit killer vision & maybe player vision slightly
-
-DONE - Make number show on door for killer based on how many rooms N/S/E/W they are from the nearest player
-
-DONE - Create skill check when picking up an item
-
-DONE - put items in chest
-
-DONE - Implement failed skill check reveal to killer for x seconds
-
-DONE - Implement power up abilites to work.
+BBQ CHILI powerup the snatcher can find that temporarily reveals the locations of all players on the map
+SPARE EYEBALLS powerup that increases their room vision for a moderate period of time
+KILL THE POWER powerup that turns off all players maps for a moderate period of time
 
 
 NEW THEME IDEA INSTEAD OF HAUNTED HOUSE
@@ -157,9 +93,6 @@ The solid objects can all be types of trees
 ambient noise can be spooky forest and walking can be leaves crunching
 
 
- move player selection to canvas
- plays can click to join as the killer or 1 or 5 runners
- they can also choose to disconnect or choose another runner
  each player can only be selected once and has a special stat
  Randal - has an even larger spotlight
  Eluid - can run slightly faster

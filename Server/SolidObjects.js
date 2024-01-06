@@ -276,6 +276,15 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
                     this.openDoors(maze,['middle']);
                 }
 
+                //Adjust the door rooms and make sure they have plenty of space to spawn
+                if(roomType == 3){
+                    this.createRandomPath(maze,'middle','east');
+                    this.createRandomPath(maze,'middle','north');
+                    this.createRandomPath(maze,'middle','south');
+                    this.createRandomPath(maze,'middle','west');
+                    this.openDoors(maze,['middle','north','south','east','west']);
+                }
+
                 //Adjust the player starting rooms and make sure they have space to spawn
                 for (let p = 0; p < gs.players.length; p++) {
                     const player = gs.players[p];
@@ -307,8 +316,12 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
                         if (maze[k][l] == '■') 
                             blockCount++; 
 
-                const minNumberOfBlocks = 30; //AKA DIFFICULTY FACTOR! (30 IS OK)
-                if(blockCount > minNumberOfBlocks)
+                //THESE ARE THE MOST IMPORTANT VARIABLES TO TWEAK FOR MAZE DIFFICULTY
+                //TOO LOW MIN AND SOME LEVELS ARE EMPTY
+                //TOO HIGH MAX AND TOO MANY LEVELS ARE SINGLE PATHS
+                const minNumberOfBlocks = 32;
+                const maxNumberOfBlocks = 65;
+                if(blockCount > minNumberOfBlocks && blockCount < maxNumberOfBlocks)
                     isMazeFun = true;
             }
 

@@ -34,7 +34,7 @@ var sc = { //Skill Check Variables
     barMoveAmount : 0,
     barFillSpeed : 1,
     successAreaStart : 0,
-    successWidth : 14,
+    successWidth : 13,
     successAreaX : 0,
     lineX : 0,
     lineWidth: 3,

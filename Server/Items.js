@@ -13,16 +13,17 @@ Items.prototype.spawnItems = function(gs) {
 
     //Name, number of items, width, height
     //We MUST spawn the exit doors 1st so we don't accidentally spawn another item in the room first
-    this.createItems('exitdoor','all', 2, 76,150); //2 exit doors ONLY!
+    this.createItems('exitdoor','all', 2, 100,100); //2 exit doors ONLY!
     this.createItems('key','all', 1, 30,20);
 
-    this.createItems('pf_flyers','runner', 1, 50,50);
-    this.createItems('the_button','runner', 75, 50,50);
-    this.createItems('magic_monocle','runner', 1, 50,50);
+    const itemSize = 65;
+    this.createItems('pf_flyers','runner', 1, itemSize,itemSize);
+    this.createItems('the_button','runner', 75, itemSize,itemSize);
+    this.createItems('magic_monocle','runner', 1, itemSize,itemSize);
 
-    this.createItems('bbq_chili','snatcher', 1, 50,50);
-    this.createItems('spare_eyeballs','snatcher', 1, 50,50);
-    this.createItems('kill_the_power','snatcher', 1, 50,50);
+    this.createItems('bbq_chili','snatcher', 1, itemSize,itemSize);
+    this.createItems('spare_eyeballs','snatcher', 1, itemSize,itemSize);
+    this.createItems('kill_the_power','snatcher', 1, itemSize,itemSize);
     
 
     for (let item of global.items) {
@@ -31,6 +32,8 @@ Items.prototype.spawnItems = function(gs) {
             var exitDoorRoom = this.findExitDoorRoom();
             item.currRoom.x = exitDoorRoom.x;
             item.currRoom.y = exitDoorRoom.y;
+            item.currPos.x = (global.canvasWidth / 2) - Math.ceil(item.width / 2);
+            item.currPos.y = (global.canvasHeight / 2) - Math.ceil(item.height / 2);
             //console.log("Exit Door: " + JSON.stringify(item));
             continue;
         }
@@ -58,7 +61,7 @@ Items.prototype.spawnItems = function(gs) {
     
                     item.currRoom.x = randomX;
                     item.currRoom.y = randomY;
-                    console.log("Item Spawned: " + JSON.stringify(item));
+                    //console.log("Item Spawned: " + JSON.stringify(item));
                 }
             }
         }

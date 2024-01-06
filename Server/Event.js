@@ -98,8 +98,8 @@ Event.prototype.teleportPlayerToRandomRoom = function(gs,player) {
                 roomFound = true;
                 player.currRoom.x = randomX;
                 player.currRoom.y = randomY;
-                player.currPos.x = spot.x; // need to adjust player since x,y is in middle and not top left
-                player.currPos.y = spot.y; // need to adjust player since x,y is in middle and not top left
+                player.currPos.x = spot.x + 32; // need to adjust player since x,y is in middle and not top left
+                player.currPos.y = spot.y + 32; // need to adjust player since x,y is in middle and not top left
                 global.sendItemsToClientsInRoom(player.currRoom.x,player.currRoom.y);
             }
         }

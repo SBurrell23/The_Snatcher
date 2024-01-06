@@ -5,7 +5,7 @@ function MapBoard() {
     this.cols = 14;
     this.totalRooms = Math.floor((this.rows*this.cols) * .65); //Should not be > then ~.85
     this.middleSize = 4; //Probably should stay as 4
-    this.spotSize = 60; //The square area open needed to spawn things in
+    this.spotSize = 65; //The square area open needed to spawn things in (items can't be larger)
     //Room Types: 0 = empty, 1 = room, 2 = starting room, 3 = exit door
 }
 
@@ -465,8 +465,16 @@ MapBoard.prototype.findOpenSpotInRoom = function(roomX, roomY) {
 
     var totalTrys = 1000; //If something DOES go wrong, we would rather the server crash then hang.
     while (!spotFound && totalTrys > 0) {
-        spot.x = Math.floor(Math.random() * (global.canvasWidth - 500) + 250);
-        spot.y = Math.floor(Math.random() * (global.canvasHeight - 500) + 250);
+        let randX;
+        do {
+            randX = Math.floor(Math.random() * 14) * 75;
+        } while (randX < 300 || randX > 850);
+        let randY;
+        do {
+            randY = Math.floor(Math.random() * 14) * 75;
+        } while (randY < 200 || randY > 550);
+        spot.x = randX + 5;
+        spot.y = randY + 5;
 
         // Check if the spot intersects with any solid object
         let intersects = false;
@@ -493,8 +501,6 @@ MapBoard.prototype.findOpenSpotInRoom = function(roomX, roomY) {
     }
     
     //Adjust the x,y to be in the middle of the spot instead of the top left corner
-    spot.x = spot.x;
-    spot.y = spot.y;
     return spot;
 }
 

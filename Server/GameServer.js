@@ -307,7 +307,7 @@ function gameLoop() {
     sendAllClients(gs);
     
     lastUpdateTime = now;
-    setTimeout(gameLoop, 1000 / 60); // Run the game loop 60 times per second
+    setTimeout(gameLoop, 1000 / 45); // Run the game loop 60 times per second
     //This ends up being 16.6ms per frame (not counting deltaTime)
 }
 gameLoop();

@@ -5,7 +5,9 @@ function MapBoard() {
     this.cols = 14;
     this.totalRooms = Math.floor((this.rows*this.cols) * .65); //Should not be > then ~.85
     this.middleSize = 4; //Probably should stay as 4
-    this.spotSize = 65; //The square area open needed to spawn things in (items can't be larger)
+
+    this.blockSize = 75;//75 is what I chose
+    this.spotSize = 60; //The square area open needed to spawn things in (items can't be larger)
     //Room Types: 0 = empty, 1 = room, 2 = starting room, 3 = exit door
 }
 
@@ -467,13 +469,13 @@ MapBoard.prototype.findOpenSpotInRoom = function(roomX, roomY) {
     while (!spotFound && totalTrys > 0) {
         let randX;
         do {
-            randX = Math.floor(Math.random() * 14) * 75;
+            randX = Math.floor(Math.random() * this.rows) * this.blockSize;
         } while (randX < 300 || randX > 850);
         let randY;
         do {
-            randY = Math.floor(Math.random() * 14) * 75;
+            randY = Math.floor(Math.random() * this.cols) * this.blockSize;
         } while (randY < 200 || randY > 550);
-        spot.x = randX + 5;
+        spot.x = randX + 5;//5 Is an offset so the box isn't flush with the walls
         spot.y = randY + 5;
 
         // Check if the spot intersects with any solid object
@@ -515,6 +517,10 @@ MapBoard.prototype.getSolidObjectsInRoom = function(x,y) {
 
 MapBoard.prototype.get = function() {
     return this.gameMap;
+}
+
+MapBoard.prototype.getBlockSize = function() {
+    return this.blockSize;
 }
 
 module.exports = MapBoard;

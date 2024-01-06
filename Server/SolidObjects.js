@@ -2,6 +2,12 @@
 function SolidObjects() {
     this.solidObjects = [];
     this.color = "#141633";
+    this.mazeHeight = (global.canvasHeight /global.map.getBlockSize());
+    this.mazeWidth = (global.canvasWidth / global.map.getBlockSize());
+    //The canvas and block size must divide into an EVEN number
+
+    this.minNumberOfBlocks = 32;
+    this.maxNumberOfBlocks = 54;
 }
 
 SolidObjects.prototype.get = function() {
@@ -12,7 +18,7 @@ SolidObjects.prototype.createPerimeterWalls = function(gs,map) {
     const canvasWidth = global.canvasWidth;
     const canvasHeight = global.canvasHeight;
     const wallWidth = 15;
-    const doorWidth = 150;
+    const doorWidth = global.map.getBlockSize()*2;
 
     var doorSize = 0;
 
@@ -163,20 +169,16 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
 
             var isMazeFun = false;
             while (isMazeFun == false){
-                var maze = [
-                    ['■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■'],
-                    ['■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■'],
-                    ['■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■'],
-                    ['■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■'],
-                    ['■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■'],
-                    ['■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■'],
-                    ['■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■'],
-                    ['■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■'],
-                    ['■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■'],
-                    ['■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■', '■']
-                ];
-                //Ratio is 10 to 14, each door must be 2 75px blocks wide
 
+                var maze = [];
+                for (let i = 0; i < this.mazeHeight; i++) {
+                    maze[i] = [];
+                    for (let j = 0; j < this.mazeWidth; j++) {
+                        maze[i][j] = '■';
+                    }
+                }
+                //Ratio is 10 to 14, each door must be 2 75px blocks wide
+                //Ratio must multiply into canvas ratio or doors wont work
                 
                 //4 DOORS
                 if(this.isRoom(map,'north',rX,rY) && this.isRoom(map,'south',rX,rY) && this.isRoom(map,'west',rX,rY) && this.isRoom(map,'east',rX,rY)){
@@ -319,13 +321,10 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
                 //THESE ARE THE MOST IMPORTANT VARIABLES TO TWEAK FOR MAZE DIFFICULTY
                 //TOO LOW MIN AND SOME LEVELS ARE EMPTY
                 //TOO HIGH MAX AND TOO MANY LEVELS ARE SINGLE PATHS
-                const minNumberOfBlocks = 32;
-                const maxNumberOfBlocks = 65;
-                if(blockCount > minNumberOfBlocks && blockCount < maxNumberOfBlocks)
+                if(blockCount > this.minNumberOfBlocks && blockCount < this.maxNumberOfBlocks)
                     isMazeFun = true;
             }
 
-            const blockSize = 75;
             //Finally after all the pathing is done turn any leftover '■' into solidObjects to build the room
             for (let k = 0; k < maze.length; k++) {
                 for (let l = 0; l < maze[k].length; l++) {
@@ -333,10 +332,10 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
                     if (value == '■') {
                         //console.log("Creating maze wall at " + l + ", " + k);
                         this.solidObjects.push({
-                            x: (l * blockSize),
-                            y: (k * blockSize),
-                            width: blockSize,
-                            height: blockSize,
+                            x: (l * global.map.getBlockSize()),
+                            y: (k * global.map.getBlockSize()),
+                            width: global.map.getBlockSize(),
+                            height: global.map.getBlockSize(),
                             color: this.color,
                             roomXY: [rX, rY],
                             type:"mazeWall"
@@ -357,45 +356,45 @@ SolidObjects.prototype.createRandomPath = function(maze, from, to) {
     var endX = null;
 
     if(from == 'north'){
-        startY = 6;
+        startY = (this.mazeWidth/2)-1;
         startX = 0;
     }
     else if(from == 'south'){
-        startY = 6;
-        startX = 9;
+        startY = (this.mazeWidth/2)-1;
+        startX = this.mazeHeight-1;
     }
     else if(from == 'west'){
         startY = 0;
-        startX = 5;
+        startX = this.mazeHeight/2;
     }
     else if(from == 'east'){
-        startY = 13;
-        startX = 5;
+        startY = this.mazeWidth-1;
+        startX = this.mazeHeight/2;
     }
     else if(from == 'middle'){
-        startY = 6;
-        startX = 5;
+        startY = (this.mazeWidth/2)-1;
+        startX = this.mazeHeight/2;
     }
 
     if(to == 'north'){
-        endY = 6;
+        endY = (this.mazeWidth/2)-1;
         endX = 0;
     }
     else if(to == 'south'){
-        endY = 6;
-        endX = 9;
+        endY = (this.mazeWidth/2)-1;
+        endX = this.mazeHeight-1;
     }
     else if(to == 'west'){
         endY = 0;
-        endX = 5;
+        endX = this.mazeHeight/2;
     }
     else if(to == 'east'){
-        endY = 13;
-        endX = 5;
+        endY = this.mazeWidth-1;
+        endX = this.mazeHeight/2;
     }
     else if(to == 'middle'){
-        endY = 5;
-        endX = 6;
+        endY = this.mazeHeight/2;
+        endX = (this.mazeWidth/2)-1;
     }
 
     grid = JSON.parse(JSON.stringify(maze));    
@@ -442,30 +441,30 @@ SolidObjects.prototype.openDoors = function(maze, directions) {
     for (let i = 0; i < directions.length; i++) {
         let direction = directions[i];
         if (direction === 'north') {
-            maze[0][6] = ' ';
-            maze[0][7] = ' ';
-            maze[1][6] = ' ';
-            maze[1][7] = ' ';
+            maze[0][(this.mazeWidth/2)-1] = ' ';
+            maze[0][(this.mazeWidth/2)] = ' ';
+            maze[1][(this.mazeWidth/2)-1] = ' ';
+            maze[1][(this.mazeWidth/2)] = ' ';
         } else if (direction === 'south') {
-            maze[9][6] = ' ';
-            maze[9][7] = ' ';
-            maze[8][6] = ' ';
-            maze[8][7] = ' ';
+            maze[this.mazeHeight-1][(this.mazeWidth/2)-1] = ' ';
+            maze[this.mazeHeight-1][(this.mazeWidth/2)] = ' ';
+            maze[this.mazeHeight-2][(this.mazeWidth/2)-1] = ' ';
+            maze[this.mazeHeight-2][(this.mazeWidth/2)] = ' ';
         } else if (direction === 'west') {
-            maze[4][0] = ' ';
-            maze[5][0] = ' ';
-            maze[4][1] = ' ';
-            maze[5][1] = ' ';
+            maze[(this.mazeHeight/2)-1][0] = ' ';
+            maze[(this.mazeHeight/2)][0] = ' ';
+            maze[(this.mazeHeight/2)-1][1] = ' ';
+            maze[(this.mazeHeight/2)][1] = ' ';
         } else if (direction === 'east') {
-            maze[5][13] = ' ';
-            maze[4][13] = ' ';
-            maze[5][12] = ' ';
-            maze[4][12] = ' ';
+            maze[(this.mazeHeight/2)-1][this.mazeWidth - 1] = ' ';
+            maze[(this.mazeHeight/2)][this.mazeWidth - 1] = ' ';
+            maze[(this.mazeHeight/2)-1][this.mazeWidth - 2] = ' ';
+            maze[(this.mazeHeight/2)][this.mazeWidth - 2] = ' ';
         }else if (direction === 'middle') {
-            maze[4][6] = ' ';
-            maze[4][7] = ' ';
-            maze[5][6] = ' ';
-            maze[5][7] = ' ';
+            maze[(this.mazeHeight/2)-1][(this.mazeWidth/2)-1] = ' ';
+            maze[(this.mazeHeight/2)-1][(this.mazeWidth/2)] = ' ';
+            maze[(this.mazeHeight/2)][(this.mazeWidth/2)-1] = ' ';
+            maze[(this.mazeHeight/2)][(this.mazeWidth/2)] = ' ';
         }
     }
 }

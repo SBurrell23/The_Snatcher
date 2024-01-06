@@ -22,6 +22,9 @@ var localState = {
     }
 };
 
+var joinButtons = {};
+var startGameButton = {};
+
 var colors = {
     snatcher: '#3d67ff',
     me: '#FF8300',
@@ -98,13 +101,6 @@ function recievedServerMessage(message) {
         localState.solidObjects = m.solidObjects;
         //console.log(localState.solidObjects);
     }
-    else if(m.type == "gs"){
-        serverState = m;
-        updateLobby(serverState);
-        updateInput(serverState,localState.playerId);
-    }else if(m.type == "pong"){
-        localState.ping = Date.now() - localState.ping;
-    }
     else if(m.type == "skillCheck"){
         if(localState.skillCheck == false){
             sc = JSON.parse(scReset);
@@ -135,6 +131,12 @@ function recievedServerMessage(message) {
         setTimeout(function() {
             localState.events['kill_the_power'] = false;
         }, m.data.unrevealTime);
+    }else if(m.type == "pong"){
+        localState.ping = Date.now() - localState.ping;
+    }else if(m.type == "gs"){
+        serverState = m;
+        updateLobby(serverState);
+        updateInput(serverState,localState.playerId);
     }
 
 }
@@ -148,8 +150,6 @@ function updateLobby(gs) {
         var row = $('<tr></tr>').appendTo(playerQueue);
         $('<td></td>').text(player.name).appendTo(row);
         $('<td></td>').text(player.points).appendTo(row);
-        $('<td></td>').text(player.rWins).appendTo(row);
-        $('<td></td>').text(player.sWins).appendTo(row);
     }
 }
 
@@ -185,7 +185,7 @@ function drawGameState(gs) {
     
     //Draw the lobby
     if(gs.state == "lobby")
-        drawLobbyScene(ctx,gs);
+        drawLobby(ctx,gs);
 
     //Draw the game
     if(gs.state == "playing" && getMe(gs).currRoom != undefined){
@@ -321,17 +321,111 @@ function drawSkillCheck(ctx,player){
 
 }
 
-function drawLobbyScene(ctx,gs){
-        // Fill the canvas with black
-        ctx.fillStyle = '#000000';
-        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+function drawLobby(ctx, gs) {
+    // Fill the canvas with black
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+    // Draw red text in the center
+    ctx.fillStyle = '#FF0000';
+    ctx.font = 'bold 55px Nunito';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('THE SNATCHER', ctx.canvas.width / 2, (ctx.canvas.height / 2) - 245);
+
+    // Draw Snatcher
+    var centerX = ctx.canvas.width / 2;
+    var centerY = (ctx.canvas.height / 2);
+    ctx.beginPath();
+    ctx.arc(centerX, centerY - 80, 22, 0, 2 * Math.PI);
+    ctx.fillStyle = 'red';
+    ctx.fill();
+
+    if(!isPlayerSpotTaken(gs, "snatcher") && !alreadyConnected(gs, localState.playerId))
+        drawJoinLeaveButton(ctx, centerX, centerY - 80 + 40, "JOIN", 'green', "snatcher");
+    else if(isMe("snatcher"))
+        drawJoinLeaveButton(ctx, centerX, centerY - 80 + 40, "LEAVE", 'red', "snatcher");
+    else
+        joinButtons['snatcher'] = {};
+
+    // Draw Players
+    var spacing = 135;
+    var colors = ['blue', 'orange', 'magenta', 'green','yellow'];
+    var names = ['george', 'vincent', 'rose', 'daniel', 'taylor'];
+
+    for (var i = 0; i < 5; i++) {
+        var x = centerX + (i - 2) * spacing;
+        var y = centerY + 120;
+
+        ctx.beginPath();
+        ctx.arc(x, y, 22, 0, 2 * Math.PI);
+        ctx.fillStyle = colors[i];
+        ctx.fill();
+
+        if(!isPlayerSpotTaken(gs, names[i]) && !alreadyConnected(gs, localState.playerId))
+            drawJoinLeaveButton(ctx, x, y + 40, "JOIN",'green', names[i]);
+        else if(isMe(names[i]))
+            drawJoinLeaveButton(ctx, x, y + 40, "LEAVE",'red', names[i]);
+        else
+            joinButtons[names[i]] = {};
+    }
+
+    // Draw Start Game Button
+    if (gs.players.length >= 2 && gs.players.length <= 6 && isMe("snatcher")) {
+        drawStartGameButton(ctx, centerX, centerY + 260, "START GAME", 'green', 200,50);
+    } else {
+        startGameButton = {};
+    }
+
+}
+
+function isPlayerSpotTaken(gs, id) {
+    for (let i = 0; i < gs.players.length; i++) {
+        if (gs.players[i].id == id)
+            return true;
+    }
+    return false;
+}
+
+function alreadyConnected(gs, id) {
+    for (let i = 0; i < gs.players.length; i++) {
+        if (gs.players[i].id == id)
+            return true;
+    }
+    return false;
+}
+
+function drawStartGameButton(ctx, x, y, text, color, width, height) {
+    ctx.fillStyle = color;
+    ctx.fillRect(x - (width / 2), y - (height / 2), width, height);
     
-        // Draw red text in the center
-        ctx.fillStyle = '#FF0000';
-        ctx.font = 'bold 55px Nunito';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('THE SNATCHER', ctx.canvas.width / 2, (ctx.canvas.height / 2)-25);
+    ctx.fillStyle = 'white';
+    ctx.font = '20px Nunito';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, x, y+2);
+
+    startGameButton.x = x - (width / 2);
+    startGameButton.y = y - (height / 2);
+    startGameButton.width = width;
+    startGameButton.height = height;
+}
+
+function drawJoinLeaveButton(ctx, x, y, text, color, id) {
+    ctx.fillStyle = color;
+    ctx.fillRect(x - 30, y - 10, 60, 30);
+
+    ctx.fillStyle = 'white';
+    ctx.font = '14px arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, x, y+6);
+
+    joinButtons[id] = {};
+    joinButtons[id].x = x - 30;
+    joinButtons[id].y = y - 10;
+    joinButtons[id].width = 60;
+    joinButtons[id].height = 30;
 }
 
 function drawSpotlights(ctx, gs, currentRoomX, currentRoomY) {
@@ -359,10 +453,14 @@ function drawSpotlights(ctx, gs, currentRoomX, currentRoomY) {
 
 function drawSnatcherDoorInfo(ctx, gs, doorInfo) {
 
+    if(!doorInfo)
+        return;
+
+
     const canvasWidth = ctx.canvas.width;
     const canvasHeight = ctx.canvas.height;
     const rectWidth = 30;
-    const rectHeight = 150;
+    const rectHeight = 128;
     const rectOffset = 5;
     
     // Draw red rectangle on the north side
@@ -768,20 +866,38 @@ window.onkeyup = function(e) {
         isSpaceDown = false;
 };
 
-$(document).ready(function() {   
+$(document).ready(function() {  
 
-    $('#joinGameButton').click(function() {
-        var playerName = $('#playerNameInput').val();
-        //if(playerName == ""){
-          playerName = "Player #"+ (Math.floor(Math.random() * 100) + 1);
-          $('#playerNameInput').val(playerName);
-        //}
-        socket.send(JSON.stringify({
-            type:"playerJoin",
-            name:playerName,
-            id:String(Date.now())
-        }));
+    // Add the event listener here
+    canvas.addEventListener('click', function(event) {
+        var rect = canvas.getBoundingClientRect();
+        var x = event.clientX - rect.left;
+        var y = event.clientY - rect.top;
+        //console.log('Clicked at ' + x + ', ' + y);
+        for (const buttonId in joinButtons) {
+            if (joinButtons.hasOwnProperty(buttonId)) {
+                const button = joinButtons[buttonId];
+                if (x >= button.x && x <= button.x + button.width && y >= button.y && y <= button.y + button.height) {
+                    console.log("Player join/leave request: " + buttonId);
+                    if(localState.playerId == -1)
+                        socket.send(JSON.stringify({
+                            type:"playerJoin",
+                            name:buttonId,
+                            id: buttonId
+                        }));
+                    else{
+                        localState.playerId = -1;
+                        socket.send(JSON.stringify({
+                            type:"playerLeave",
+                            name:buttonId,
+                            id: buttonId
+                        }));
+                    }
+                }
+            }
+        }
     });
+
 
     $('#playerNameInput').keypress(function(e) {
         if (e.which === 13) {

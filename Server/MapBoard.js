@@ -1,8 +1,24 @@
 
-function MapBoard() {
+function MapBoard(numRunners) {
     this.gameMap = [];
-    this.rows = 13;
-    this.cols = 13;
+
+    var mapSize = 0;
+
+    if(numRunners == 1 || numRunners == 0)
+        mapSize = 12;
+    if(numRunners == 2)
+        mapSize = 13;
+    else if(numRunners == 3)
+        mapSize = 14;
+    else if(numRunners == 4)
+        mapSize = 15;
+    else if(numRunners == 5)
+        mapSize = 16;
+    else   
+        mapSize = 16; //THIS SHOULD NOT HAPPEN! Runner maximum is 5
+
+    this.rows = mapSize;
+    this.cols = mapSize;
     this.totalRooms = Math.floor((this.rows*this.cols) * .65); //Should not be > then ~.85
     this.middleSize = 4; //Probably should stay as 4
 

@@ -14,18 +14,31 @@ Items.prototype.spawnItems = function(gs) {
     //Name, number of items, width, height
     //We MUST spawn the exit doors 1st so we don't accidentally spawn another item in the room first
     this.createItems('exitdoor','all', 2, 100,100); //2 exit doors ONLY!
-    this.createItems('key','all', 20, 30,20);
+
+    var numKeys = (gs.players.length - 1) * 5 + 5;
+    this.createItems('key','all', numKeys, 30,20);
 
     const itemSize = global.map.getBlockSize() *  .8;
-    this.createItems('pf_flyers','runner', 10, itemSize,itemSize);
-    this.createItems('the_button','runner', 10, itemSize,itemSize);
-    this.createItems('magic_monocle','runner', 10, itemSize,itemSize);
 
-    this.createItems('bbq_chili','snatcher', 5, itemSize,itemSize);
-    this.createItems('spare_eyeballs','snatcher', 5, itemSize,itemSize);
-    this.createItems('kill_the_power','snatcher', 5, itemSize,itemSize);
+    var numPlayerItems = (gs.players.length - 1) * 2 + 4
+    this.createItems('pf_flyers','runner', numPlayerItems, itemSize,itemSize);
+    this.createItems('the_button','runner', numPlayerItems, itemSize,itemSize);
+    this.createItems('magic_monocle','runner', numPlayerItems, itemSize,itemSize);
+
+    var numSnatcherItems = (gs.players.length) + 5;
+    this.createItems('bbq_chili','snatcher', numSnatcherItems, itemSize,itemSize);
+    this.createItems('spare_eyeballs','snatcher', numSnatcherItems, itemSize,itemSize);
+    this.createItems('kill_the_power','snatcher', numSnatcherItems, itemSize,itemSize);
     
     //check to make sure available rooms is less then num items with some margin for error..
+    var availableRooms = global.map.getAvailableRooms();
+    while(global.items.length > (availableRooms-10)){ //10 Is a buffer zone of empty rooms we want to keep
+        console.log("Not enough rooms to spawn items! " + availableRooms + " rooms available and " + global.items.length + " items to spawn!");
+        //This will only trim runner items as to not remove keys/doors/snatcher items are more limited anyway
+        this.trimItemsIftooMany();
+    }
+
+    console.log("Spawning " + global.items.length + " items in " + availableRooms + " rooms");
 
     for (let item of global.items) {
 
@@ -104,6 +117,17 @@ Items.prototype.useItem = function(gs, playerId) {
     var item = global.items.find(item => (item.ownerId == player.id && item.type != "key" && item.type != "door"));
     if(item)
         new Event().triggerItemEvent(gs,player,item);
+}
+
+Items.prototype.trimItemsIftooMany = function() {
+    var index = global.items.findIndex(item => item.type === 'pf_flyers');
+    if (index !== -1) global.items.splice(index, 1);
+
+    index = global.items.findIndex(item => item.type === 'the_button');
+    if (index !== -1) global.items.splice(index, 1);
+
+    index = global.items.findIndex(item => item.type === 'magic_monocle');
+    if (index !== -1) global.items.splice(index, 1);
 }
 
 Items.prototype.pickupItemIfAllowed = function(player, item, pickupRequested) {

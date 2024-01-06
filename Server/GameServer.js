@@ -21,8 +21,6 @@ var playerObject ={
     isConnected: false,
     isAlive: false,
     points:0,
-    sWins:0,
-    rWins:0,
     currRoom:{x:-1,y:-1},
     currPos:{x:-1000,y:-1000},
     hasKeys: [],
@@ -32,6 +30,7 @@ var playerObject ={
     spotlight: 375,
     isSnatcher: false
 };
+
 global.baseSpeed = JSON.stringify(350);
 global.killerBaseSpotlight = JSON.stringify(225);
 
@@ -64,15 +63,14 @@ wss.on('connection', (ws) => {
 
         if(message.type == "playerJoin"){
             console.log("Player join request: " + message.id);
-            if(playerConnected(message.id) == false){
+            if(playerTaken(message.name) == false){
                 var newPlayer = JSON.parse(JSON.stringify(playerObject));
                 newPlayer.isConnected = true;
-                newPlayer.name = message.name;
                 newPlayer.speed = JSON.parse(global.baseSpeed);
-                newPlayer.id = String(Date.now());
+                newPlayer.name = message.name;
+                newPlayer.id = message.name;
                 gs.players.push(newPlayer);
-                clients.set(ws, newPlayer.id);
-
+                clients.set(ws, message.name);
                 console.log("Player joined: " + JSON.stringify(newPlayer));
                 // Send the player's ID back to the client
                 ws.send(JSON.stringify({ type: "playerId", id: newPlayer.id }));
@@ -82,7 +80,10 @@ wss.on('connection', (ws) => {
                 console.log("Player already connected: " + message.id);
             }
         }
-
+        if(message.type == "playerLeave"){
+            console.log("Player left " + message.id);
+            gs.players = gs.players.filter(player => player.id !== message.id);
+        }
         if(message.type == "generateMap"){
             startGame();
         }
@@ -140,7 +141,7 @@ function startGame(){
     setSnatcher();
     resetPlayerStats();
 
-    global.map = new MapBoard();
+    global.map = new MapBoard(gs.players.length - 1);
     sendAllClients({type: "map", map: global.map.generateNewMap()});
 
     global.map.spawnPlayers(gs.players);
@@ -249,9 +250,9 @@ function isSnatcher(id){
     return false;
 }
 
-function playerConnected(id){
+function playerTaken(name){
     for (let i = 0; i < gs.players.length; i++) 
-        if (gs.players[i].id == id) 
+        if (gs.players[i].name == name) 
             return true;
     return false;
 }

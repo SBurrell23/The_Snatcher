@@ -6,8 +6,8 @@ function SolidObjects() {
     this.mazeWidth = (global.canvasWidth / global.map.getBlockSize());
     //The canvas and block size must divide into an EVEN number
 
-    this.minNumberOfBlocks = 45;
-    this.maxNumberOfBlocks = 90;
+    this.minNumberOfBlocks = 40;
+    this.maxNumberOfBlocks = 85;
 }
 
 SolidObjects.prototype.get = function() {

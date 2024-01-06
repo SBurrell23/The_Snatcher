@@ -42,7 +42,7 @@ var sc = { //Skill Check Variables
     barHeight : 20,
     successAreaColor: 'green'
 }
-const scReset = JSON.parse(JSON.stringify(sc));
+const scReset = JSON.stringify(sc);
 
 function connectWebSocket() {
     console.log("Attempting to connect to server...");
@@ -107,7 +107,7 @@ function recievedServerMessage(message) {
     }
     else if(m.type == "skillCheck"){
         if(localState.skillCheck == false){
-            sc = JSON.parse(JSON.stringify(scReset));
+            sc = JSON.parse(scReset);
             sc.successAreaStart = Math.floor(Math.random() * 121) - 60;
             localState.skillCheckItemId = m.data;
             localState.skillCheck = true;
@@ -202,7 +202,7 @@ function drawGameState(gs) {
         drawSkillCheck(ctx,getMe(gs));
 
         //This needs to come after objects that are under the spotlight and before things over it
-        //drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
+        drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
         
         drawMap(ctx,gs,localState.map);
         drawPlayerInventory(ctx, gs);
@@ -735,7 +735,7 @@ $(document).keydown(function(e) {
                 }, 1500);
 
             }
-            else if(serverState && serverState.state == "playing" && getMe(serverState).isAlive){
+            else if(serverState && serverState.state == "playing" && getMe(serverState).isAlive && !localState.skillCheck){
                 if(getMe(serverState).hasItem == undefined){
                     socket.send(JSON.stringify({
                         type: "pickupItem",

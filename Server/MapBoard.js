@@ -1,13 +1,14 @@
 
 function MapBoard() {
     this.gameMap = [];
-    this.rows = 14;
-    this.cols = 14;
+    this.rows = 13;
+    this.cols = 13;
     this.totalRooms = Math.floor((this.rows*this.cols) * .65); //Should not be > then ~.85
     this.middleSize = 4; //Probably should stay as 4
 
     this.blockSize = 64;//75 is what I chose to start, too small?
     //Room Types: 0 = empty, 1 = room, 2 = starting room, 3 = exit door
+    this.availableRooms = 0;
 }
 
 MapBoard.prototype.generateNewMap = function() {
@@ -270,6 +271,15 @@ MapBoard.prototype.generateNewMap = function() {
         }
     }
 
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            if (map[i][j] === 1) {
+                this.availableRooms++;
+            }
+        }
+    }
+    console.log("Total open rooms spawned: " + this.availableRooms);
+
     //Finally, a good lookin' map!
     this.gameMap = map;
     return map;
@@ -520,6 +530,10 @@ MapBoard.prototype.get = function() {
 
 MapBoard.prototype.getBlockSize = function() {
     return this.blockSize;
+}
+
+MapBoard.prototype.getAvailableRooms = function() {
+    return this.availableRooms;
 }
 
 module.exports = MapBoard;

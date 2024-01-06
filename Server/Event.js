@@ -1,7 +1,7 @@
 function Event() {
     this.failedSkillCheckRevealTime = 6000;
 
-    this.pfFlyersSpeed = 300;
+    this.pfFlyersSpeed = 250;
     this.pfFlyersTime = 5000;
 
     this.magicMonocleRevealTime = 5000;
@@ -19,13 +19,13 @@ Event.prototype.triggerItemEvent = function(gs,player,item) {
 
     console.log("Player " + player.name + " used item " + item.id);
 
-    // player.hasItem = undefined;
-    // item.isConsumed = true;
-    // item.ownerId = -1;
-    // item.currRoom.x = -1;
-    // item.currRoom.y = -1;
-    // item.currPos.x = -2000;
-    // item.currPos.y = -2000;
+    player.hasItem = undefined;
+    item.isConsumed = true;
+    item.ownerId = -1;
+    item.currRoom.x = -1;
+    item.currRoom.y = -1;
+    item.currPos.x = -2000;
+    item.currPos.y = -2000;
 
     switch(item.type) {
         case "pf_flyers":

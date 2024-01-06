@@ -14,17 +14,18 @@ Items.prototype.spawnItems = function(gs) {
     //Name, number of items, width, height
     //We MUST spawn the exit doors 1st so we don't accidentally spawn another item in the room first
     this.createItems('exitdoor','all', 2, 100,100); //2 exit doors ONLY!
-    this.createItems('key','all', 75, 30,20);
+    this.createItems('key','all', 20, 30,20);
 
     const itemSize = global.map.getBlockSize() *  .8;
-    this.createItems('pf_flyers','runner', 1, itemSize,itemSize);
-    this.createItems('the_button','runner', 1, itemSize,itemSize);
-    this.createItems('magic_monocle','runner', 1, itemSize,itemSize);
+    this.createItems('pf_flyers','runner', 10, itemSize,itemSize);
+    this.createItems('the_button','runner', 10, itemSize,itemSize);
+    this.createItems('magic_monocle','runner', 10, itemSize,itemSize);
 
-    this.createItems('bbq_chili','snatcher', 1, itemSize,itemSize);
-    this.createItems('spare_eyeballs','snatcher', 1, itemSize,itemSize);
-    this.createItems('kill_the_power','snatcher', 1, itemSize,itemSize);
+    this.createItems('bbq_chili','snatcher', 5, itemSize,itemSize);
+    this.createItems('spare_eyeballs','snatcher', 5, itemSize,itemSize);
+    this.createItems('kill_the_power','snatcher', 5, itemSize,itemSize);
     
+    //check to make sure available rooms is less then num items with some margin for error..
 
     for (let item of global.items) {
 

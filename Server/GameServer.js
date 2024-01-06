@@ -32,7 +32,7 @@ var playerObject ={
     spotlight: 375,
     isSnatcher: false
 };
-global.baseSpeed = JSON.stringify(400);
+global.baseSpeed = JSON.stringify(350);
 global.killerBaseSpotlight = JSON.stringify(225);
 
 var timeouts = [];
@@ -154,6 +154,7 @@ function startGame(){
     sendAllClients({type: "solidObjects", solidObjects: global.solidObjects.get()});
 
     gs.state = 'playing';
+    console.log("Game Started!");
     sendAllClients(gs);
 
     global.map.sendSnatcherDoorInfo(gs);

@@ -5,15 +5,15 @@ function MapBoard(numRunners) {
     var mapSize = 0;
 
     if(numRunners == 1 || numRunners == 0)
+        mapSize = 11;
+    else if(numRunners == 2)
         mapSize = 12;
-    if(numRunners == 2)
-        mapSize = 13;
     else if(numRunners == 3)
-        mapSize = 14;
+        mapSize = 13;
     else if(numRunners == 4)
-        mapSize = 15;
+        mapSize = 14;
     else if(numRunners == 5)
-        mapSize = 16;
+        mapSize = 15;
     else   
         mapSize = 16; //THIS SHOULD NOT HAPPEN! Runner maximum is 5
 

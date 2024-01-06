@@ -12,7 +12,14 @@
 
 <style>
     html body{
-        background-color: #3c3c3cad
+        background-color: #3c3c3cad;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: auto; /* Change this from 100vh to auto */
+        min-height: 100vh; /* Add this line */
+        overflow-y: auto; /* Add this line */
+        margin: 0;
     }
     #gameHeader{
         font-family: 'Nunito';
@@ -35,37 +42,8 @@
     }
 </style>
 <body>
-    <div class="container custom-container" style="margin-top:35px;">
-        <div class="row">
-            <div class="col-3">
-                <div class="text-center" id="gameHeader">The<br>Snatcher!</div>
-                <div class="input-group">
-                    <div class="input-group" id="joinInputs">
-                        <input id="playerNameInput" maxlength="15" class="form-control" placeholder="Choose A Name" />
-                        <button class="btn btn-primary" id="joinGameButton" type="button">Join Game</button>
-                    </div>
-                </div>
-                <div class="text-center">
-                    <h3 style="margin-top:30px;" id="queueHeader"><b>Players</b></h3>
-                    <table class="table table-sm table-dark" id="playerQueue">
-                        <thead>
-                            <tr>
-                            <th scope="col" style="border-top-left-radius:4px;">Name</th>
-                            <th scope="col">Points</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
-                    <br>
-                    <button class="btn btn-lg btn-primary" id="startGameButton">Start Game</button>
-                </div>
-            </div>
-            <div class="col-9">
-                <canvas id="canvas" width="1152" height="768" style="border-radius: 4px;"></canvas><br>
-                <div id="gameContainer"></div>
-            </div>
-        </div>
+    <div style=""></div>
+        <canvas id="canvas" width="1152" height="768" style="border-radius: 4px;"></canvas><br>
     </div>
     <div id="offlineMessage" style="display:flex;position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #ff7979; color: black;justify-content: center; align-items: center; font-size: 34px;z-index: 10000;">
         <span>Attempting to connect to game server...</span>

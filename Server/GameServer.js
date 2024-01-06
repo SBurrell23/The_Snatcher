@@ -28,7 +28,8 @@ var playerObject ={
     speed: "?",
     radius:22,
     spotlight: 375,
-    isSnatcher: false
+    isSnatcher: false,
+    color: "#000000"
 };
 
 global.baseSpeed = JSON.stringify(350);
@@ -66,6 +67,7 @@ wss.on('connection', (ws) => {
             if(playerTaken(message.name) == false){
                 var newPlayer = JSON.parse(JSON.stringify(playerObject));
                 newPlayer.isConnected = true;
+                newPlayer.color = message.color;
                 newPlayer.speed = JSON.parse(global.baseSpeed);
                 newPlayer.name = message.name;
                 newPlayer.id = message.name;
@@ -89,6 +91,7 @@ wss.on('connection', (ws) => {
         }
 
         if(message.type =="startGame"){
+            sendAllClients({type: "loadingGame"});
             startGame();
         }
 

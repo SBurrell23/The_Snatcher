@@ -20,12 +20,12 @@ Items.prototype.spawnItems = function(gs) {
 
     const itemSize = global.map.getBlockSize() *  .8;
 
-    var numPlayerItems = (gs.players.length - 1) * 2 + 4
+    var numPlayerItems = (gs.players.length - 1) * 2 + 10
     this.createItems('pf_flyers','runner', numPlayerItems, itemSize,itemSize);
     this.createItems('the_button','runner', numPlayerItems, itemSize,itemSize);
     this.createItems('magic_monocle','runner', numPlayerItems, itemSize,itemSize);
 
-    var numSnatcherItems = (gs.players.length) + 5;
+    var numSnatcherItems = (gs.players.length) * 2 + 6;
     this.createItems('bbq_chili','snatcher', numSnatcherItems, itemSize,itemSize);
     this.createItems('spare_eyeballs','snatcher', numSnatcherItems, itemSize,itemSize);
     this.createItems('kill_the_power','snatcher', numSnatcherItems, itemSize,itemSize);

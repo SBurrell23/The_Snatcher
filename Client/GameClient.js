@@ -24,11 +24,10 @@ var localState = {
 
 var joinButtons = {};
 var startGameButton = {};
+var isGameLoading = false;
 
 var colors = {
-    snatcher: '#3d67ff',
-    me: '#FF8300',
-    otherPlayer: '#81B622',
+    otherPlayer: '#32CD32',
     key: '#f7d707',
     spotlight: 'rgba(0, 0, 0, .988)'
 }
@@ -137,6 +136,9 @@ function recievedServerMessage(message) {
         serverState = m;
         updateLobby(serverState);
         updateInput(serverState,localState.playerId);
+    }else if(m.type == "loadingGame"){
+        console.log("Loading game...");
+        isGameLoading = true;
     }
 
 }
@@ -218,30 +220,30 @@ function drawMap(ctx, gs, map) {
     const walloffset = 20;
     if (map) {
 
-        var noRoom = 'rgba(0, 0, 0, .65)';
+        var noRoom = 'rgba(255, 255, 255, .65)';
         ctx.fillStyle = noRoom;
         ctx.fillRect(
-            ctx.canvas.width - (map[0].length * roomSize) - walloffset, 
+            walloffset, 
             walloffset, 
             roomSize * map[0].length, 
             roomSize * map.length
         );
 
-        const emptyRoom = 'rgba(255, 0, 0, .65)';
-        const exitDoor = 'rgba(182, 129, 0, .65)';
+        const emptyRoom = 'rgba(36, 66, 117, .65)';
+        const exitDoor = 'rgba(66, 29, 4, .75)';
 
         for (let row = 0; row < map.length; row++) {
-            for (let col = 0; col < map[row].length; col++) {
+            for (let col = map[row].length - 1; col >= 0; col--) { // Reverse the loop for horizontal flipping
                 const room = map[row][col];
-                const roomX = ctx.canvas.width - (roomSize * (col + 1));
+                const roomX = walloffset + 10 + (roomSize * (map[row].length - col));
                 const roomY = roomSize * row;
 
                 var roomColor = 'gray';
                 if(isAnyPlayerInThisRoom(gs,row,col)){
                     if(getSnatcher(gs).currRoom.x == col && getSnatcher(gs).currRoom.y == row)
-                        roomColor = colors.snatcher;
+                        roomColor = getSnatcher(gs).color;
                     else if(getMe(gs).currRoom.x == col && getMe(gs).currRoom.y == row){
-                        roomColor = colors.me;
+                        roomColor = getMe(gs).color;
                         if(!localState.roomsIveBeenIn.some(room => room[0] == row && room[1] == col))
                             localState.roomsIveBeenIn.push([row,col]);
                     }
@@ -264,7 +266,7 @@ function drawMap(ctx, gs, map) {
                     }
                     else if(localState.events['magic_monocle'])
                         ctx.fillRect(roomX - walloffset, roomY + walloffset, roomSize, roomSize);
-                    else if(haveIBeenInThisRoom(row,col) || (roomColor == colors.snatcher)){
+                    else if(haveIBeenInThisRoom(row,col) || (roomColor == getSnatcher(gs).color)){
                         if(roomColor = colors.otherPlayer) //We don't show other players on the map unless magic monocle.
                             roomColor = emptyRoom;
                         ctx.fillRect(roomX - walloffset, roomY + walloffset, roomSize, roomSize);
@@ -278,7 +280,7 @@ function drawMap(ctx, gs, map) {
                     }else if(localState.events['failedSkillCheck'].length > 0 && localState.events['failedSkillCheck'].includes(getPlayerInRoom(gs,row,col))){
                         //If a player is in the room and has failed a skill check, draw them
                         ctx.fillStyle = colors.otherPlayer;
-                    }else if(roomColor != colors.snatcher){ //Else override any other room color to just be empty (doors included)
+                    }else if(roomColor != getSnatcher(gs).color){ //Else override any other room color to just be empty (doors included)
                         ctx.fillStyle = emptyRoom;
                     }
                     ctx.fillRect(roomX - walloffset, roomY + walloffset, roomSize, roomSize);
@@ -342,9 +344,9 @@ function drawLobby(ctx, gs) {
     ctx.fill();
 
     if(!isPlayerSpotTaken(gs, "snatcher") && !alreadyConnected(gs, localState.playerId))
-        drawJoinLeaveButton(ctx, centerX, centerY - 80 + 40, "JOIN", 'green', "snatcher");
+        drawJoinLeaveButton(ctx, centerX, centerY - 80 + 40, "JOIN", 'green', "snatcher", "red");
     else if(isMe("snatcher"))
-        drawJoinLeaveButton(ctx, centerX, centerY - 80 + 40, "LEAVE", 'red', "snatcher");
+        drawJoinLeaveButton(ctx, centerX, centerY - 80 + 40, "LEAVE", 'red', "snatcher", "red");
     else
         joinButtons['snatcher'] = {};
 
@@ -363,15 +365,15 @@ function drawLobby(ctx, gs) {
         ctx.fill();
 
         if(!isPlayerSpotTaken(gs, names[i]) && !alreadyConnected(gs, localState.playerId))
-            drawJoinLeaveButton(ctx, x, y + 40, "JOIN",'green', names[i]);
+            drawJoinLeaveButton(ctx, x, y + 40, "JOIN",'green', names[i], colors[i]);
         else if(isMe(names[i]))
-            drawJoinLeaveButton(ctx, x, y + 40, "LEAVE",'red', names[i]);
+            drawJoinLeaveButton(ctx, x, y + 40, "LEAVE",'red', names[i], colors[i]);
         else
             joinButtons[names[i]] = {};
     }
 
     // Draw Start Game Button
-    if (gs.players.length >= 2 && gs.players.length <= 6 && isMe("snatcher")) {
+    if (gs.players.length >= 1 && gs.players.length <= 6 && isMe("snatcher") && !isGameLoading) {
         drawStartGameButton(ctx, centerX, centerY + 260, "START GAME", 'green', 200,50);
     } else {
         startGameButton = {};
@@ -405,13 +407,18 @@ function drawStartGameButton(ctx, x, y, text, color, width, height) {
     ctx.textBaseline = 'middle';
     ctx.fillText(text, x, y+2);
 
+    startGameButton.enabled = true;
     startGameButton.x = x - (width / 2);
     startGameButton.y = y - (height / 2);
     startGameButton.width = width;
     startGameButton.height = height;
 }
 
-function drawJoinLeaveButton(ctx, x, y, text, color, id) {
+function drawJoinLeaveButton(ctx, x, y, text, color, id, playerColor) {
+
+    if(isGameLoading)
+        return;
+
     ctx.fillStyle = color;
     ctx.fillRect(x - 30, y - 10, 60, 30);
 
@@ -426,6 +433,7 @@ function drawJoinLeaveButton(ctx, x, y, text, color, id) {
     joinButtons[id].y = y - 10;
     joinButtons[id].width = 60;
     joinButtons[id].height = 30;
+    joinButtons[id].playerColor = playerColor;
 }
 
 function drawSpotlights(ctx, gs, currentRoomX, currentRoomY) {
@@ -585,27 +593,27 @@ function drawPlayerInventory(ctx, gs) {
     var me = getMe(gs);
 
     ctx.fillStyle = 'rgba(255, 255, 255, .65)';
-    ctx.fillRect(20, 20, 140, 140);
+    ctx.fillRect(ctx.canvas.width  - 160, 20, 140, 140);
 
     // Draw INVENTORY text
     ctx.font = '18px Arial';
     ctx.fillStyle = 'black';
     ctx.textAlign = 'center';
-    ctx.fillText("INVENTORY", 90, 40);
+    ctx.fillText("INVENTORY", ctx.canvas.width - 90, 40);
 
     if (me.hasKeys.length > 0) {
         for (let i = 1; i <= me.hasKeys.length; i++) {
             ctx.font = '16px Arial';
             ctx.fillStyle = colors.key;
             ctx.textAlign = 'center';
-            ctx.fillText("KEY#" + i, 90, 45 + (i * 25));
+            ctx.fillText("KEY#" + i, ctx.canvas.width - 90, 45 + (i * 25));
         }
     }
     if (me.hasItem) {
         ctx.font = '14px Arial';
         ctx.textAlign = 'center';
         ctx.fillStyle = 'magenta';
-        ctx.fillText(me.hasItem.type.toUpperCase(), 90, 130);
+        ctx.fillText(me.hasItem.type.toUpperCase(), ctx.canvas.width - 90, 130);
     }
 }
 
@@ -613,16 +621,7 @@ function drawPlayers(ctx, gs, currentRoomX, currentRoomY) {
     for (let i = 0, len = gs.players.length; i < len; i++) {
         var player = gs.players[i];
         if (player.currRoom.x == currentRoomX && player.currRoom.y == currentRoomY) {
-            var color = colors.otherPlayer;
-            
-            if (isSnatcher(gs, player.id)){
-                color = colors.snatcher;
-            }
-            else if (isMe(player.id)){
-                color = colors.me;
-            }
-
-            ctx.fillStyle = color;
+            ctx.fillStyle = player.color;
             ctx.beginPath();
             ctx.arc(player.currPos.x, player.currPos.y, player.radius, 0, 2 * Math.PI);
             ctx.fill();
@@ -874,16 +873,19 @@ $(document).ready(function() {
         var x = event.clientX - rect.left;
         var y = event.clientY - rect.top;
         //console.log('Clicked at ' + x + ', ' + y);
+
+        //Check for join/leave button clicks
         for (const buttonId in joinButtons) {
             if (joinButtons.hasOwnProperty(buttonId)) {
                 const button = joinButtons[buttonId];
                 if (x >= button.x && x <= button.x + button.width && y >= button.y && y <= button.y + button.height) {
-                    console.log("Player join/leave request: " + buttonId);
+                    //console.log("Player join/leave request: " + buttonId);
                     if(localState.playerId == -1)
                         socket.send(JSON.stringify({
                             type:"playerJoin",
                             name:buttonId,
-                            id: buttonId
+                            id: buttonId,
+                            color: button.playerColor
                         }));
                     else{
                         localState.playerId = -1;
@@ -896,6 +898,20 @@ $(document).ready(function() {
                 }
             }
         }
+        var button = startGameButton;
+        if (x >= button.x && 
+            x <= button.x + button.width && 
+            y >= button.y && 
+            y <= button.y + button.height &&
+            isMe("snatcher") &&
+            startGameButton && startGameButton.enabled) {
+            socket.send(JSON.stringify({
+                type:"startGame",
+            }));
+            isGameLoading = true;
+        }
+            
+
     });
 
 

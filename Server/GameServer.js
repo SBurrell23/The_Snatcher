@@ -3,12 +3,11 @@ const MapBoard = require('./MapBoard.js');
 const Movement = require('./Movement.js');
 const SolidObjects = require('./SolidObjects.js');
 const Items = require('./Items.js');
-const Event = require('./Event.js');
 
 const wss = new WebSocket.Server({ port: 8080 });
 
-global.canvasWidth = 1050;
-global.canvasHeight = 750;
+global.canvasWidth = 1152;
+global.canvasHeight = 768;
 
 var gs = {
     type: "gs",
@@ -29,7 +28,7 @@ var playerObject ={
     hasKeys: [],
     hasItem: undefined,
     speed: "?",
-    radius:25,
+    radius:22,
     spotlight: 375,
     isSnatcher: false
 };

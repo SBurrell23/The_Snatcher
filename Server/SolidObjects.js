@@ -6,8 +6,8 @@ function SolidObjects() {
     this.mazeWidth = (global.canvasWidth / global.map.getBlockSize());
     //The canvas and block size must divide into an EVEN number
 
-    this.minNumberOfBlocks = 32;
-    this.maxNumberOfBlocks = 54;
+    this.minNumberOfBlocks = 56;//32
+    this.maxNumberOfBlocks = 94;//54
 }
 
 SolidObjects.prototype.get = function() {
@@ -15,9 +15,10 @@ SolidObjects.prototype.get = function() {
 }
 
 SolidObjects.prototype.createPerimeterWalls = function(gs,map) {
+    console.log("Creating perimeter walls...");
     const canvasWidth = global.canvasWidth;
     const canvasHeight = global.canvasHeight;
-    const wallWidth = 15;
+    const wallWidth = 12;
     const doorWidth = global.map.getBlockSize()*2;
 
     var doorSize = 0;
@@ -156,6 +157,8 @@ SolidObjects.prototype.isRoom = function(map,location,col,row){
 }
 
 SolidObjects.prototype.createMazeWalls = function(gs, map) {
+    console.log("Creating maze walls...");
+
     for (let i = 0; i < map.length; i++) {
         for (let j = 0; j < map[i].length; j++) {
 

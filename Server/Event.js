@@ -4,7 +4,7 @@ function Event() {
     this.pfFlyersSpeed = 300;
     this.pfFlyersTime = 5000;
 
-    this.magicMonocleRevealTime = 3500;
+    this.magicMonocleRevealTime = 5000;
 
     this.bbqChiliRevealTime = 3000;
 
@@ -98,8 +98,8 @@ Event.prototype.teleportPlayerToRandomRoom = function(gs,player) {
                 roomFound = true;
                 player.currRoom.x = randomX;
                 player.currRoom.y = randomY;
-                player.currPos.x = spot.x + 32; // need to adjust player since x,y is in middle and not top left
-                player.currPos.y = spot.y + 32; // this can be the blocksize /2 - the 5px offset
+                player.currPos.x = spot.x + Math.floor((global.map.getBlockSize()) / 2);
+                player.currPos.y = spot.y + Math.floor((global.map.getBlockSize()) / 2);
                 global.sendItemsToClientsInRoom(player.currRoom.x,player.currRoom.y);
             }
         }

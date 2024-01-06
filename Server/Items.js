@@ -14,11 +14,11 @@ Items.prototype.spawnItems = function(gs) {
     //Name, number of items, width, height
     //We MUST spawn the exit doors 1st so we don't accidentally spawn another item in the room first
     this.createItems('exitdoor','all', 2, 100,100); //2 exit doors ONLY!
-    this.createItems('key','all', 1, 30,20);
+    this.createItems('key','all', 75, 30,20);
 
-    const itemSize = 65;
+    const itemSize = global.map.getBlockSize() *  .8;
     this.createItems('pf_flyers','runner', 1, itemSize,itemSize);
-    this.createItems('the_button','runner', 75, itemSize,itemSize);
+    this.createItems('the_button','runner', 1, itemSize,itemSize);
     this.createItems('magic_monocle','runner', 1, itemSize,itemSize);
 
     this.createItems('bbq_chili','snatcher', 1, itemSize,itemSize);
@@ -56,8 +56,8 @@ Items.prototype.spawnItems = function(gs) {
                 }else{
                     roomFound = true;
 
-                    item.currPos.x = spot.x;
-                    item.currPos.y = spot.y;
+                    item.currPos.x = spot.x + Math.floor((global.map.getBlockSize() - item.width) / 2);
+                    item.currPos.y = spot.y + Math.floor((global.map.getBlockSize() - item.height) / 2);
     
                     item.currRoom.x = randomX;
                     item.currRoom.y = randomY;

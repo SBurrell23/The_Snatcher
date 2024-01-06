@@ -6,8 +6,7 @@ function MapBoard() {
     this.totalRooms = Math.floor((this.rows*this.cols) * .65); //Should not be > then ~.85
     this.middleSize = 4; //Probably should stay as 4
 
-    this.blockSize = 75;//75 is what I chose
-    this.spotSize = 60; //The square area open needed to spawn things in (items can't be larger)
+    this.blockSize = 64;//75 is what I chose to start, too small?
     //Room Types: 0 = empty, 1 = room, 2 = starting room, 3 = exit door
 }
 
@@ -457,8 +456,8 @@ MapBoard.prototype.findOpenSpotInRoom = function(roomX, roomY) {
     var spot = {
         x: 0,
         y: 0,
-        width: this.spotSize,
-        height: this.spotSize
+        width: this.blockSize/2,
+        height: this.blockSize/2
     };
 
     let spotFound = false;
@@ -470,13 +469,13 @@ MapBoard.prototype.findOpenSpotInRoom = function(roomX, roomY) {
         let randX;
         do {
             randX = Math.floor(Math.random() * this.rows) * this.blockSize;
-        } while (randX < 300 || randX > 850);
+        } while (randX < (global.canvasWidth*.25) || randX > (global.canvasWidth*.75));
         let randY;
         do {
             randY = Math.floor(Math.random() * this.cols) * this.blockSize;
-        } while (randY < 200 || randY > 550);
-        spot.x = randX + 5;//5 Is an offset so the box isn't flush with the walls
-        spot.y = randY + 5;
+        } while (randY < (global.canvasHeight*.25) || randY > (global.canvasHeight*.75));
+        spot.x = randX;
+        spot.y = randY;
 
         // Check if the spot intersects with any solid object
         let intersects = false;

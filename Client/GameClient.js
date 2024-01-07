@@ -56,7 +56,7 @@ function connectWebSocket() {
 
     //wss://the-snatcher.onrender.com
     //ws://localhost:8080
-    socket = new WebSocket('ws://localhost:8080');  
+    socket = new WebSocket('wss://the-snatcher.onrender.com');  
     socket.addEventListener('open', function () {
         console.log('Server connection established!');
         $("#offlineMessage").css("display", "none");
@@ -617,16 +617,51 @@ function drawPlayerInventory(ctx, gs) {
     }
 }
 
+let startPosition = { x: 0, y: 0 };
+let targetPosition = { x: 0, y: 0 };
+const lerpTime = 0.2; // Time taken to interpolate (adjust as needed)
+let currentLerpTime = 0;
 function drawPlayers(ctx, gs, currentRoomX, currentRoomY) {
     for (let i = 0, len = gs.players.length; i < len; i++) {
         var player = gs.players[i];
         if (player.currRoom.x == currentRoomX && player.currRoom.y == currentRoomY) {
-            ctx.fillStyle = player.color;
-            ctx.beginPath();
-            ctx.arc(player.currPos.x, player.currPos.y, player.radius, 0, 2 * Math.PI);
-            ctx.fill();
+            if(isMe(player.id)){
+
+                targetPosition = { x: player.currPos.x, y: player.currPos.y };
+                // Interpolate between start and target positions
+                if (currentLerpTime < lerpTime) {
+                    currentLerpTime += 0.016; // Assuming 60 FPS, adjust according to your game's frame rate
+                    const t = currentLerpTime / lerpTime;
+                    const interpolatedX = lerp(startPosition.x, targetPosition.x, t);
+                    const interpolatedY = lerp(startPosition.y, targetPosition.y, t);
+                    // Update object position using the interpolated values
+                    ctx.fillStyle = player.color;
+                    ctx.beginPath();
+                    ctx.arc(interpolatedX, interpolatedY, player.radius, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+                // Reset interpolation when reaching the target
+                else {
+                    startPosition = { ...targetPosition };
+                    currentLerpTime = 0;
+                    ctx.fillStyle = player.color;
+                    ctx.beginPath();
+                    ctx.arc(player.currPos.x, player.currPos.y, player.radius, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+
+            }else{
+                ctx.fillStyle = player.color;
+                ctx.beginPath();
+                ctx.arc(player.currPos.x, player.currPos.y, player.radius, 0, 2 * Math.PI);
+                ctx.fill();
+            }
         }
     }
+}
+
+function lerp(start, end, t) {
+    return start * (1 - t) + end * t;
 }
 
 function drawItems(ctx, currentRoomX, currentRoomY) {

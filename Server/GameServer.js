@@ -89,34 +89,29 @@ wss.on('connection', (ws) => {
         if(message.type == "generateMap"){
             startGame();
         }
-
         if(message.type =="startGame"){
             sendAllClients({type: "loadingGame"});
             startGame();
         }
-
         if(message.type == "mp"){
             movementQueue.set(message.id, message.dir);
         }
-
         if(message.type == "pickupItem"){
             new Items().pickupItem(gs,message.id);
         }
-
         if(message.type == "dropItem"){
             new Items().dropItem(gs,message.id,true);
         }
-
         if(message.type == "skillCheckResult"){
             new Items().skillCheckResult(gs,message.id,message.itemId,message.result);
         }
         if(message.type == "useItem"){
             new Items().useItem(gs,message.id);
         }
-
         if(message.type == "ping"){
             sendClient(message.id,{type: "pong"});
         }
+
     });
 
     //A user has disconnected
@@ -277,6 +272,7 @@ function clearAllTimeouts() {
 }
 
 function sendAllClients(object){
+   
     wss.clients.forEach((client) => {
         if (client.readyState === WebSocket.OPEN)
             client.send(JSON.stringify(object));
@@ -307,7 +303,7 @@ function gameLoop() {
     sendAllClients(gs);
     
     lastUpdateTime = now;
-    setTimeout(gameLoop, 1000 / 45); // Run the game loop 60 times per second
+    setTimeout(gameLoop, 1000 / 60); // Run the game loop 60 times per second
     //This ends up being 16.6ms per frame (not counting deltaTime)
 }
 gameLoop();

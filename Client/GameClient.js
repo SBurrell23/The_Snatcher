@@ -621,6 +621,7 @@ let startPosition = { x: 0, y: 0 };
 let targetPosition = { x: 0, y: 0 };
 const lerpTime = 0.2; // Time taken to interpolate (adjust as needed)
 let currentLerpTime = 0;
+var myLastRoom = {x:-1,y:-1};
 function drawPlayers(ctx, gs, currentRoomX, currentRoomY) {
     for (let i = 0, len = gs.players.length; i < len; i++) {
         var player = gs.players[i];
@@ -628,6 +629,10 @@ function drawPlayers(ctx, gs, currentRoomX, currentRoomY) {
             if(isMe(player.id)){
 
                 targetPosition = { x: player.currPos.x, y: player.currPos.y };
+                
+                if(myLastRoom.x != player.currRoom.x || myLastRoom.y != player.currRoom.y)
+                    startPosition = { x: player.currPos.x, y: player.currPos.y };
+
                 // Interpolate between start and target positions
                 if (currentLerpTime < lerpTime) {
                     currentLerpTime += 0.016; // Assuming 60 FPS, adjust according to your game's frame rate
@@ -649,6 +654,7 @@ function drawPlayers(ctx, gs, currentRoomX, currentRoomY) {
                     ctx.arc(player.currPos.x, player.currPos.y, player.radius, 0, 2 * Math.PI);
                     ctx.fill();
                 }
+                myLastRoom = {x:player.currRoom.x,y:player.currRoom.y};
 
             }else{
                 ctx.fillStyle = player.color;

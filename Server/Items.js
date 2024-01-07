@@ -85,10 +85,13 @@ Items.prototype.spawnItems = function(gs) {
 
 Items.prototype.createItems = function(type,whoIsFor,numItems,width,height) {
     var doesItemStartInChest = true;
+    var specialCount2 = 0;
 
     for (let i = 1; i <= numItems; i++) {
         if(whoIsFor == 'snatcher' || type == 'exitdoor')
             doesItemStartInChest = false;
+        if(type == 'exitdoor')
+            specialCount2 = global.keysNeededToOpenDoor;
         global.items.push({
             type: type,
             id: type + (global.items.length + 1),
@@ -105,6 +108,7 @@ Items.prototype.createItems = function(type,whoIsFor,numItems,width,height) {
             ownerId: -1,
             isConsumed: false,
             specialCount: 0,
+            specialCount2: specialCount2,
             whoIsFor:whoIsFor,
             inChest:doesItemStartInChest,
             skillCheckInProgress:false
@@ -168,7 +172,6 @@ Items.prototype.pickupItemIfAllowed = function(player, item, pickupRequested) {
             player.currPos.y = -1000;
             player.isAlive = false;
             player.points += global.pointsForEscape;
-            player.rWins += 1;
             console.log("Player " + player.name + " has escaped through the exit door at " + item.currRoom.x + ", " + item.currRoom.y + "!");
             global.sendItemsToClientsInRoom(pRoomX,pRoomY);
             global.checkForGameOver('escaped');

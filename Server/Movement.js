@@ -152,6 +152,7 @@ Movement.prototype.checkForPlayerCollision = function(gs, player) {
                 new Items().dropKeys(gs,snatchedPlayer.id,false);
             if(snatchedPlayer.hasItem)
                 new Items().dropItem(gs,snatchedPlayer.id,false);
+            
             snatchedPlayer.currPos.x = -1000;
             snatchedPlayer.currPos.y = -1000;
             snatchedPlayer.currRoom.x = -1000;

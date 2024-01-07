@@ -188,9 +188,8 @@ function drawGameState(gs) {
     //Draw the lobby
     if(gs.state == "lobby")
         drawLobby(ctx,gs);
-
     //Draw the game
-    if(gs.state == "playing" && getMe(gs).currRoom != undefined){
+    else if(gs.state == "playing" && getMe(gs).currRoom != undefined){
         var currentRoomX = getMe(gs).currRoom.x;
         var currentRoomY = getMe(gs).currRoom.y;
     
@@ -210,10 +209,21 @@ function drawGameState(gs) {
         drawPlayerInventory(ctx, gs);
 
         drawPing(ctx);
-        
+    }else{
+        drawGameInProgress(ctx);
     }
 
 }   
+
+function drawGameInProgress(ctx) {
+    var canvas = document.getElementById('canvas');
+    var centerX = canvas.width / 2;
+    var centerY = canvas.height / 2;
+    ctx.font = '40px Arial';
+    ctx.fillStyle = 'white';
+    ctx.textAlign = 'center';
+    ctx.fillText('Game is currently in progress...', centerX, centerY);
+}
 
 function drawMap(ctx, gs, map) {
     const roomSize = 9;
@@ -617,57 +627,76 @@ function drawPlayerInventory(ctx, gs) {
     }
 }
 
-let startPosition = { x: 0, y: 0 };
-let targetPosition = { x: 0, y: 0 };
-const lerpTime = 0.2; // Time taken to interpolate (adjust as needed)
-let currentLerpTime = 0;
-var myLastRoom = {x:-1,y:-1};
+const lerpTime = 0.175; // Time taken to interpolate (adjust as needed)
+let playerInterpolations = {}; // Store interpolation data for each player
+
+function updatePlayerInterpolation(player) {
+    if (!playerInterpolations[player.id]) {
+        playerInterpolations[player.id] = {
+            startPosition: { x: player.currPos.x, y: player.currPos.y },
+            targetPosition: { x: player.currPos.x, y: player.currPos.y },
+            currentLerpTime: 0,
+            lastRoom: { x: player.currRoom.x, y: player.currRoom.y }
+        };
+    } else {
+        const interpolation = playerInterpolations[player.id];
+        interpolation.targetPosition = { x: player.currPos.x, y: player.currPos.y };
+
+        // A check to prevent interpolation from smoothing if the player has changed rooms
+        if (
+            interpolation.lastRoom.x !== player.currRoom.x ||
+            interpolation.lastRoom.y !== player.currRoom.y
+        ) {
+            interpolation.startPosition = { x: player.currPos.x, y: player.currPos.y };
+        }
+
+        interpolation.lastRoom = { x: player.currRoom.x, y: player.currRoom.y };
+    }
+}
+
+function interpolatePosition(start, end, t) {
+    return start * (1 - t) + end * t;
+}
+
+
 function drawPlayers(ctx, gs, currentRoomX, currentRoomY) {
     for (let i = 0, len = gs.players.length; i < len; i++) {
-        var player = gs.players[i];
-        if (player.currRoom.x == currentRoomX && player.currRoom.y == currentRoomY) {
-            if(isMe(player.id)){
+        const player = gs.players[i];
+        if (player.currRoom.x === currentRoomX && player.currRoom.y === currentRoomY) {
+            updatePlayerInterpolation(player);
+            const interpolation = playerInterpolations[player.id];
 
-                targetPosition = { x: player.currPos.x, y: player.currPos.y };
-                
-                if(myLastRoom.x != player.currRoom.x || myLastRoom.y != player.currRoom.y)
-                    startPosition = { x: player.currPos.x, y: player.currPos.y };
-
-                // Interpolate between start and target positions
-                if (currentLerpTime < lerpTime) {
-                    currentLerpTime += 0.016; // Assuming 60 FPS, adjust according to your game's frame rate
-                    const t = currentLerpTime / lerpTime;
-                    const interpolatedX = lerp(startPosition.x, targetPosition.x, t);
-                    const interpolatedY = lerp(startPosition.y, targetPosition.y, t);
-                    // Update object position using the interpolated values
-                    ctx.fillStyle = player.color;
-                    ctx.beginPath();
-                    ctx.arc(interpolatedX, interpolatedY, player.radius, 0, 2 * Math.PI);
-                    ctx.fill();
-                }
-                // Reset interpolation when reaching the target
-                else {
-                    startPosition = { ...targetPosition };
-                    currentLerpTime = 0;
-                    ctx.fillStyle = player.color;
-                    ctx.beginPath();
-                    ctx.arc(player.currPos.x, player.currPos.y, player.radius, 0, 2 * Math.PI);
-                    ctx.fill();
-                }
-                myLastRoom = {x:player.currRoom.x,y:player.currRoom.y};
-
-            }else{
-                ctx.fillStyle = player.color;
-                ctx.beginPath();
-                ctx.arc(player.currPos.x, player.currPos.y, player.radius, 0, 2 * Math.PI);
-                ctx.fill();
+            // Interpolate between start and target positions
+            if (interpolation.currentLerpTime < lerpTime) {
+                interpolation.currentLerpTime += 0.016; // Assuming 60 FPS
+                const t = interpolation.currentLerpTime / lerpTime;
+                const interpolatedX = interpolatePosition(
+                    interpolation.startPosition.x,
+                    interpolation.targetPosition.x,
+                    t
+                );
+                const interpolatedY = interpolatePosition(
+                    interpolation.startPosition.y,
+                    interpolation.targetPosition.y,
+                    t
+                );
+                drawPlayer(ctx, player, interpolatedX, interpolatedY);
+            }
+            // Reset interpolation when reaching the target
+            else {
+                interpolation.startPosition = { ...interpolation.targetPosition };
+                interpolation.currentLerpTime = 0;
+                drawPlayer(ctx, player, player.currPos.x, player.currPos.y);
             }
         }
     }
 }
 
-function lerp(start, end, t) {
-    return start * (1 - t) + end * t;
+function drawPlayer(ctx, player, x, y) {
+    ctx.fillStyle = player.color;
+    ctx.beginPath();
+    ctx.arc(x, y, player.radius, 0, 2 * Math.PI);
+    ctx.fill();
 }
 
 function drawItems(ctx, currentRoomX, currentRoomY) {
@@ -691,7 +720,7 @@ function drawItems(ctx, currentRoomX, currentRoomY) {
                 ctx.font = '18px Arial';
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
-                ctx.fillText("("+item.specialCount+")", item.currPos.x + Math.ceil(item.width/2), item.currPos.y + Math.ceil(item.height/2));
+                ctx.fillText("("+item.specialCount+" / "+item.specialCount2+")", item.currPos.x + Math.ceil(item.width/2), item.currPos.y + Math.ceil(item.height/2));
             }
             else{
                 if(item.inChest){

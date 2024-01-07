@@ -124,8 +124,14 @@ wss.on('connection', (ws) => {
         gs.players = gs.players.filter(player => player.id !== disconnectedUserId);
         
         //If nobody is left or the snatcher leaves, reset the game
-        if(clients.size === 0 || isSnatcher(disconnectedUserId)) {
+        if(clients.size === 0) {
             console.log('All clients disconnected...');
+            clearAllTimeouts();
+            resetGameState();
+        }
+        if(isSnatcher(disconnectedUserId)){
+            console.log('The snatcher has disconnected...');
+            global.checkForGameOver('ragequit');
             clearAllTimeouts();
             resetGameState();
         }
@@ -152,6 +158,9 @@ function startGame(){
 
     sendAllClients({type: "solidObjects", solidObjects: global.solidObjects.get()});
 
+    //Set winning keys # 
+    global.keysNeededToOpenDoor = ((gs.players.length-1) * 2) + 1;
+
     gs.state = 'playing';
     console.log("Game Started!");
     sendAllClients(gs);
@@ -163,9 +172,11 @@ function startGame(){
 global.checkForGameOver = function(lastAction){
     var alivePlayers = gs.players.filter(player => !player.isSnatcher && player.isAlive);
     if (alivePlayers.length == 0 && lastAction == 'snatched') {
+        setGameOver('escaped');
         console.log("All players have been snatched! GAME OVER!");
     }
     else if (alivePlayers.length == 0 && lastAction == 'escaped') {
+        setGameOver('snatched');
         console.log("All still alive players have escaped! GAME OVER!");
     }
 }
@@ -216,6 +227,11 @@ global.sendSnatcherDoorInfo = function(doorInfoObject){
             if(player.isSnatcher)
                 sendClient(player.id,{type: "doorInfo", doorInfo: doorInfoObject});
 
+}
+
+function setGameOver(whyIsGameOver){
+    gs.state = 'gameOver';
+    sendAllClients(gs);
 }
 
 function setSnatcher(){

@@ -13,7 +13,8 @@ var gs = {
     type: "gs",
     state: 'lobby',
     endReason: '',
-    players:[]
+    players:[],
+    seed: 0,
 };
 
 var playerObject ={
@@ -152,6 +153,9 @@ function startGame(){
     sendAllClients({type: "map", map: global.map.generateNewMap()});
 
     global.map.spawnPlayers(gs.players);
+
+    //Set winning keys # 
+    global.keysNeededToOpenDoor = ((gs.players.length-1) * 2) + 1;
     
     global.solidObjects = new SolidObjects();
     global.solidObjects.createPerimeterWalls(gs, global.map.get());
@@ -161,11 +165,9 @@ function startGame(){
 
     sendAllClients({type: "solidObjects", solidObjects: global.solidObjects.get()});
 
-    //Set winning keys # 
-    global.keysNeededToOpenDoor = ((gs.players.length-1) * 2) + 1;
-
     gs.state = 'playing';
     console.log("Game Started!");
+    gs.seed = new Date().getTime();
     sendAllClients(gs);
 
     global.map.sendSnatcherDoorInfo(gs);

@@ -5,8 +5,8 @@ var keys = {};
 var font = "Metal Mania";
 var font2 = "Jolly Lodger";
 
-var serverState = null;
-var localState = {
+var serverState = null; //In case we need to access the server state in the future
+var localState = { //A local state needed to store things specific to the client
     playerId: -1,
     map: null,
     solidObjects: null,
@@ -24,15 +24,20 @@ var localState = {
     }
 };
 
-var joinButtons = {};
-var startGameButton = {};
+var joinButtons = {}; //Lobby screen join/leave button x,y,w,h
+var startGameButton = {}; //Lobby screen start game button x,y,w,h
 var isGameLoading = false;
 
-var colors = {
+const lerpTime = 0.165; // Time taken to interpolate - higher is smooother/less responsive
+let playerInterpolations = {}; // Store interpolation data for each player
+
+var colors = { //Map colors
     otherPlayer: '#32CD32',
     key: '#f7d707',
-    spotlight: 'rgba(0, 0, 0, .988)'
+    spotlight: 'rgba(0, 0, 0, .92)'
 }
+
+var sprites = {};
 
 var sc = { //Skill Check Variables
     barMoveAmount : 0,
@@ -47,12 +52,6 @@ var sc = { //Skill Check Variables
     successAreaColor: 'green'
 }
 const scReset = JSON.stringify(sc);
-
-var sprites = {};
-
-function loadAssets() {
-    //sprites['background'] = loadImage('Assets/Sprites/background.png');
-}
 
 function connectWebSocket() {
     console.log("Attempting to connect to server...");
@@ -171,7 +170,7 @@ function drawGameState(gs) {
         isGameLoading = false;
         var currentRoomX = getMe(gs).currRoom.x;
         var currentRoomY = getMe(gs).currRoom.y;
-    
+        
         drawBackground(ctx);
         
         drawSolidObjects(ctx, currentRoomX, currentRoomY);  
@@ -182,7 +181,7 @@ function drawGameState(gs) {
         drawSkillCheck(ctx,getMe(gs));
 
         //This needs to come after objects that are under the spotlight and before things over it
-        drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
+        //drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
         
         drawMap(ctx,gs,localState.map);
         drawPlayerInventory(ctx, gs);
@@ -421,22 +420,6 @@ function drawLobby(ctx, gs) {
 
 }
 
-function isPlayerSpotTaken(gs, id) {
-    for (let i = 0; i < gs.players.length; i++) {
-        if (gs.players[i].id == id)
-            return true;
-    }
-    return false;
-}
-
-function alreadyConnected(gs, id) {
-    for (let i = 0; i < gs.players.length; i++) {
-        if (gs.players[i].id == id)
-            return true;
-    }
-    return false;
-}
-
 function drawStartGameButton(ctx, x, y, text, color, width, height) {
     ctx.fillStyle = color;
     ctx.fillRect(x - (width / 2), y - (height / 2), width, height);
@@ -544,15 +527,26 @@ function drawSnatcherDoorInfo(ctx, gs, doorInfo) {
 }
 
 function drawBackground(ctx) {
+    const canvasWidth = ctx.canvas.width;
+    const canvasHeight = ctx.canvas.height;
+    const spriteWidth = 48;
+    const spriteHeight = 48;
+
     ctx.fillStyle = '#98ABC7';
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
     var lineWidth = 5;
     ctx.fillStyle = '#4F3100';
-    ctx.fillRect(0, 0, ctx.canvas.width, lineWidth);
-    ctx.fillRect(0, 0, lineWidth, ctx.canvas.height);
-    ctx.fillRect(ctx.canvas.width - lineWidth, 0, lineWidth, ctx.canvas.height);
-    ctx.fillRect(0, ctx.canvas.height - lineWidth, ctx.canvas.width, lineWidth);
+    ctx.fillRect(0, 0, canvasWidth, lineWidth);
+    ctx.fillRect(0, 0, lineWidth, canvasHeight);
+    ctx.fillRect(canvasWidth - lineWidth, 0, lineWidth, canvasHeight);
+    ctx.fillRect(0, canvasHeight - lineWidth, canvasWidth, lineWidth);
+
+    for (let x = 0; x < canvasWidth; x += spriteWidth) {
+        for (let y = 0; y < canvasHeight; y += spriteHeight) {
+            drawSprite(ctx, 'ground1', x, y, spriteWidth, spriteHeight);
+        }
+    }
 }
 
 function drawWalls(ctx,map,gs) {
@@ -589,51 +583,6 @@ function drawWalls(ctx,map,gs) {
         ctx.fillRect(canvasWidth - wallWidth, wallWidth + gapVerticalOffset, wallWidth, gapWidth);
 }
 
-function isRoom(gs, map, location) {
-    if(!map)
-        return false;
-
-    const me = getMe(gs);
-
-    if(me.currRoom == undefined)
-        return false;
-
-    const row = me.currRoom.y;
-    const col = me.currRoom.x;
-    
-    if(row == -1 || col == -1)
-        return false;
-
-    if (location === 'above') {
-        if (row > 0 && map[row - 1][col] !== 0) {
-            return true;
-        }
-    } else if (location === 'below') {
-        if (row < map.length - 1 && map[row + 1][col] !== 0) {
-            return true;
-        }
-    } else if (location === 'left') {
-        if (col < map[row].length - 1 && map[row][col + 1] !== 0) {
-            return true;
-        }
-
-    } else if (location === 'right') {
-        if (col > 0 && map[row][col - 1] !== 0) {
-            return true;
-        }
-    }
-    return false;
-}
-
-function haveIBeenInThisRoom(row,col){
-    for (let i = 0; i < localState.roomsIveBeenIn.length; i++) {
-        const room = localState.roomsIveBeenIn[i];
-        if(room[0] == row && room[1] == col)
-            return true;
-    }
-    return false;
-}
-
 function drawPlayerInventory(ctx, gs) {
     var me = getMe(gs);
 
@@ -661,9 +610,6 @@ function drawPlayerInventory(ctx, gs) {
         ctx.fillText(me.hasItem.type.toUpperCase(), ctx.canvas.width - 90, 130);
     }
 }
-
-const lerpTime = 0.165; // Time taken to interpolate higher is smooother/less responsive
-let playerInterpolations = {}; // Store interpolation data for each player
 
 function updatePlayerInterpolation(player) {
     if (!playerInterpolations[player.id]) {
@@ -785,8 +731,16 @@ function drawSolidObjects(ctx,currentRoomX, currentRoomY) {
         var roomObjects = solidObjects[currentRoomX+","+currentRoomY];
         for (let i = 0; i < roomObjects.length; i++) {
             const solidObject = roomObjects[i];
-            ctx.fillStyle = solidObject.color;
-            ctx.fillRect(solidObject.x, solidObject.y, solidObject.width, solidObject.height);
+
+            if(solidObject.type == "block"){
+                var ranRock = 'rock' + seededRandom(serverState.seed + i,1,10).toString();
+                drawSprite(ctx, ranRock, solidObject.x, solidObject.y, solidObject.width, solidObject.height);
+            }
+            else{//(solidObject.type == "wall"){
+                ctx.fillStyle = solidObject.color;
+                ctx.fillRect(solidObject.x, solidObject.y, solidObject.width, solidObject.height);
+            }
+
         }
     }
 }
@@ -807,6 +761,67 @@ function drawPing(ctx){
         return;
     }
     ctx.fillText("Ping: "+Math.ceil(localState.ping), 20, canvas.height - 20);
+}
+
+function isPlayerSpotTaken(gs, id) {
+    for (let i = 0; i < gs.players.length; i++) {
+        if (gs.players[i].id == id)
+            return true;
+    }
+    return false;
+}
+
+function alreadyConnected(gs, id) {
+    for (let i = 0; i < gs.players.length; i++) {
+        if (gs.players[i].id == id)
+            return true;
+    }
+    return false;
+}
+
+function isRoom(gs, map, location) {
+    if(!map)
+        return false;
+
+    const me = getMe(gs);
+
+    if(me.currRoom == undefined)
+        return false;
+
+    const row = me.currRoom.y;
+    const col = me.currRoom.x;
+    
+    if(row == -1 || col == -1)
+        return false;
+
+    if (location === 'above') {
+        if (row > 0 && map[row - 1][col] !== 0) {
+            return true;
+        }
+    } else if (location === 'below') {
+        if (row < map.length - 1 && map[row + 1][col] !== 0) {
+            return true;
+        }
+    } else if (location === 'left') {
+        if (col < map[row].length - 1 && map[row][col + 1] !== 0) {
+            return true;
+        }
+
+    } else if (location === 'right') {
+        if (col > 0 && map[row][col - 1] !== 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function haveIBeenInThisRoom(row,col){
+    for (let i = 0; i < localState.roomsIveBeenIn.length; i++) {
+        const room = localState.roomsIveBeenIn[i];
+        if(room[0] == row && room[1] == col)
+            return true;
+    }
+    return false;
 }
 
 function isAnyPlayerInThisRoom(gs, row, col) {
@@ -851,119 +866,13 @@ function isMe(id){
     return id == localState.playerId;
 }
 
-function handlePlayerMovement(){
-    if(localState.skillCheck)
-        return;
-
-    if(keys['w'] && keys['a']){
-        movePlayer("ul");
-    }
-    else if(keys['w'] && keys['d']){
-        movePlayer("ur");
-    }
-    else if(keys['s'] && keys['a']){
-        movePlayer("dl");
-    }
-    else if(keys['s'] && keys['d']){
-        movePlayer("dr");
-    }
-    else if(keys['w']){
-        movePlayer("u");
-    }
-    else if(keys['s']){
-        movePlayer("d");
-    }
-    else if(keys['a']){
-        movePlayer("l");
-    }
-    else if(keys['d'] ){
-        movePlayer("r");
-    }
+function seededRandom(seed, x, z) {
+    var m = 0x80000000;
+    seed = seed % m;
+    seed = (seed * 1103515245 + 12345) % m;
+    var random = seed / m;
+    return Math.floor(x + random * (z - x));
 }
-
-function movePlayer(direction){
-    if(serverState && serverState.state == "playing" && getMe(serverState).isAlive){
-        socket.send(JSON.stringify({
-            type:"mp",
-            id:localState.playerId,
-            dir:direction
-        }));
-    }
-}
-
-let isSpaceDown = false;
-$(document).keydown(function(e) {
-    keys[e.key] = true;
-    if (e.which === 13) { // Enter key
-        e.preventDefault();
-        socket.send(JSON.stringify({
-            type: "generateMap"
-        }));
-    }else if (e.which === 32) { // Space to pickup or drop an item or do a skill check
-        e.preventDefault();
-        if(!isSpaceDown){
-            isSpaceDown = true;
-            if(serverState && serverState.state == "playing" && getMe(serverState).isAlive && localState.skillCheck && sc.barFillSpeed != 0){
-                //This is used to stop the bar from moving, but we want to wait a sec
-                //so the player can see their result before formally ending the skill check and sending the rsponse
-                sc.barFillSpeed = 0;
-                var isSCGood = (sc.lineX >= sc.successAreaX && (sc.lineX+sc.lineWidth) <= sc.successAreaX + sc.successWidth);
-                
-                if(!isSCGood)
-                    sc.successAreaColor = 'red';
-
-                setTimeout(function() {
-                    if(isSCGood){
-                        socket.send(JSON.stringify({
-                            type: "skillCheckResult",
-                            id: localState.playerId,
-                            itemId: localState.skillCheckItemId,
-                            result: 'success'
-                        }));
-                    }else{
-                        socket.send(JSON.stringify({
-                            type: "skillCheckResult",
-                            id: localState.playerId,
-                            itemId: localState.skillCheckItemId,
-                            result: 'failure'
-                        }));
-                    }
-                    localState.skillCheck = false;
-                }, 1500);
-
-            }
-            else if(serverState && serverState.state == "playing" && getMe(serverState).isAlive && !localState.skillCheck){
-                if(getMe(serverState).hasItem == undefined){
-                    socket.send(JSON.stringify({
-                        type: "pickupItem",
-                        id: localState.playerId
-                    }));
-                }else{
-                    socket.send(JSON.stringify({
-                        type: "dropItem",
-                        id: localState.playerId
-                    }));
-                }
-            }
-        }
-    }else if(e.which === 69 || e.which === 82){ // E or R to use an item
-        e.preventDefault();
-        if(serverState && serverState.state == "playing" && getMe(serverState).isAlive){
-            if(getMe(serverState).hasItem != undefined){
-                socket.send(JSON.stringify({
-                    type: "useItem",
-                    id: localState.playerId,
-                }));
-            }
-        }
-    }
-});
-
-window.onkeyup = function(e) {
-    keys[e.key] = false;
-    if (e.which === 32)
-        isSpaceDown = false;
-};
 
 $(document).ready(function() {  
 
@@ -1011,21 +920,6 @@ $(document).ready(function() {
             isGameLoading = true;
         }
             
-
-    });
-
-
-    $('#playerNameInput').keypress(function(e) {
-        if (e.which === 13) {
-            $('#joinGameButton').click();
-        }
-    });
-
-    $('#startGameButton').click(function() {
-        socket.send(JSON.stringify({
-            type:"startGame",
-            id:localState.playerId
-        }));
     });
 
 });

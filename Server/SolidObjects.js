@@ -6,8 +6,8 @@ function SolidObjects() {
     this.mazeWidth = (global.canvasWidth / global.map.getBlockSize());
     //The canvas and block size must divide into an EVEN number
 
-    this.minNumberOfBlocks = 100;
-    this.maxNumberOfBlocks = 250;
+    this.minNumberOfBlocks = 75;
+    this.maxNumberOfBlocks = 150;
 }
 
 SolidObjects.prototype.get = function() {
@@ -49,7 +49,7 @@ SolidObjects.prototype.createPerimeterWalls = function(gs,map) {
                 width: (canvasWidth - doorSize) / 2,
                 height: wallWidth,
                 color: this.color,
-                type:"wall"
+                type:"wall_nw"
             });
             this.solidObjects[roomX+","+roomY].push({
                 x: (canvasWidth  + doorSize) / 2,
@@ -57,7 +57,7 @@ SolidObjects.prototype.createPerimeterWalls = function(gs,map) {
                 width: (canvasWidth- doorSize) / 2,
                 height: wallWidth,
                 color: this.color,
-                type:"wall"
+                type:"wall_ne"
             });
         
             if(this.isRoom(map,'south',roomX,roomY))
@@ -72,7 +72,7 @@ SolidObjects.prototype.createPerimeterWalls = function(gs,map) {
                 width: (canvasWidth - doorSize) / 2,
                 height: wallWidth,
                 color: this.color,
-                type:"wall"
+                type:"wall_sw"
             });
             this.solidObjects[roomX+","+roomY].push({
                 x: (canvasWidth + doorSize) / 2,
@@ -80,7 +80,7 @@ SolidObjects.prototype.createPerimeterWalls = function(gs,map) {
                 width: (canvasWidth - doorSize) / 2,
                 height: wallWidth,
                 color: this.color,
-                type:"wall"
+                type:"wall_se"
             });
         
             if(this.isRoom(map,'west',roomX,roomY))
@@ -94,7 +94,7 @@ SolidObjects.prototype.createPerimeterWalls = function(gs,map) {
                 width: wallWidth,
                 height: (canvasHeight - (2 * wallWidth) - doorSize) / 2,
                 color: this.color,
-                type:"wall"
+                type:"wall_wn"
             });
             this.solidObjects[roomX+","+roomY].push({
                 x: 0,
@@ -102,7 +102,7 @@ SolidObjects.prototype.createPerimeterWalls = function(gs,map) {
                 width: wallWidth,
                 height: (canvasHeight - (2 * wallWidth) - doorSize) / 2,
                 color: this.color,
-                type:"wall"
+                type:"wall_ws"
             });
         
             if(this.isRoom(map,'east',roomX,roomY))
@@ -116,7 +116,7 @@ SolidObjects.prototype.createPerimeterWalls = function(gs,map) {
                 width: wallWidth,
                 height: (canvasHeight - (2 * wallWidth) - doorSize) / 2,
                 color: this.color,
-                type:"wall"
+                type:"wall_en"
             });
             this.solidObjects[roomX+","+roomY].push({
                 x: canvasWidth - wallWidth,
@@ -124,7 +124,7 @@ SolidObjects.prototype.createPerimeterWalls = function(gs,map) {
                 width: wallWidth,
                 height: (canvasHeight - (2 * wallWidth) - doorSize) / 2,
                 color: this.color,
-                type:"wall"
+                type:"wall_es"
             });
 
         }
@@ -322,6 +322,8 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
                 //TOO HIGH MAX AND TOO MANY LEVELS ARE SINGLE PATHS
                 if(blockCount > this.minNumberOfBlocks && blockCount < this.maxNumberOfBlocks)
                     isMazeFun = true;
+
+                //Add another check here for large open areas. if a room is a yin-yang, its not fun.
             }
 
             //Finally after all the pathing is done turn any leftover '■' into solidObjects to build the room
@@ -336,7 +338,7 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
                             width: global.map.getBlockSize(),
                             height: global.map.getBlockSize(),
                             color: this.color,
-                            type:"mazeWall"
+                            type:"block"
                         });
                     }
                 }
@@ -395,7 +397,7 @@ SolidObjects.prototype.createRandomPath = function(maze, from, to) {
         endX = (this.mazeWidth/2)-1;
     }
 
-    grid = JSON.parse(JSON.stringify(maze));    
+    grid = JSON.parse(JSON.stringify(maze));
 
     const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]]; // Up, Down, Left, Right
     const path = [];

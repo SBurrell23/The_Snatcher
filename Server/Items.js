@@ -16,7 +16,7 @@ Items.prototype.spawnItems = function(gs) {
     this.createItems('exitdoor','all', 2, 82,82); //2 exit doors ONLY!
 
     var numKeys = (gs.players.length - 1) * 5 + 5;
-    this.createItems('key','all', numKeys, 30,20);
+    this.createItems('key','all', numKeys, 21,14);
 
     const itemSize = global.map.getBlockSize() *  .8;
 

@@ -22,7 +22,7 @@ function MapBoard(numRunners) {
     this.totalRooms = Math.floor((this.rows*this.cols) * .65); //Should not be > then ~.85
     this.middleSize = 4; //Probably should stay as 4
 
-    this.blockSize = 48;//75 is what I chose to start, too small?
+    this.blockSize = 48;//
     //Room Types: 0 = empty, 1 = room, 2 = starting room, 3 = exit door
     this.availableRooms = 0;
 }

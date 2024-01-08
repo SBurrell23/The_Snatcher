@@ -48,6 +48,12 @@ var sc = { //Skill Check Variables
 }
 const scReset = JSON.stringify(sc);
 
+var sprites = {};
+
+function loadAssets() {
+    //sprites['background'] = loadImage('Assets/Sprites/background.png');
+}
+
 function connectWebSocket() {
     console.log("Attempting to connect to server...");
     serverState = null;
@@ -80,6 +86,8 @@ function connectWebSocket() {
         }, 1000); //On disconnect, try to reconnect every second
     });
 }
+
+loadAssets();
 connectWebSocket();
 
 function recievedServerMessage(message) {
@@ -96,7 +104,7 @@ function recievedServerMessage(message) {
         localState.doorInfo = m.doorInfo;
     }else if(m.type == "solidObjects"){
         localState.solidObjects = m.solidObjects;
-        console.log(localState.solidObjects);
+        //console.log(localState.solidObjects);
     }else if(m.type == "skillCheck"){
         if(localState.skillCheck == false){
             sc = JSON.parse(scReset);
@@ -174,7 +182,7 @@ function drawGameState(gs) {
         drawSkillCheck(ctx,getMe(gs));
 
         //This needs to come after objects that are under the spotlight and before things over it
-        //drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
+        drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
         
         drawMap(ctx,gs,localState.map);
         drawPlayerInventory(ctx, gs);
@@ -203,6 +211,7 @@ function drawGameInProgress(ctx) {
     ctx.textAlign = 'center';
     ctx.fillText('Game is currently in progress...', centerX, centerY);
 }
+
 function drawGameOver(ctx, gs) {
     localState.playerId = -1;
     var gameOverMessage = 'Game Over!';
@@ -357,12 +366,12 @@ function drawLobby(ctx, gs) {
     var centerX = ctx.canvas.width / 2;
     var centerY = (ctx.canvas.height / 2);
     ctx.beginPath();
-    ctx.arc(centerX, centerY - 80, 22, 0, 2 * Math.PI);
-    ctx.fillStyle = 'red';
+    ctx.arc(centerX, centerY - 80, 19, 0, 2 * Math.PI);
+    ctx.fillStyle = '#d90f0f';
     ctx.fill();
 
     // Draw snatcher's name
-    ctx.fillStyle = 'red';
+    ctx.fillStyle = '#d90f0f';
     ctx.font = 'bold 20px '+ font;
     ctx.textAlign = 'center'; ;
     ctx.fillText("Snatcher", centerX, centerY - 80 - 42);
@@ -376,7 +385,7 @@ function drawLobby(ctx, gs) {
 
     // Draw Players
     var spacing = 135;
-    var colors = ['blue', 'orange', 'magenta', '#33ff00','yellow'];
+    var colors = ['#0f2abf', 'orange', '#d616e0', '#51de14','#edda0c'];
     var names = ['george', 'vincent', 'rose', 'daniel', 'taylor'];
 
     for (var i = 0; i < 5; i++) {
@@ -384,7 +393,7 @@ function drawLobby(ctx, gs) {
         var y = centerY + 120;
 
         ctx.beginPath();
-        ctx.arc(x, y, 22, 0, 2 * Math.PI);
+        ctx.arc(x, y, 19, 0, 2 * Math.PI);
         ctx.fillStyle = colors[i];
         ctx.fill();
 
@@ -793,7 +802,7 @@ function drawPing(ctx){
     ctx.font = 'bold 15px Arial';
     ctx.textAlign = 'left';
 
-    if(localState.ping > 10000){
+    if(localState.ping > 1000000){
         ctx.fillText("Ping: ?", 20, canvas.height - 20);
         return;
     }

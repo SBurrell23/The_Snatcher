@@ -13,7 +13,7 @@ Items.prototype.spawnItems = function(gs) {
 
     //Name, number of items, width, height
     //We MUST spawn the exit doors 1st so we don't accidentally spawn another item in the room first
-    this.createItems('exitdoor','all', 2, 100,100); //2 exit doors ONLY!
+    this.createItems('exitdoor','all', 2, 82,82); //2 exit doors ONLY!
 
     var numKeys = (gs.players.length - 1) * 5 + 5;
     this.createItems('key','all', numKeys, 30,20);

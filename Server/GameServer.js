@@ -27,7 +27,7 @@ var playerObject ={
     hasKeys: [],
     hasItem: undefined,
     speed: "?",
-    radius:22,
+    radius: 16,
     spotlight: 375,
     isSnatcher: false,
     color: "#000000"

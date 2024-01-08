@@ -533,11 +533,7 @@ MapBoard.prototype.findOpenSpotInRoom = function(roomX, roomY) {
 
 MapBoard.prototype.getSolidObjectsInRoom = function(x,y) {
     var solidObjects = global.solidObjects.get();
-    var inRoom = [];
-    for (let solidObject of solidObjects)
-        if(solidObject.roomXY[0] == x && solidObject.roomXY[1] == y)
-            inRoom.push(solidObject);
-    return inRoom;
+    return solidObjects[x+","+y];
 }
 
 MapBoard.prototype.get = function() {

@@ -4,7 +4,7 @@ function Movement() {
     
 }
 
-Movement.prototype.movePlayer = function(gs,map, id, direction,solidObjects,deltaTime) {
+Movement.prototype.movePlayer = function(gs,map, id, direction,deltaTime) {
     var player = gs.players.find(player => player.id == id);
     if(player){
         let moveAmount = player.speed * deltaTime; // Units per second
@@ -14,7 +14,7 @@ Movement.prototype.movePlayer = function(gs,map, id, direction,solidObjects,delt
                 if((player.currPos.y - moveAmount >= 0)){
                     var destPosY = player.currPos.y - moveAmount;
                     var destPosX = player.currPos.x;
-                    if(!this.checkForWallCollision(player,destPosX,destPosY,solidObjects)){
+                    if(!this.checkForWallCollision(player,destPosX,destPosY)){
                         player.currPos.y = destPosY;
                         new Items().checkForItemCollision(player,false);
                         this.checkForPlayerCollision(gs,player);
@@ -27,7 +27,7 @@ Movement.prototype.movePlayer = function(gs,map, id, direction,solidObjects,delt
                 if((player.currPos.y + moveAmount <= global.canvasHeight)){
                     var destPosY = player.currPos.y + moveAmount;
                     var destPosX = player.currPos.x;
-                    if(!this.checkForWallCollision(player,destPosX,destPosY,solidObjects)){
+                    if(!this.checkForWallCollision(player,destPosX,destPosY)){
                         player.currPos.y = destPosY;
                         new Items().checkForItemCollision(player,false);
                         this.checkForPlayerCollision(gs,player);
@@ -40,7 +40,7 @@ Movement.prototype.movePlayer = function(gs,map, id, direction,solidObjects,delt
                 if((player.currPos.x - moveAmount >= 0)){
                     var destPosX = player.currPos.x - moveAmount;
                     var destPosY = player.currPos.y;
-                    if(!this.checkForWallCollision(player,destPosX,destPosY,solidObjects)){
+                    if(!this.checkForWallCollision(player,destPosX,destPosY)){
                         player.currPos.x = destPosX;
                         new Items().checkForItemCollision(player,false);
                         this.checkForPlayerCollision(gs,player);
@@ -53,7 +53,7 @@ Movement.prototype.movePlayer = function(gs,map, id, direction,solidObjects,delt
                 if((player.currPos.x + moveAmount <= global.canvasWidth)){
                     var destPosX = player.currPos.x + moveAmount
                     var destPosY = player.currPos.y;
-                    if(!this.checkForWallCollision(player,destPosX,destPosY,solidObjects)){
+                    if(!this.checkForWallCollision(player,destPosX,destPosY)){
                         player.currPos.x = destPosX;
                         new Items().checkForItemCollision(player,false);
                         this.checkForPlayerCollision(gs,player);
@@ -104,7 +104,7 @@ Movement.prototype.movePlayerToNewRoom = function(gs,player,map, newXRoom, newYR
     }
 }
 
-Movement.prototype.checkForWallCollision = function(player, destPosX, destPosY, solidObjects) {
+Movement.prototype.checkForWallCollision = function(player, destPosX, destPosY) {
     
     // Calculate the boundaries of the player's circle
     var playerLeft = destPosX - player.radius;
@@ -113,12 +113,9 @@ Movement.prototype.checkForWallCollision = function(player, destPosX, destPosY, 
     var playerBottom = destPosY + player.radius;
 
     // Check for collision with each solid object
+    var solidObjects = global.map.getSolidObjectsInRoom(player.currRoom.x, player.currRoom.y);
     for (var i = 0; i < solidObjects.length; i++) {
         var object = solidObjects[i];
-
-        if (object.roomXY[0] != player.currRoom.x || object.roomXY[1] != player.currRoom.y) {
-            continue; // Skip solid objects in other rooms
-        }
 
         // Calculate the boundaries of the solid object's rectangle
         var objectLeft = object.x;

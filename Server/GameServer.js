@@ -12,6 +12,7 @@ global.canvasHeight = 768;
 var gs = {
     type: "gs",
     state: 'lobby',
+    endReason: '',
     players:[]
 };
 
@@ -51,7 +52,7 @@ global.map = null // This is sent only at the start of the game since it's HUGE
 global.solidObjects = null; // This is sent only at the start of the game since it's HUGE
 global.items = []; //This is sent on demand dependent on game actions since it's HUGE
 
-var defaultGameState = JSON.parse(JSON.stringify(gs));
+var defaultGameState = JSON.stringify(gs);
 
 const clients = new Map();
 const movementQueue = new Map();
@@ -86,6 +87,7 @@ wss.on('connection', (ws) => {
             console.log("Player left " + message.id);
             gs.players = gs.players.filter(player => player.id !== message.id);
         }
+        //This needs to be removed once game is live
         if(message.type == "generateMap"){
             startGame();
         }
@@ -120,20 +122,21 @@ wss.on('connection', (ws) => {
         const disconnectedUserId = clients.get(ws);
         clients.delete(ws);
 
-        // Remove the player from the gs.players array with the id of the disconnected user
-        gs.players = gs.players.filter(player => player.id !== disconnectedUserId);
-        
+        //Need a final check to see if the snatcher is the only one left
         //If nobody is left or the snatcher leaves, reset the game
         if(clients.size === 0) {
+            gs.players = gs.players.filter(player => player.id !== disconnectedUserId);
             console.log('All clients disconnected...');
             clearAllTimeouts();
             resetGameState();
         }
-        if(isSnatcher(disconnectedUserId)){
+        else if(isSnatcher(disconnectedUserId)){
+            gs.players = gs.players.filter(player => player.id !== disconnectedUserId);
+            gs.players.forEach(player => {
+                player.isAlive = false;
+            });
             console.log('The snatcher has disconnected...');
-            global.checkForGameOver('ragequit');
-            clearAllTimeouts();
-            resetGameState();
+            setGameOver('ragequit');
         }
     });
 
@@ -172,11 +175,11 @@ function startGame(){
 global.checkForGameOver = function(lastAction){
     var alivePlayers = gs.players.filter(player => !player.isSnatcher && player.isAlive);
     if (alivePlayers.length == 0 && lastAction == 'snatched') {
-        setGameOver('escaped');
+        setGameOver('snatched');
         console.log("All players have been snatched! GAME OVER!");
     }
     else if (alivePlayers.length == 0 && lastAction == 'escaped') {
-        setGameOver('snatched');
+        setGameOver('escaped');
         console.log("All still alive players have escaped! GAME OVER!");
     }
 }
@@ -229,9 +232,28 @@ global.sendSnatcherDoorInfo = function(doorInfoObject){
 
 }
 
-function setGameOver(whyIsGameOver){
-    gs.state = 'gameOver';
+let timeoutRemainingTime = 10000; // Initial timeout duration in milliseconds
+function setGameOver(whyIsGameOver) {
+    gs.state = 'gameover';
+    gs.endReason = whyIsGameOver + ":" + (timeoutRemainingTime / 1000);
     sendAllClients(gs);
+
+    // Start the timeout and track remaining time
+    createTimeout(() => {
+        clearAllTimeouts();
+        resetGameState();
+    }, timeoutRemainingTime);
+
+    // Update remaining time every second
+    const interval = setInterval(() => {
+        timeoutRemainingTime -= 1000;
+        gs.endReason = whyIsGameOver + ":" + (timeoutRemainingTime / 1000);
+        sendAllClients(gs);
+        if (timeoutRemainingTime <= 0) {
+            timeoutRemainingTime = 10000;
+            clearInterval(interval);
+        }
+    }, 1000);
 }
 
 function setSnatcher(){
@@ -240,7 +262,7 @@ function setSnatcher(){
 
     
     var snatcherSpeedMod = 1.12; // :)
-    var snatcher = gs.players[0]; //First player is the snatcher
+    var snatcher = gs.players.find(player => player.name === 'snatcher');
 
     snatcher.isSnatcher = true;
     snatcher.spotlight = JSON.parse(global.killerBaseSpotlight);
@@ -272,7 +294,10 @@ function playerTaken(name){
 }
 
 function resetGameState(){
-    gs = JSON.parse(JSON.stringify(defaultGameState));
+    clearAllTimeouts();
+    gs = JSON.parse(defaultGameState);
+    clients.clear();
+    sendAllClients(gs);
 }
 
 function createTimeout(fn, delay) {
@@ -305,7 +330,7 @@ function sendClient(id,object){
 
 function updateMovements(deltaTime){
     movementQueue.forEach((dir, id) => {
-        new Movement().movePlayer(gs,global.map.get(),id, dir,global.solidObjects.get(),deltaTime);
+        new Movement().movePlayer(gs,global.map.get(),id, dir,deltaTime);
     });
     movementQueue.clear();
 }

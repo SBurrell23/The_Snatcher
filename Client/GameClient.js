@@ -2,6 +2,8 @@ var socket = null;
 var reConnectInterval = null;
 var pingInterval = null;
 var keys = {};
+var font = "Metal Mania";
+var font2 = "Jolly Lodger";
 
 var serverState = null;
 var localState = {
@@ -56,7 +58,7 @@ function connectWebSocket() {
 
     //wss://the-snatcher.onrender.com
     //ws://localhost:8080
-    socket = new WebSocket('wss://the-snatcher.onrender.com');  
+    socket = new WebSocket('ws://localhost:8080');  
     socket.addEventListener('open', function () {
         console.log('Server connection established!');
         $("#offlineMessage").css("display", "none");
@@ -85,22 +87,17 @@ function recievedServerMessage(message) {
 
     if(m.type == "playerId"){
         localState.playerId = m.id
-    }
-    else if(m.type == "map"){
+    }else if(m.type == "map"){
         localState.map = m.map;
         roomsIveBeenIn = [];
-    }
-    else if(m.type == "items"){
+    }else if(m.type == "items"){
         localState.items = m.items;
-    }
-    else if(m.type == "doorInfo"){
+    }else if(m.type == "doorInfo"){
         localState.doorInfo = m.doorInfo;
-    }
-    else if(m.type == "solidObjects"){
+    }else if(m.type == "solidObjects"){
         localState.solidObjects = m.solidObjects;
-        //console.log(localState.solidObjects);
-    }
-    else if(m.type == "skillCheck"){
+        console.log(localState.solidObjects);
+    }else if(m.type == "skillCheck"){
         if(localState.skillCheck == false){
             sc = JSON.parse(scReset);
             sc.successAreaStart = Math.floor(Math.random() * 121) - 60;
@@ -134,38 +131,11 @@ function recievedServerMessage(message) {
         localState.ping = Date.now() - localState.ping;
     }else if(m.type == "gs"){
         serverState = m;
-        updateLobby(serverState);
-        updateInput(serverState,localState.playerId);
     }else if(m.type == "loadingGame"){
         console.log("Loading game...");
         isGameLoading = true;
     }
 
-}
-
-function updateLobby(gs) {
-    var playerQueue = $('#playerQueue tbody');
-    playerQueue.empty(); // Clear the table
-
-    for (var i = 0; i < gs.players.length; i++) {
-        var player = gs.players[i];
-        var row = $('<tr></tr>').appendTo(playerQueue);
-        $('<td></td>').text(player.name).appendTo(row);
-        $('<td></td>').text(player.points).appendTo(row);
-    }
-}
-
-function updateInput(gs, id) {
-    var input = $('#playerNameInput');
-    var joinButton = $('#joinGameButton');
-
-    if (gs.players.some(player => player.id === id)) {
-        // input.prop('disabled', true);
-        // joinButton.prop('disabled', true);
-    } else {
-        input.prop('disabled', false);
-        joinButton.prop('disabled', false);
-    }
 }
 
 function sendPing() {
@@ -189,7 +159,8 @@ function drawGameState(gs) {
     if(gs.state == "lobby")
         drawLobby(ctx,gs);
     //Draw the game
-    else if(gs.state == "playing" && getMe(gs).currRoom != undefined){
+    else if(gs.state == "playing" && getMe(gs).isAlive){
+        isGameLoading = false;
         var currentRoomX = getMe(gs).currRoom.x;
         var currentRoomY = getMe(gs).currRoom.y;
     
@@ -203,14 +174,17 @@ function drawGameState(gs) {
         drawSkillCheck(ctx,getMe(gs));
 
         //This needs to come after objects that are under the spotlight and before things over it
-        drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
+        //drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
         
         drawMap(ctx,gs,localState.map);
         drawPlayerInventory(ctx, gs);
 
         drawPing(ctx);
     }else{
-        drawGameInProgress(ctx);
+        if(gs.state == "playing")
+            drawGameInProgress(ctx);
+        else if(gs.state == "gameover")
+            drawGameOver(ctx,gs);
     }
 
 }   
@@ -219,10 +193,44 @@ function drawGameInProgress(ctx) {
     var canvas = document.getElementById('canvas');
     var centerX = canvas.width / 2;
     var centerY = canvas.height / 2;
-    ctx.font = '40px Arial';
+
+    // Fill the canvas with black
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+    ctx.font = '40px '+font2;
     ctx.fillStyle = 'white';
     ctx.textAlign = 'center';
     ctx.fillText('Game is currently in progress...', centerX, centerY);
+}
+function drawGameOver(ctx, gs) {
+    localState.playerId = -1;
+    var gameOverMessage = 'Game Over!';
+    var reason = gs.endReason.split(":")[0];
+    var timeBeforeReset = gs.endReason.split(":")[1];
+    var subText = "Returning to lobby in " + timeBeforeReset + "..."
+
+    if (reason == "snatched") {
+        gameOverMessage = 'The Snatcher has snatched all players!';
+    } else if (reason == "escaped") {
+        gameOverMessage = 'All players have escaped and won!';
+    } else if (reason == "ragequit") {
+        gameOverMessage = 'The Snatcher has rage quit!';
+    }
+
+    // Fill the canvas with black
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+    var canvas = document.getElementById('canvas');
+    var centerX = canvas.width / 2;
+    var centerY = canvas.height / 2;
+    ctx.font = '65px '+ font;
+    ctx.fillStyle = 'white';
+    ctx.textAlign = 'center';
+    ctx.fillText(gameOverMessage, centerX, centerY - 90);
+    ctx.font = '35px '+ font;
+    ctx.fillText(subText, centerX, centerY + 50);
 }
 
 function drawMap(ctx, gs, map) {
@@ -340,7 +348,7 @@ function drawLobby(ctx, gs) {
 
     // Draw red text in the center
     ctx.fillStyle = '#FF0000';
-    ctx.font = 'bold 55px Nunito';
+    ctx.font = 'bold 85px ' + font;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('THE SNATCHER', ctx.canvas.width / 2, (ctx.canvas.height / 2) - 245);
@@ -353,16 +361,22 @@ function drawLobby(ctx, gs) {
     ctx.fillStyle = 'red';
     ctx.fill();
 
+    // Draw snatcher's name
+    ctx.fillStyle = 'red';
+    ctx.font = 'bold 20px '+ font;
+    ctx.textAlign = 'center'; ;
+    ctx.fillText("Snatcher", centerX, centerY - 80 - 42);
+
     if(!isPlayerSpotTaken(gs, "snatcher") && !alreadyConnected(gs, localState.playerId))
-        drawJoinLeaveButton(ctx, centerX, centerY - 80 + 40, "JOIN", 'green', "snatcher", "red");
+        drawJoinLeaveButton(ctx, centerX, centerY - 80 + 45, "JOIN", 'green', "snatcher", "red");
     else if(isMe("snatcher"))
-        drawJoinLeaveButton(ctx, centerX, centerY - 80 + 40, "LEAVE", 'red', "snatcher", "red");
+        drawJoinLeaveButton(ctx, centerX, centerY - 80 + 45, "LEAVE", 'red', "snatcher", "red");
     else
         joinButtons['snatcher'] = {};
 
     // Draw Players
     var spacing = 135;
-    var colors = ['blue', 'orange', 'magenta', 'green','yellow'];
+    var colors = ['blue', 'orange', 'magenta', '#33ff00','yellow'];
     var names = ['george', 'vincent', 'rose', 'daniel', 'taylor'];
 
     for (var i = 0; i < 5; i++) {
@@ -374,10 +388,17 @@ function drawLobby(ctx, gs) {
         ctx.fillStyle = colors[i];
         ctx.fill();
 
+        // Draw player's name
+        ctx.fillStyle = colors[i];
+        ctx.font = '20px '+ font;
+        ctx.textAlign = 'center'; ;
+        ctx.fillText(names[i].charAt(0).toUpperCase() + names[i].slice(1), x, y - 42);
+
+
         if(!isPlayerSpotTaken(gs, names[i]) && !alreadyConnected(gs, localState.playerId))
-            drawJoinLeaveButton(ctx, x, y + 40, "JOIN",'green', names[i], colors[i]);
+            drawJoinLeaveButton(ctx, x, y + 45, "JOIN",'green', names[i], colors[i]);
         else if(isMe(names[i]))
-            drawJoinLeaveButton(ctx, x, y + 40, "LEAVE",'red', names[i], colors[i]);
+            drawJoinLeaveButton(ctx, x, y + 45, "LEAVE",'red', names[i], colors[i]);
         else
             joinButtons[names[i]] = {};
     }
@@ -412,7 +433,7 @@ function drawStartGameButton(ctx, x, y, text, color, width, height) {
     ctx.fillRect(x - (width / 2), y - (height / 2), width, height);
     
     ctx.fillStyle = 'white';
-    ctx.font = '20px Nunito';
+    ctx.font = '32px '+ font2;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(text, x, y+2);
@@ -429,20 +450,25 @@ function drawJoinLeaveButton(ctx, x, y, text, color, id, playerColor) {
     if(isGameLoading)
         return;
 
+    var width = 80;
+    var height = 30;
+    var x = x - 40;
+    var y = y - 10;
+
     ctx.fillStyle = color;
-    ctx.fillRect(x - 30, y - 10, 60, 30);
+    ctx.fillRect(x, y, width, height);
 
     ctx.fillStyle = 'white';
-    ctx.font = '14px arial';
+    ctx.font = '20px '+font2;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(text, x, y+6);
+    ctx.fillText(text, x + width/2, 1+y+height/2);
 
     joinButtons[id] = {};
-    joinButtons[id].x = x - 30;
-    joinButtons[id].y = y - 10;
-    joinButtons[id].width = 60;
-    joinButtons[id].height = 30;
+    joinButtons[id].x = x;
+    joinButtons[id].y = y;
+    joinButtons[id].width = width;
+    joinButtons[id].height = height;
     joinButtons[id].playerColor = playerColor;
 }
 
@@ -606,28 +632,28 @@ function drawPlayerInventory(ctx, gs) {
     ctx.fillRect(ctx.canvas.width  - 160, 20, 140, 140);
 
     // Draw INVENTORY text
-    ctx.font = '18px Arial';
+    ctx.font = '26px '+font2;
     ctx.fillStyle = 'black';
     ctx.textAlign = 'center';
     ctx.fillText("INVENTORY", ctx.canvas.width - 90, 40);
 
     if (me.hasKeys.length > 0) {
         for (let i = 1; i <= me.hasKeys.length; i++) {
-            ctx.font = '16px Arial';
+            ctx.font = '20px '+font2;
             ctx.fillStyle = colors.key;
             ctx.textAlign = 'center';
-            ctx.fillText("KEY#" + i, ctx.canvas.width - 90, 45 + (i * 25));
+            ctx.fillText("KEY #" + i, ctx.canvas.width - 90, 45 + (i * 25));
         }
     }
     if (me.hasItem) {
-        ctx.font = '14px Arial';
+        ctx.font = '20px '+font2;
         ctx.textAlign = 'center';
         ctx.fillStyle = 'magenta';
         ctx.fillText(me.hasItem.type.toUpperCase(), ctx.canvas.width - 90, 130);
     }
 }
 
-const lerpTime = 0.175; // Time taken to interpolate (adjust as needed)
+const lerpTime = 0.165; // Time taken to interpolate higher is smooother/less responsive
 let playerInterpolations = {}; // Store interpolation data for each player
 
 function updatePlayerInterpolation(player) {
@@ -657,7 +683,6 @@ function updatePlayerInterpolation(player) {
 function interpolatePosition(start, end, t) {
     return start * (1 - t) + end * t;
 }
-
 
 function drawPlayers(ctx, gs, currentRoomX, currentRoomY) {
     for (let i = 0, len = gs.players.length; i < len; i++) {
@@ -710,24 +735,24 @@ function drawItems(ctx, currentRoomX, currentRoomY) {
             ) {
             if(item.type == 'key'){
                 ctx.fillStyle = colors.key;
-                ctx.font = '18px Arial';
+                ctx.font = '22px '+font2;
                 ctx.fillRect(item.currPos.x, item.currPos.y, item.width, item.height);
             }
             else if(item.type == 'exitdoor'){
                 ctx.fillStyle = '#522a00';
                 ctx.fillRect(item.currPos.x, item.currPos.y, item.width, item.height);
                 ctx.fillStyle = colors.key
-                ctx.font = '18px Arial';
+                ctx.font = '22px '+font2;
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
-                ctx.fillText("("+item.specialCount+" / "+item.specialCount2+")", item.currPos.x + Math.ceil(item.width/2), item.currPos.y + Math.ceil(item.height/2));
+                ctx.fillText("( "+item.specialCount+" / "+item.specialCount2+" )", item.currPos.x + Math.ceil(item.width/2), item.currPos.y + Math.ceil(item.height/2));
             }
             else{
                 if(item.inChest){
                     ctx.fillStyle = '#4F3100';
                     ctx.fillRect(item.currPos.x, item.currPos.y, item.width, item.height);
-                    ctx.fillStyle = 'magenta';
-                    ctx.font = '12px Arial';
+                    ctx.fillStyle = 'black';
+                    ctx.font = '20px '+font2;
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
                     ctx.fillText("CHEST", item.currPos.x + item.width / 2, item.currPos.y + item.height / 2);
@@ -735,7 +760,7 @@ function drawItems(ctx, currentRoomX, currentRoomY) {
                     ctx.fillStyle = 'magenta';
                     ctx.fillRect(item.currPos.x, item.currPos.y, item.width, item.height);
                     ctx.fillStyle = 'black';
-                    ctx.font = '14px Arial';
+                    ctx.font = '14px '+font2;
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
                     ctx.fillText(item.type.toUpperCase(), item.currPos.x + item.width / 2, item.currPos.y + item.height / 2);
@@ -748,25 +773,21 @@ function drawItems(ctx, currentRoomX, currentRoomY) {
 function drawSolidObjects(ctx,currentRoomX, currentRoomY) {
     const solidObjects = localState.solidObjects;
     if (solidObjects) {
-        for (let i = 0; i < solidObjects.length; i++) {
-            const solidObject = solidObjects[i];
-            if(
-                solidObject.roomXY[0] == currentRoomX && 
-                solidObject.roomXY[1] == currentRoomY
-                ){
-                ctx.fillStyle = solidObject.color;
-                ctx.fillRect(solidObject.x, solidObject.y, solidObject.width, solidObject.height);
-            }
+        var roomObjects = solidObjects[currentRoomX+","+currentRoomY];
+        for (let i = 0; i < roomObjects.length; i++) {
+            const solidObject = roomObjects[i];
+            ctx.fillStyle = solidObject.color;
+            ctx.fillRect(solidObject.x, solidObject.y, solidObject.width, solidObject.height);
         }
     }
 }
 
 function drawPing(ctx){
-    var player = getMe(serverState);
-    ctx.fillStyle = 'white';
-    ctx.font = '15px Arial';
-    ctx.textAlign = 'left';
-    ctx.fillText(`X: ${player.currRoom.x}, Y: ${player.currRoom.y}`, 20, canvas.height-50);
+    // var player = getMe(serverState);
+    // ctx.fillStyle = 'white';
+    // ctx.font = '15px Arial';
+    // ctx.textAlign = 'left';
+    // ctx.fillText(`X: ${player.currRoom.x}, Y: ${player.currRoom.y}`, 20, canvas.height-50);
 
     ctx.fillStyle = '#1cfc03';
     ctx.font = 'bold 15px Arial';

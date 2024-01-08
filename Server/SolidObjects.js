@@ -1,6 +1,6 @@
 
 function SolidObjects() {
-    this.solidObjects = [];
+    this.solidObjects = {};
     this.color = "#141633";
     this.mazeHeight = (global.canvasHeight /global.map.getBlockSize());
     this.mazeWidth = (global.canvasWidth / global.map.getBlockSize());
@@ -31,15 +31,19 @@ SolidObjects.prototype.createPerimeterWalls = function(gs,map) {
             if(roomType == 0)
                 continue;
 
+            
+
             const roomX = j;
             const roomY = i;
+
+            this.solidObjects[roomX+","+roomY] = [];
 
             if(this.isRoom(map,'north',roomX,roomY))
                 doorSize = doorWidth;
             else
                 doorSize = 0;
             // Top walls
-            this.solidObjects.push({
+            this.solidObjects[roomX+","+roomY].push({
                 x: 0,
                 y: 0,
                 width: (canvasWidth - doorSize) / 2,
@@ -48,7 +52,7 @@ SolidObjects.prototype.createPerimeterWalls = function(gs,map) {
                 roomXY: [roomX, roomY],
                 type:"wall"
             });
-            this.solidObjects.push({
+            this.solidObjects[roomX+","+roomY].push({
                 x: (canvasWidth  + doorSize) / 2,
                 y: 0,
                 width: (canvasWidth- doorSize) / 2,
@@ -64,7 +68,7 @@ SolidObjects.prototype.createPerimeterWalls = function(gs,map) {
                 doorSize = 0;
 
             // Bottom walls
-            this.solidObjects.push({
+            this.solidObjects[roomX+","+roomY].push({
                 x: 0,
                 y: canvasHeight - wallWidth,
                 width: (canvasWidth - doorSize) / 2,
@@ -73,7 +77,7 @@ SolidObjects.prototype.createPerimeterWalls = function(gs,map) {
                 roomXY: [roomX, roomY],
                 type:"wall"
             });
-            this.solidObjects.push({
+            this.solidObjects[roomX+","+roomY].push({
                 x: (canvasWidth + doorSize) / 2,
                 y: canvasHeight - wallWidth,
                 width: (canvasWidth - doorSize) / 2,
@@ -88,7 +92,7 @@ SolidObjects.prototype.createPerimeterWalls = function(gs,map) {
             else
                 doorSize = 0;
             // Left walls
-            this.solidObjects.push({
+            this.solidObjects[roomX+","+roomY].push({
                 x: 0,
                 y: wallWidth,
                 width: wallWidth,
@@ -97,7 +101,7 @@ SolidObjects.prototype.createPerimeterWalls = function(gs,map) {
                 roomXY: [roomX, roomY],
                 type:"wall"
             });
-            this.solidObjects.push({
+            this.solidObjects[roomX+","+roomY].push({
                 x: 0,
                 y: (canvasHeight + doorSize) / 2,
                 width: wallWidth,
@@ -112,7 +116,7 @@ SolidObjects.prototype.createPerimeterWalls = function(gs,map) {
             else
                 doorSize = 0;
             // Right walls
-            this.solidObjects.push({
+            this.solidObjects[roomX+","+roomY].push({
                 x: canvasWidth - wallWidth,
                 y: wallWidth,
                 width: wallWidth,
@@ -121,7 +125,7 @@ SolidObjects.prototype.createPerimeterWalls = function(gs,map) {
                 roomXY: [roomX, roomY],
                 type:"wall"
             });
-            this.solidObjects.push({
+            this.solidObjects[roomX+","+roomY].push({
                 x: canvasWidth - wallWidth,
                 y: (canvasHeight + doorSize) / 2,
                 width: wallWidth,
@@ -334,7 +338,7 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
                     const value = maze[k][l];
                     if (value == '■') {
                         //console.log("Creating maze wall at " + l + ", " + k);
-                        this.solidObjects.push({
+                        this.solidObjects[rX+","+rY].push({
                             x: (l * global.map.getBlockSize()),
                             y: (k * global.map.getBlockSize()),
                             width: global.map.getBlockSize(),

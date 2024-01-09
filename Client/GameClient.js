@@ -527,17 +527,18 @@ function drawSnatcherDoorInfo(ctx, gs, doorInfo) {
 }
 
 function drawBackground(ctx) {
-    const canvasWidth = ctx.canvas.width;
-    const canvasHeight = ctx.canvas.height;
-    const spriteWidth = 48;
-    const spriteHeight = 48;
 
-    ctx.fillStyle = '#98ABC7';
-    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    const blockSize = 48;
 
-    for (let x = 0; x < canvasWidth; x += spriteWidth) {
-        for (let y = 0; y < canvasHeight; y += spriteHeight) {
-            drawSprite(ctx, 'ground', x, y, spriteWidth, spriteHeight);
+    var groundPattern = [
+        ['ground1', 'ground3'],
+        ['ground2', 'ground4']
+    ];
+
+    for (let x = 0; x < (ctx.canvas.width/blockSize); x ++) {
+        for (let y = 0; y < (ctx.canvas.height/blockSize); y ++) {
+            let spriteName = groundPattern[x % 2][y % 2];
+            drawSprite(ctx, spriteName, x * blockSize, y * blockSize, blockSize, blockSize);
         }
     }
 }
@@ -694,6 +695,9 @@ function drawSolidObjects(ctx,currentRoomX, currentRoomY) {
             if(solidObject.type == "block"){
                 //var ranRock = 'rock' + seededRandom(serverState.seed + i,5,5).toString();
                 drawSprite(ctx, 'block', solidObject.x, solidObject.y, solidObject.width, solidObject.height);
+            }
+            else if(solidObject.type == "gate"){
+                drawSprite(ctx, 'gate', solidObject.x, solidObject.y, solidObject.width, solidObject.height);
             }
 
         }

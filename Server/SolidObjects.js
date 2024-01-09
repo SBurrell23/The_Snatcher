@@ -229,13 +229,17 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
                     const value = maze[k][l];
                     if (value == '■') {
                         //console.log("Creating maze wall at " + l + ", " + k);
+                        var type = "block";
+                        if(k == 0 || k == maze.length-1 || l == 0 || l == maze[k].length-1)
+                            type = "gate";
+
                         this.solidObjects[rX+","+rY].push({
                             x: (l * global.map.getBlockSize()),
                             y: (k * global.map.getBlockSize()),
                             width: global.map.getBlockSize(),
                             height: global.map.getBlockSize(),
                             color: this.color,
-                            type:"block"
+                            type:type
                         });
                     }
                 }

@@ -1,38 +1,31 @@
 var crypt = new Image();
-crypt.src = 'Assets/Tilesets/Crypt.png';
+crypt.src = 'Assets/Tilesets/MASTER_TILESET.png';
 
-var jungle = new Image();
-jungle.src = 'Assets/Tilesets/RA_Jungle.png';
 
 
 function loadAssets(){
-    loadCryptAssets(crypt);
-    //loadJungleAssets(jungle);
+    loadMasterTileset(crypt);
 }
 
-var tileSize = 48;
 
-function loadCryptAssets(ts) {
-    sprites['ground'] = getTileSourceRect(ts,6, 0);
-    sprites['block'] = getTileSourceRect(ts,6, 1);
 
+function loadMasterTileset(ts) {
+    sprites['ground1'] = getTileSourceRect(ts,8, 0);
+    sprites['ground2'] = getTileSourceRect(ts,9, 0);
+    sprites['ground3'] = getTileSourceRect(ts,8, 1);
+    sprites['ground4'] = getTileSourceRect(ts,9,1);
+
+    sprites['block'] = getTileSourceRect(ts,24, 0);
+    sprites['gate'] = getTileSourceRect(ts,22, 8);
+
+    sprites['chest'] = getTileSourceRect(ts,6, 1);
+    sprites['key'] = getTileSourceRect(ts,1, 0);
 
 }
 
-function loadJungleAssets(ts) {
-    sprites['ground1'] = getTileSourceRect(ts,6, 34);
-
-    sprites['rock1'] = getTileSourceRect(ts,23, 31);
-    sprites['rock2'] = getTileSourceRect(ts,24 , 31);
-    sprites['rock3'] = getTileSourceRect(ts,25, 31);
-    sprites['rock4'] = getTileSourceRect(ts,26 , 31);
-    sprites['rock5'] = getTileSourceRect(ts,23, 32);
-    sprites['rock6'] = getTileSourceRect(ts,24, 32);
-    sprites['rock7'] = getTileSourceRect(ts,25, 32);
-    sprites['rock8'] = getTileSourceRect(ts,26, 32);
-}
 
 function getTileSourceRect(tileset, tileX, tileY) {
+    var tileSize = 48;
     return {
         tileset: tileset,
         x: tileX * tileSize,

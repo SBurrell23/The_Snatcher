@@ -1,34 +1,45 @@
-var tilesetImage = new Image();
-tilesetImage.src = 'Assets/Tilesets/Graveyard.png';
+var crypt = new Image();
+crypt.src = 'Assets/Tilesets/Crypt.png';
 
-var tileSize = 48; // The size of a tile in the tileset
+var jungle = new Image();
+jungle.src = 'Assets/Tilesets/RA_Jungle.png';
 
-function getTileSourceRect(tileX, tileY) {
+
+function loadAssets(){
+    loadCryptAssets(crypt);
+    //loadJungleAssets(jungle);
+}
+
+var tileSize = 48;
+
+function loadCryptAssets(ts) {
+    sprites['ground'] = getTileSourceRect(ts,6, 0);
+    sprites['block'] = getTileSourceRect(ts,6, 1);
+
+
+}
+
+function loadJungleAssets(ts) {
+    sprites['ground1'] = getTileSourceRect(ts,6, 34);
+
+    sprites['rock1'] = getTileSourceRect(ts,23, 31);
+    sprites['rock2'] = getTileSourceRect(ts,24 , 31);
+    sprites['rock3'] = getTileSourceRect(ts,25, 31);
+    sprites['rock4'] = getTileSourceRect(ts,26 , 31);
+    sprites['rock5'] = getTileSourceRect(ts,23, 32);
+    sprites['rock6'] = getTileSourceRect(ts,24, 32);
+    sprites['rock7'] = getTileSourceRect(ts,25, 32);
+    sprites['rock8'] = getTileSourceRect(ts,26, 32);
+}
+
+function getTileSourceRect(tileset, tileX, tileY) {
     return {
+        tileset: tileset,
         x: tileX * tileSize,
         y: tileY * tileSize,
         width: tileSize,
         height: tileSize
     };
-}
-
-//sprites is located in GameClient.js
-function loadAssets() {
-    sprites['ground1'] = getTileSourceRect(0, 3);
-
-    sprites['rock1'] = getTileSourceRect(6, 6);
-    sprites['rock2'] = getTileSourceRect(6, 5);
-    sprites['rock3'] = getTileSourceRect(7, 6);
-    sprites['rock4'] = getTileSourceRect(7, 5);
-    sprites['rock5'] = getTileSourceRect(8, 6);
-    sprites['rock6'] = getTileSourceRect(8, 5);
-    sprites['rock7'] = getTileSourceRect(9, 6);
-    sprites['rock8'] = getTileSourceRect(9, 5);
-    sprites['rock9'] = getTileSourceRect(10, 6);
-    sprites['rock10']= getTileSourceRect(10, 5);
-
-    console.log(sprites);
-    console.log('Assets loaded');
 }
 
 function drawSprite(ctx, spriteName, x, y, width, height) {
@@ -37,7 +48,7 @@ function drawSprite(ctx, spriteName, x, y, width, height) {
         throw 'Sprite "' + spriteName + '" does not exist';
     
     ctx.drawImage(
-        tilesetImage,
+        sprite.tileset,
         sprite.x,
         sprite.y,
         sprite.width,

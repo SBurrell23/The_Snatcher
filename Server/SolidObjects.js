@@ -1,134 +1,17 @@
 
 function SolidObjects() {
     this.solidObjects = {};
-    this.color = "#141633";
+    this.color = "#2d211b";
     this.mazeHeight = (global.canvasHeight /global.map.getBlockSize());
     this.mazeWidth = (global.canvasWidth / global.map.getBlockSize());
     //The canvas and block size must divide into an EVEN number
 
-    this.minNumberOfBlocks = 75;
-    this.maxNumberOfBlocks = 150;
+    this.minNumberOfBlocks = 100;
+    this.maxNumberOfBlocks = 250;
 }
 
 SolidObjects.prototype.get = function() {
     return this.solidObjects;
-}
-
-SolidObjects.prototype.createPerimeterWalls = function(gs,map) {
-    console.log("Creating perimeter walls...");
-    const canvasWidth = global.canvasWidth;
-    const canvasHeight = global.canvasHeight;
-    const wallWidth = 8;
-    const doorWidth = global.map.getBlockSize()*2;
-
-    var doorSize = 0;
-
-    for (let i = 0; i < map.length; i++) {
-        for (let j = 0; j < map[i].length; j++) {
-
-            //Don't bother creating objects in empty rooms.
-            const roomType = map[i][j];
-            if(roomType == 0)
-                continue;
-
-            
-
-            const roomX = j;
-            const roomY = i;
-
-            this.solidObjects[roomX+","+roomY] = [];
-
-            if(this.isRoom(map,'north',roomX,roomY))
-                doorSize = doorWidth;
-            else
-                doorSize = 0;
-            // Top walls
-            this.solidObjects[roomX+","+roomY].push({
-                x: 0,
-                y: 0,
-                width: (canvasWidth - doorSize) / 2,
-                height: wallWidth,
-                color: this.color,
-                type:"wall_nw"
-            });
-            this.solidObjects[roomX+","+roomY].push({
-                x: (canvasWidth  + doorSize) / 2,
-                y: 0,
-                width: (canvasWidth- doorSize) / 2,
-                height: wallWidth,
-                color: this.color,
-                type:"wall_ne"
-            });
-        
-            if(this.isRoom(map,'south',roomX,roomY))
-                doorSize = doorWidth;
-            else
-                doorSize = 0;
-
-            // Bottom walls
-            this.solidObjects[roomX+","+roomY].push({
-                x: 0,
-                y: canvasHeight - wallWidth,
-                width: (canvasWidth - doorSize) / 2,
-                height: wallWidth,
-                color: this.color,
-                type:"wall_sw"
-            });
-            this.solidObjects[roomX+","+roomY].push({
-                x: (canvasWidth + doorSize) / 2,
-                y: canvasHeight - wallWidth,
-                width: (canvasWidth - doorSize) / 2,
-                height: wallWidth,
-                color: this.color,
-                type:"wall_se"
-            });
-        
-            if(this.isRoom(map,'west',roomX,roomY))
-                doorSize = doorWidth;
-            else
-                doorSize = 0;
-            // Left walls
-            this.solidObjects[roomX+","+roomY].push({
-                x: 0,
-                y: wallWidth,
-                width: wallWidth,
-                height: (canvasHeight - (2 * wallWidth) - doorSize) / 2,
-                color: this.color,
-                type:"wall_wn"
-            });
-            this.solidObjects[roomX+","+roomY].push({
-                x: 0,
-                y: (canvasHeight + doorSize) / 2,
-                width: wallWidth,
-                height: (canvasHeight - (2 * wallWidth) - doorSize) / 2,
-                color: this.color,
-                type:"wall_ws"
-            });
-        
-            if(this.isRoom(map,'east',roomX,roomY))
-                doorSize = doorWidth;
-            else
-                doorSize = 0;
-            // Right walls
-            this.solidObjects[roomX+","+roomY].push({
-                x: canvasWidth - wallWidth,
-                y: wallWidth,
-                width: wallWidth,
-                height: (canvasHeight - (2 * wallWidth) - doorSize) / 2,
-                color: this.color,
-                type:"wall_en"
-            });
-            this.solidObjects[roomX+","+roomY].push({
-                x: canvasWidth - wallWidth,
-                y: (canvasHeight + doorSize) / 2,
-                width: wallWidth,
-                height: (canvasHeight - (2 * wallWidth) - doorSize) / 2,
-                color: this.color,
-                type:"wall_es"
-            });
-
-        }
-    }
 }
 
 SolidObjects.prototype.isRoom = function(map,location,col,row){
@@ -162,9 +45,12 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
             const roomType = map[i][j];
             if (roomType == 0)
                 continue;
-
+            
+            
             const rX = j;
             const rY = i;
+
+            this.solidObjects[rX+","+rY] = [];
 
             var isMazeFun = false;
             while (isMazeFun == false){
@@ -279,11 +165,22 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
 
                 //Adjust the door rooms and make sure they have plenty of space to spawn
                 if(roomType == 3){
-                    this.createRandomPath(maze,'middle','east');
-                    this.createRandomPath(maze,'middle','north');
-                    this.createRandomPath(maze,'middle','south');
-                    this.createRandomPath(maze,'middle','west');
-                    this.openDoors(maze,['middle','north','south','east','west']);
+                    if(this.isRoom(map,'north',rX,rY)){
+                        this.createRandomPath(maze,'middle','north');
+                        this.openDoors(maze,['middle','north']);
+                    }
+                    if(this.isRoom(map,'south',rX,rY)){
+                        this.createRandomPath(maze,'middle','south');
+                        this.openDoors(maze,['middle','south']);
+                    }
+                    if(this.isRoom(map,'east',rX,rY)){
+                        this.createRandomPath(maze,'middle','east');
+                        this.openDoors(maze,['middle','east']);
+                    }
+                    if(this.isRoom(map,'west',rX,rY)){
+                        this.createRandomPath(maze,'middle','west');
+                        this.openDoors(maze,['middle','west']);
+                    }
                 }
 
                 //Adjust the player starting rooms and make sure they have space to spawn
@@ -357,18 +254,18 @@ SolidObjects.prototype.createRandomPath = function(maze, from, to) {
 
     if(from == 'north'){
         startY = (this.mazeWidth/2)-1;
-        startX = 0;
+        startX = 1;
     }
     else if(from == 'south'){
         startY = (this.mazeWidth/2)-1;
-        startX = this.mazeHeight-1;
+        startX = this.mazeHeight-2;
     }
     else if(from == 'west'){
-        startY = 0;
+        startY = 1;
         startX = this.mazeHeight/2;
     }
     else if(from == 'east'){
-        startY = this.mazeWidth-1;
+        startY = this.mazeWidth-2;
         startX = this.mazeHeight/2;
     }
     else if(from == 'middle'){
@@ -378,18 +275,18 @@ SolidObjects.prototype.createRandomPath = function(maze, from, to) {
 
     if(to == 'north'){
         endY = (this.mazeWidth/2)-1;
-        endX = 0;
+        endX = 1;
     }
     else if(to == 'south'){
         endY = (this.mazeWidth/2)-1;
-        endX = this.mazeHeight-1;
+        endX = this.mazeHeight-2;
     }
     else if(to == 'west'){
-        endY = 0;
+        endY = 1;
         endX = this.mazeHeight/2;
     }
     else if(to == 'east'){
-        endY = this.mazeWidth-1;
+        endY = this.mazeWidth-2;
         endX = this.mazeHeight/2;
     }
     else if(to == 'middle'){
@@ -418,12 +315,12 @@ SolidObjects.prototype.createRandomPath = function(maze, from, to) {
             let newX = x + dx;
             let newY = y + dy;
 
-            // Check if the new position is within the grid and not yet visited
-            if ( newX >= 0 &&
-                 newY >= 0 &&
-                 newX < grid.length && 
-                 newY < grid[0].length && 
-                 grid[newX][newY] != 1
+            // Check if the new position is within the grid and not yet visited and not on an edge
+            if (newX > 0 &&
+                newY > 0 &&
+                newX < grid.length - 1 &&
+                newY < grid[0].length - 1 &&
+                grid[newX][newY] != 1
             ) {
                 stack.push([newX, newY]);
                 // Mark as visited

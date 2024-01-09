@@ -535,52 +535,11 @@ function drawBackground(ctx) {
     ctx.fillStyle = '#98ABC7';
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-    var lineWidth = 5;
-    ctx.fillStyle = '#4F3100';
-    ctx.fillRect(0, 0, canvasWidth, lineWidth);
-    ctx.fillRect(0, 0, lineWidth, canvasHeight);
-    ctx.fillRect(canvasWidth - lineWidth, 0, lineWidth, canvasHeight);
-    ctx.fillRect(0, canvasHeight - lineWidth, canvasWidth, lineWidth);
-
     for (let x = 0; x < canvasWidth; x += spriteWidth) {
         for (let y = 0; y < canvasHeight; y += spriteHeight) {
-            drawSprite(ctx, 'ground1', x, y, spriteWidth, spriteHeight);
+            drawSprite(ctx, 'ground', x, y, spriteWidth, spriteHeight);
         }
     }
-}
-
-function drawWalls(ctx,map,gs) {
-    const canvasWidth = ctx.canvas.width;
-    const canvasHeight = ctx.canvas.height;
-    const wallWidth = 10;
-    const gapWidth = 120;
-    const gapOffset = (canvasWidth - gapWidth) / 2;
-    const gapVerticalOffset = (canvasHeight - (2 * wallWidth) - gapWidth) / 2;
-
-    // Top wall
-    ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, canvasWidth, wallWidth);
-    // Bottom wall
-    ctx.fillRect(0, canvasHeight - wallWidth, canvasWidth, wallWidth);
-    // Left wall
-    ctx.fillRect(0, 0, wallWidth, canvasHeight);
-    // Right wall
-    ctx.fillRect(canvasWidth - wallWidth, 0, wallWidth, canvasHeight);
-
-    ctx.fillStyle = 'brown';
-
-    // Top gap
-    if(isRoom(gs,map,'above'))
-        ctx.fillRect(gapOffset, 0, gapWidth, wallWidth);
-    // Bottom gap
-    if(isRoom(gs,map,'below'))
-        ctx.fillRect(gapOffset, canvasHeight - wallWidth, gapWidth, wallWidth);
-    // Left gap
-    if(isRoom(gs,map,'left'))
-        ctx.fillRect(0, wallWidth + gapVerticalOffset, wallWidth, gapWidth);
-    // Right gap
-    if(isRoom(gs,map,'right'))
-        ctx.fillRect(canvasWidth - wallWidth, wallWidth + gapVerticalOffset, wallWidth, gapWidth);
 }
 
 function drawPlayerInventory(ctx, gs) {
@@ -733,12 +692,8 @@ function drawSolidObjects(ctx,currentRoomX, currentRoomY) {
             const solidObject = roomObjects[i];
 
             if(solidObject.type == "block"){
-                var ranRock = 'rock' + seededRandom(serverState.seed + i,1,10).toString();
-                drawSprite(ctx, ranRock, solidObject.x, solidObject.y, solidObject.width, solidObject.height);
-            }
-            else{//(solidObject.type == "wall"){
-                ctx.fillStyle = solidObject.color;
-                ctx.fillRect(solidObject.x, solidObject.y, solidObject.width, solidObject.height);
+                //var ranRock = 'rock' + seededRandom(serverState.seed + i,5,5).toString();
+                drawSprite(ctx, 'block', solidObject.x, solidObject.y, solidObject.width, solidObject.height);
             }
 
         }

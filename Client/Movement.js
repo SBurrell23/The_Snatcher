@@ -44,7 +44,8 @@ $(document).keydown(function(e) {
     if (e.which === 13) { // Enter key
         e.preventDefault();
         socket.send(JSON.stringify({
-            type: "generateMap"
+            type: "generateMap",
+            id: localState.playerId
         }));
     }else if (e.which === 32) { // Space to pickup or drop an item or do a skill check
         e.preventDefault();

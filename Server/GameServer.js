@@ -3,6 +3,7 @@ const MapBoard = require('./MapBoard.js');
 const Movement = require('./Movement.js');
 const SolidObjects = require('./SolidObjects.js');
 const Items = require('./Items.js');
+const Event = require('./Event.js');
 
 const wss = new WebSocket.Server({ port: 8080 });
 
@@ -91,7 +92,11 @@ wss.on('connection', (ws) => {
         }
         //This needs to be removed once game is live
         if(message.type == "generateMap"){
-            startGame();
+           // startGame();
+           for (let i = 0; i < gs.players.length; i++) {
+                if(gs.players[i].id == message.id)
+                    new Event().teleportPlayerToRandomRoom(gs, gs.players[i]);
+            }
         }
         if(message.type =="startGame"){
             sendAllClients({type: "loadingGame"});

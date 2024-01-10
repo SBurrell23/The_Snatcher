@@ -1,13 +1,15 @@
 var crypt = new Image();
-crypt.src = 'Assets/Tilesets/MASTER_TILESET.png';
+crypt.src = 'Assets/Tileset/MASTER_TILESET.png';
 
+
+// Load fonts
+new FontFace('Metal Mania','url(Assets/Fonts/MetalMania-Regular.ttf)').load().then(function(lf) {document.fonts.add(lf);});
+new FontFace('Jolly Lodger','url(Assets/Fonts/JollyLodger-Regular.ttf)').load().then(function(lf) {document.fonts.add(lf);});
 
 
 function loadAssets(){
     loadMasterTileset(crypt);
 }
-
-
 
 function loadMasterTileset(ts) {
     sprites['ground1'] = getTileSourceRect(ts,0, 10);
@@ -32,6 +34,9 @@ function loadMasterTileset(ts) {
 
     sprites['playerInventory'] = getTileSourceAdjustable(ts,8, 0 ,240,144);
     sprites['snatcherInventory'] = getTileSourceAdjustable(ts,13, 0 ,144,144);
+
+    sprites['exitdoorClosed'] = getTileSourceAdjustable(ts,9, 3 ,96,96);
+    sprites['exitdoorOpen'] = getTileSourceAdjustable(ts,12, 3 ,96,96);
 
     loadPlayerAnimations(ts);
 

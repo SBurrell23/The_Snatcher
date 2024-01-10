@@ -632,7 +632,6 @@ function drawPlayers(ctx, gs, currentRoomX, currentRoomY) {
 function drawPlayer(ctx, player, x, y) {
     const px = x-24;
     const py = y-30;
-    const ts = 48;
 
     var pName = "";
     switch(player.name){
@@ -686,13 +685,16 @@ function drawItems(ctx, currentRoomX, currentRoomY) {
                 drawSprite(ctx, 'key', item.currPos.x, item.currPos.y);
             }
             else if(item.type == 'exitdoor'){
-                ctx.fillStyle = '#522a00';
-                ctx.fillRect(item.currPos.x, item.currPos.y, item.width, item.height);
-                ctx.fillStyle = colors.key
-                ctx.font = '22px '+font2;
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                ctx.fillText("( "+item.specialCount+" / "+item.specialCount2+" )", item.currPos.x + Math.ceil(item.width/2), item.currPos.y + Math.ceil(item.height/2));
+                if(item.specialCount >= item.specialCount2)
+                    drawSprite(ctx, 'exitdoorOpen', item.currPos.x - 7, item.currPos.y - 7);
+                else{
+                    drawSprite(ctx, 'exitdoorClosed', item.currPos.x - 7, item.currPos.y - 7);
+                    ctx.fillStyle = colors.key
+                    ctx.font = '17px '+font2;
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.fillText(item.specialCount+" / "+item.specialCount2, item.currPos.x + 1 + Math.ceil(item.width/2), item.currPos.y + 11 + Math.ceil(item.height/2));
+                }
             }
             else{
                 if(item.inChest){

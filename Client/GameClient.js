@@ -34,7 +34,7 @@ let playerInterpolations = {}; // Store interpolation data for each player
 var colors = { //Map colors
     otherPlayer: '#32CD32',
     key: '#f7d707',
-    spotlight: 'rgba(0, 0, 0, .92)'
+    spotlight: 'rgba(0, 0, 0, .975)'
 }
 
 var sprites = {};
@@ -427,7 +427,7 @@ function drawStartGameButton(ctx, x, y, text, color, width, height) {
     ctx.fillRect(x - (width / 2), y - (height / 2), width, height);
     
     ctx.fillStyle = 'white';
-    ctx.font = '32px '+ font2;
+    ctx.font = '32px '+ font;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(text, x, y+2);
@@ -453,7 +453,7 @@ function drawJoinLeaveButton(ctx, x, y, text, color, id, playerColor) {
     ctx.fillRect(x, y, width, height);
 
     ctx.fillStyle = 'white';
-    ctx.font = '20px '+font2;
+    ctx.font = '20px '+ font;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(text, x + width/2, 1+y+height/2);
@@ -732,21 +732,20 @@ function drawItems(ctx, currentRoomX, currentRoomY) {
     }  
 }
 
-function drawSolidObjects(ctx,currentRoomX, currentRoomY) {
+function drawSolidObjects(ctx, currentRoomX, currentRoomY) {
     const solidObjects = localState.solidObjects;
     if (solidObjects) {
-        var roomObjects = solidObjects[currentRoomX+","+currentRoomY];
+        var roomObjects = solidObjects[currentRoomX + "," + currentRoomY];
         for (let i = 0; i < roomObjects.length; i++) {
             const solidObject = roomObjects[i];
 
-            if(solidObject.type == "block"){
-                //var ranRock = 'rock' + seededRandom(serverState.seed + i,5,5).toString();
+            if (solidObject.type == "block") {
                 drawSprite(ctx, 'block', solidObject.x, solidObject.y);
+            } else if (solidObject.type == "gate") {
+                var aFrames = ['1', '2', '3', '4'];
+                let frameIndex = Math.floor((currentFrame + i * 10) / 55) % aFrames.length;
+                drawSprite(ctx, 'fireBlock' + aFrames[frameIndex], solidObject.x, solidObject.y);
             }
-            else if(solidObject.type == "gate"){
-                drawSprite(ctx, 'gate', solidObject.x, solidObject.y);
-            }
-
         }
     }
 }

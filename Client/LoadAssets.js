@@ -1,14 +1,12 @@
-var crypt = new Image();
-crypt.src = 'Assets/Tileset/MASTER_TILESET.png';
-
+var masterTileset = new Image();
+masterTileset.src = 'Assets/Tilesets/MASTER_TILESET.png';
 
 // Load fonts
 new FontFace('Metal Mania','url(Assets/Fonts/MetalMania-Regular.ttf)').load().then(function(lf) {document.fonts.add(lf);});
 new FontFace('Jolly Lodger','url(Assets/Fonts/JollyLodger-Regular.ttf)').load().then(function(lf) {document.fonts.add(lf);});
 
-
 function loadAssets(){
-    loadMasterTileset(crypt);
+    loadMasterTileset(masterTileset);
 }
 
 function loadMasterTileset(ts) {
@@ -17,8 +15,7 @@ function loadMasterTileset(ts) {
     sprites['ground3'] = getTileSourceRect(ts,0, 11);
     sprites['ground4'] = getTileSourceRect(ts,1,11);
 
-    sprites['block'] = getTileSourceRect(ts,24, 0);
-    sprites['gate'] = getTileSourceRect(ts,22, 8);
+    sprites['block'] = getTileSourceRect(ts,25, 0);
 
     sprites['chest1'] = getTileSourceRect(ts,2, 0);
     sprites['chest2'] = getTileSourceRect(ts,4, 0);
@@ -39,7 +36,17 @@ function loadMasterTileset(ts) {
     sprites['exitdoorOpen'] = getTileSourceAdjustable(ts,12, 3 ,96,96);
 
     loadPlayerAnimations(ts);
+    loadFireBlockAnimation(ts);
+    
+    console.log("Assets loaded");
+    console.log(sprites);
+}
 
+function loadFireBlockAnimation(ts){
+    sprites['fireBlock1'] = getTileSourceRect(ts,9, 11);
+    sprites['fireBlock2'] = getTileSourceRect(ts,10, 11);
+    sprites['fireBlock3'] = getTileSourceRect(ts,11, 11);
+    sprites['fireBlock4'] = getTileSourceRect(ts,12, 11);
 }
 
 function loadPlayerAnimations(ts){

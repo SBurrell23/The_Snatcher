@@ -15,10 +15,10 @@ Items.prototype.spawnItems = function(gs) {
     //We MUST spawn the exit doors 1st so we don't accidentally spawn another item in the room first
     this.createItems('exitdoor','all', 2, 82,82); //2 exit doors ONLY!
 
-    var numKeys = (gs.players.length - 1) * 5 + 5;
-    this.createItems('key','all', numKeys, 21,14);
-
     const itemSize = global.map.getBlockSize() *  .8;
+
+    var numKeys = (gs.players.length - 1) * 5 + 5;
+    this.createItems('key','all', numKeys, itemSize,itemSize);
 
     var numPlayerItems = (gs.players.length - 1) * 2 + 10
     this.createItems('pf_flyers','runner', numPlayerItems, itemSize,itemSize);
@@ -88,7 +88,7 @@ Items.prototype.createItems = function(type,whoIsFor,numItems,width,height) {
     var specialCount2 = 0;
 
     for (let i = 1; i <= numItems; i++) {
-        if(whoIsFor == 'snatcher' || type == 'exitdoor')
+        if(type == 'exitdoor')
             doesItemStartInChest = false;
         if(type == 'exitdoor')
             specialCount2 = global.keysNeededToOpenDoor;

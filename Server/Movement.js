@@ -11,6 +11,7 @@ Movement.prototype.movePlayer = function(gs,map, id, direction,deltaTime) {
         //console.log("Moving player " + player.name + " at speed " + moveAmount);
 
         if(direction == "u" || direction == "ul" || direction == "ur"){
+                player.lastDirection = "north";
                 if((player.currPos.y - moveAmount >= 0)){
                     var destPosY = player.currPos.y - moveAmount;
                     var destPosX = player.currPos.x;
@@ -24,6 +25,7 @@ Movement.prototype.movePlayer = function(gs,map, id, direction,deltaTime) {
                 }
         }
         if(direction == "d" || direction == "dl" || direction == "dr"){
+                player.lastDirection = "south";
                 if((player.currPos.y + moveAmount <= global.canvasHeight)){
                     var destPosY = player.currPos.y + moveAmount;
                     var destPosX = player.currPos.x;
@@ -37,6 +39,7 @@ Movement.prototype.movePlayer = function(gs,map, id, direction,deltaTime) {
                 }
         }
         if(direction == "l" || direction == "ul" || direction == "dl"){
+                player.lastDirection = "west";
                 if((player.currPos.x - moveAmount >= 0)){
                     var destPosX = player.currPos.x - moveAmount;
                     var destPosY = player.currPos.y;
@@ -50,6 +53,7 @@ Movement.prototype.movePlayer = function(gs,map, id, direction,deltaTime) {
                 }
         }
         if(direction == "r" || direction == "ur" || direction == "dr"){
+                player.lastDirection = "east";
                 if((player.currPos.x + moveAmount <= global.canvasWidth)){
                     var destPosX = player.currPos.x + moveAmount
                     var destPosY = player.currPos.y;

@@ -38,6 +38,7 @@ var colors = { //Map colors
 }
 
 var sprites = {};
+let currentFrame = 0;
 
 var sc = { //Skill Check Variables
     barMoveAmount : 0,
@@ -151,6 +152,7 @@ function sendPing() {
 }
 
 function gameLoop() {
+    currentFrame++;
     if (serverState){
         drawGameState(serverState);
         handlePlayerMovement();
@@ -492,12 +494,11 @@ function drawSnatcherDoorInfo(ctx, gs, doorInfo) {
     if(!doorInfo)
         return;
 
-
     const canvasWidth = ctx.canvas.width;
     const canvasHeight = ctx.canvas.height;
-    const rectWidth = 30;
-    const rectHeight = 128;
-    const rectOffset = 5;
+    const rectWidth = 32;
+    const rectHeight = 96;
+    const rectOffset = 0;
     
     // Draw red rectangle on the north side
     if(doorInfo.north){
@@ -632,11 +633,54 @@ function drawPlayers(ctx, gs, currentRoomX, currentRoomY) {
     }
 }
 
+
 function drawPlayer(ctx, player, x, y) {
-    ctx.fillStyle = player.color;
-    ctx.beginPath();
-    ctx.arc(x, y, player.radius, 0, 2 * Math.PI);
-    ctx.fill();
+    // ctx.fillStyle = player.color;
+    // ctx.beginPath();
+    // ctx.arc(x, y, player.radius, 0, 2 * Math.PI);
+    // ctx.fill();
+
+    const px = x-24;
+    const py = y-30;
+    const ts = 48;
+
+    var pName = "";
+    switch(player.name){
+        case 'snatcher':
+            pName = 'player1';
+            break;
+        case 'george':
+            pName = 'player2';
+            break;
+        case 'vincent':
+            pName = 'player3';
+            break;
+        case 'rose':
+            pName = 'player4';
+            break;
+        case 'daniel':
+            pName = 'player5';
+            break;
+        case 'taylor':
+            pName = 'player6';
+            break;
+    }
+
+    var aFrame;
+    var lastDir = player.lastDirection;
+    if(lastDir == "north")
+        aFrame = ['n1','n2','n3'];
+    else if(lastDir == "south")
+        aFrame = ['s1','s2','s3'];
+    else if(lastDir == "east")
+        aFrame = ['e1','e2','e3'];
+    else if(lastDir == "west")
+        aFrame = ['w1','w2','w3'];
+
+    const framesBeforeNextAnimate = 45;
+    let frameIndex = Math.floor(currentFrame / framesBeforeNextAnimate) % aFrame.length;
+
+    drawSprite(ctx, pName+ aFrame[frameIndex], px, py, ts,ts);
 }
 
 function drawItems(ctx, currentRoomX, currentRoomY) {
@@ -649,9 +693,7 @@ function drawItems(ctx, currentRoomX, currentRoomY) {
             item.ownerId == -1
             ) {
             if(item.type == 'key'){
-                ctx.fillStyle = colors.key;
-                ctx.font = '22px '+font2;
-                ctx.fillRect(item.currPos.x, item.currPos.y, item.width, item.height);
+                drawSprite(ctx, 'key', item.currPos.x, item.currPos.y, item.width, item.height);
             }
             else if(item.type == 'exitdoor'){
                 ctx.fillStyle = '#522a00';
@@ -664,21 +706,34 @@ function drawItems(ctx, currentRoomX, currentRoomY) {
             }
             else{
                 if(item.inChest){
-                    ctx.fillStyle = '#4F3100';
-                    ctx.fillRect(item.currPos.x, item.currPos.y, item.width, item.height);
-                    ctx.fillStyle = 'black';
-                    ctx.font = '20px '+font2;
-                    ctx.textAlign = "center";
-                    ctx.textBaseline = "middle";
-                    ctx.fillText("CHEST", item.currPos.x + item.width / 2, item.currPos.y + item.height / 2);
+                    if(getMe(serverState).isSnatcher)
+                        drawSprite(ctx, 'chest2', item.currPos.x, item.currPos.y, item.width, item.height);
+                    else
+                        drawSprite(ctx, 'chest1', item.currPos.x, item.currPos.y, item.width, item.height);
                 }else{
-                    ctx.fillStyle = 'magenta';
-                    ctx.fillRect(item.currPos.x, item.currPos.y, item.width, item.height);
-                    ctx.fillStyle = 'black';
-                    ctx.font = '14px '+font2;
-                    ctx.textAlign = "center";
-                    ctx.textBaseline = "middle";
-                    ctx.fillText(item.type.toUpperCase(), item.currPos.x + item.width / 2, item.currPos.y + item.height / 2);
+                    switch(item.type){
+                        case 'pf_flyers':
+                            drawSprite(ctx, 'pf_flyers', item.currPos.x, item.currPos.y, item.width, item.height);
+                            break;
+                        case 'the_button':
+                            drawSprite(ctx, 'the_button', item.currPos.x, item.currPos.y, item.width, item.height);
+                            break;
+                        case 'magic_monocle':
+                            drawSprite(ctx, 'magic_monocle', item.currPos.x, item.currPos.y, item.width, item.height);
+                            break;
+                        case 'bbq_chili':
+                            drawSprite(ctx, 'bbq_chili', item.currPos.x, item.currPos.y, item.width, item.height);
+                            break;
+                        case 'spare_eyeballs':
+                            drawSprite(ctx, 'spare_eyeballs', item.currPos.x, item.currPos.y, item.width, item.height);
+                            break;
+                        case 'kill_the_power':
+                            drawSprite(ctx, 'kill_the_power', item.currPos.x, item.currPos.y, item.width, item.height);
+                            break;
+                        default:
+                            break;
+                    }
+
                 }
             }
         }

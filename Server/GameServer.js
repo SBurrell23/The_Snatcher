@@ -31,7 +31,8 @@ var playerObject ={
     radius: 16,
     spotlight: 375,
     isSnatcher: false,
-    color: "#000000"
+    color: "#000000",
+    lastDirection: "south"
 };
 
 global.baseSpeed = JSON.stringify(350);

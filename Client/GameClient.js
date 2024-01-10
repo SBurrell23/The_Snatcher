@@ -539,7 +539,7 @@ function drawBackground(ctx) {
     for (let x = 0; x < (ctx.canvas.width/blockSize); x ++) {
         for (let y = 0; y < (ctx.canvas.height/blockSize); y ++) {
             let spriteName = groundPattern[x % 2][y % 2];
-            drawSprite(ctx, spriteName, x * blockSize, y * blockSize, blockSize, blockSize);
+            drawSprite(ctx, spriteName, x * blockSize, y * blockSize);
         }
     }
 }
@@ -547,29 +547,25 @@ function drawBackground(ctx) {
 function drawPlayerInventory(ctx, gs) {
     var me = getMe(gs);
 
-    ctx.fillStyle = 'rgba(255, 255, 255, .65)';
-    ctx.fillRect(ctx.canvas.width  - 160, 20, 140, 140);
+    if(me.isSnatcher){
+        drawSprite(ctx,'snatcherInventory', ctx.canvas.width - 140, 10);
+        if (me.hasItem) 
+            drawSprite(ctx, me.hasItem.type, ctx.canvas.width - 92, 42);
+    }
+    else{
+        drawSprite(ctx,'playerInventory', ctx.canvas.width - 235, 10);
 
-    // Draw INVENTORY text
-    ctx.font = '26px '+font2;
-    ctx.fillStyle = 'black';
-    ctx.textAlign = 'center';
-    ctx.fillText("INVENTORY", ctx.canvas.width - 90, 40);
+        if (me.hasItem) 
+            drawSprite(ctx, me.hasItem.type, ctx.canvas.width - 92, 42);
 
-    if (me.hasKeys.length > 0) {
-        for (let i = 1; i <= me.hasKeys.length; i++) {
-            ctx.font = '20px '+font2;
-            ctx.fillStyle = colors.key;
-            ctx.textAlign = 'center';
-            ctx.fillText("KEY #" + i, ctx.canvas.width - 90, 45 + (i * 25));
+        if (me.hasKeys.length == 1)
+            drawSprite(ctx,'key', ctx.canvas.width - 200, 42);
+        else if (me.hasKeys.length == 2){
+            drawSprite(ctx,'key', ctx.canvas.width - 200, 42);
+            drawSprite(ctx,'key', ctx.canvas.width - 150, 42);
         }
     }
-    if (me.hasItem) {
-        ctx.font = '20px '+font2;
-        ctx.textAlign = 'center';
-        ctx.fillStyle = 'magenta';
-        ctx.fillText(me.hasItem.type.toUpperCase(), ctx.canvas.width - 90, 130);
-    }
+    
 }
 
 function updatePlayerInterpolation(player) {
@@ -633,13 +629,7 @@ function drawPlayers(ctx, gs, currentRoomX, currentRoomY) {
     }
 }
 
-
 function drawPlayer(ctx, player, x, y) {
-    // ctx.fillStyle = player.color;
-    // ctx.beginPath();
-    // ctx.arc(x, y, player.radius, 0, 2 * Math.PI);
-    // ctx.fill();
-
     const px = x-24;
     const py = y-30;
     const ts = 48;
@@ -680,7 +670,7 @@ function drawPlayer(ctx, player, x, y) {
     const framesBeforeNextAnimate = 45;
     let frameIndex = Math.floor(currentFrame / framesBeforeNextAnimate) % aFrame.length;
 
-    drawSprite(ctx, pName+ aFrame[frameIndex], px, py, ts,ts);
+    drawSprite(ctx, pName+ aFrame[frameIndex], px, py);
 }
 
 function drawItems(ctx, currentRoomX, currentRoomY) {
@@ -693,7 +683,7 @@ function drawItems(ctx, currentRoomX, currentRoomY) {
             item.ownerId == -1
             ) {
             if(item.type == 'key'){
-                drawSprite(ctx, 'key', item.currPos.x, item.currPos.y, item.width, item.height);
+                drawSprite(ctx, 'key', item.currPos.x, item.currPos.y);
             }
             else if(item.type == 'exitdoor'){
                 ctx.fillStyle = '#522a00';
@@ -707,28 +697,28 @@ function drawItems(ctx, currentRoomX, currentRoomY) {
             else{
                 if(item.inChest){
                     if(getMe(serverState).isSnatcher)
-                        drawSprite(ctx, 'chest2', item.currPos.x, item.currPos.y, item.width, item.height);
+                        drawSprite(ctx, 'chest2', item.currPos.x - 5, item.currPos.y - 5);
                     else
-                        drawSprite(ctx, 'chest1', item.currPos.x, item.currPos.y, item.width, item.height);
+                        drawSprite(ctx, 'chest1', item.currPos.x - 5, item.currPos.y - 5);
                 }else{
                     switch(item.type){
                         case 'pf_flyers':
-                            drawSprite(ctx, 'pf_flyers', item.currPos.x, item.currPos.y, item.width, item.height);
+                            drawSprite(ctx, 'pf_flyers', item.currPos.x, item.currPos.y);
                             break;
                         case 'the_button':
-                            drawSprite(ctx, 'the_button', item.currPos.x, item.currPos.y, item.width, item.height);
+                            drawSprite(ctx, 'the_button', item.currPos.x, item.currPos.y);
                             break;
                         case 'magic_monocle':
-                            drawSprite(ctx, 'magic_monocle', item.currPos.x, item.currPos.y, item.width, item.height);
+                            drawSprite(ctx, 'magic_monocle', item.currPos.x, item.currPos.y);
                             break;
                         case 'bbq_chili':
-                            drawSprite(ctx, 'bbq_chili', item.currPos.x, item.currPos.y, item.width, item.height);
+                            drawSprite(ctx, 'bbq_chili', item.currPos.x, item.currPos.y);
                             break;
                         case 'spare_eyeballs':
-                            drawSprite(ctx, 'spare_eyeballs', item.currPos.x, item.currPos.y, item.width, item.height);
+                            drawSprite(ctx, 'spare_eyeballs', item.currPos.x, item.currPos.y);
                             break;
                         case 'kill_the_power':
-                            drawSprite(ctx, 'kill_the_power', item.currPos.x, item.currPos.y, item.width, item.height);
+                            drawSprite(ctx, 'kill_the_power', item.currPos.x, item.currPos.y);
                             break;
                         default:
                             break;
@@ -749,10 +739,10 @@ function drawSolidObjects(ctx,currentRoomX, currentRoomY) {
 
             if(solidObject.type == "block"){
                 //var ranRock = 'rock' + seededRandom(serverState.seed + i,5,5).toString();
-                drawSprite(ctx, 'block', solidObject.x, solidObject.y, solidObject.width, solidObject.height);
+                drawSprite(ctx, 'block', solidObject.x, solidObject.y);
             }
             else if(solidObject.type == "gate"){
-                drawSprite(ctx, 'gate', solidObject.x, solidObject.y, solidObject.width, solidObject.height);
+                drawSprite(ctx, 'gate', solidObject.x, solidObject.y);
             }
 
         }

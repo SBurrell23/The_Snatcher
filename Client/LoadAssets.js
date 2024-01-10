@@ -10,10 +10,10 @@ function loadAssets(){
 
 
 function loadMasterTileset(ts) {
-    sprites['ground1'] = getTileSourceRect(ts,8, 0);
-    sprites['ground2'] = getTileSourceRect(ts,9, 0);
-    sprites['ground3'] = getTileSourceRect(ts,8, 1);
-    sprites['ground4'] = getTileSourceRect(ts,9,1);
+    sprites['ground1'] = getTileSourceRect(ts,0, 10);
+    sprites['ground2'] = getTileSourceRect(ts,1, 10);
+    sprites['ground3'] = getTileSourceRect(ts,0, 11);
+    sprites['ground4'] = getTileSourceRect(ts,1,11);
 
     sprites['block'] = getTileSourceRect(ts,24, 0);
     sprites['gate'] = getTileSourceRect(ts,22, 8);
@@ -25,11 +25,13 @@ function loadMasterTileset(ts) {
     sprites['pf_flyers'] = getTileSourceRect(ts,0, 1);
     sprites['the_button'] = getTileSourceRect(ts,1, 2);
     sprites['magic_monocle'] = getTileSourceRect(ts,1, 3);
-    
 
     sprites['bbq_chili'] = getTileSourceRect(ts,3, 1);
     sprites['spare_eyeballs'] = getTileSourceRect(ts,3, 2);
     sprites['kill_the_power'] = getTileSourceRect(ts,2, 3);
+
+    sprites['playerInventory'] = getTileSourceAdjustable(ts,8, 0 ,240,144);
+    sprites['snatcherInventory'] = getTileSourceAdjustable(ts,13, 0 ,144,144);
 
     loadPlayerAnimations(ts);
 
@@ -72,7 +74,18 @@ function getTileSourceRect(tileset, tileX, tileY) {
     };
 }
 
-function drawSprite(ctx, spriteName, x, y, width, height) {
+function getTileSourceAdjustable(tileset, tileX, tileY,chonkWidth,chonkHeight) {
+    var tileSize = 48;
+    return {
+        tileset: tileset,
+        x: tileX * tileSize,
+        y: tileY * tileSize,
+        width: chonkWidth,
+        height: chonkHeight
+    };
+}
+
+function drawSprite(ctx, spriteName, x, y) {
     var sprite = sprites[spriteName];
     if (!sprite) 
         throw 'Sprite "' + spriteName + '" does not exist';
@@ -85,8 +98,8 @@ function drawSprite(ctx, spriteName, x, y, width, height) {
         sprite.height,
         x,
         y,
-        width,
-        height
+        sprite.width,
+        sprite.height
     );
 }
 

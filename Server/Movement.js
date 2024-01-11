@@ -72,6 +72,9 @@ Movement.prototype.movePlayer = function(gs,map, id, direction,deltaTime) {
 
 Movement.prototype.movePlayerToNewRoom = function(gs,player,map, newXRoom, newYRoom, directionToSpawn) {
 
+    if(player.isAlive == false)
+        return;
+    
     if (map[newYRoom][newXRoom] > 0) { // Room is not empty.
         //console.log("Player " + player.name + " moved to " + newYRoom + ", " + newXRoom);
         player.currRoom.x = newXRoom;
@@ -120,6 +123,7 @@ Movement.prototype.checkForWallCollision = function(player, destPosX, destPosY) 
     var solidObjects = global.map.getSolidObjectsInRoom(player.currRoom.x, player.currRoom.y);
     if(solidObjects == undefined)
         return false;
+
     for (var i = 0; i < solidObjects.length; i++) {
         var object = solidObjects[i];
 

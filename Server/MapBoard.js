@@ -23,7 +23,7 @@ function MapBoard(numRunners) {
     this.middleSize = 4; //Probably should stay as 4
 
     this.blockSize = 48;//
-    //Room Types: 0 = empty, 1 = room, 2 = starting room, 3 = exit door
+    //Room Types: 0 = empty, 1 = room, 3 = exit door
     this.availableRooms = 0;
 }
 
@@ -213,10 +213,6 @@ MapBoard.prototype.generateNewMap = function() {
             }
         }
     }
-
-    //Set the middle room to be the starting room (for the snatcher)
-    var startingRoomType = 2;
-    map[Math.floor(rows / 2)][Math.floor(cols / 2)] = startingRoomType;
 
 
     //Decide if we want to spawn the doors N/S or E/W

@@ -166,8 +166,13 @@ Movement.prototype.checkForPlayerCollision = function(gs, player) {
             snatchedPlayer.isAlive = false;
             snatchedPlayer.currPos.x = -1000;
             snatchedPlayer.currPos.y = -1000;
-            snatchedPlayer.currRoom.x = -1000;
-            snatchedPlayer.currRoom.y = -1000;
+
+            //Wait a second to stop any player movement race conditions
+            setTimeout(function() {
+                snatchedPlayer.currRoom.x = -1000;
+                snatchedPlayer.currRoom.y = -1000;
+            }, 1000);
+
             player.points += global.pointsForSnatching;
             console.log("The snatcher has SNATCHED " + snatchedPlayer.name + "!!! RIP!!!");
             global.sendEventToAllRunners("eventMessage", {

@@ -34,9 +34,10 @@ let playerInterpolations = {}; // Store interpolation data for each player
 
 var colors = { //Map colors
     otherPlayer: '#32CD32',
-    key: '#f7d707',
     spotlight: 'rgba(0, 0, 0, .975)'
 }
+
+var eventTextInterval = null;
 
 var sprites = {};
 let currentFrame = 0;
@@ -220,7 +221,7 @@ function drawGameState(gs) {
         drawSkillCheck(ctx,getMe(gs));
 
         //This needs to come after objects that are under the spotlight and before things over it
-        //drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
+        drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
 
         drawEventText(ctx,localState.eventText);
         
@@ -258,7 +259,6 @@ function drawLoading(ctx) {
     ctx.fillText(randomLoadingMessage, ctx.canvas.width / 2, ctx.canvas.height / 2);
 }
 
-
 function drawGameOver(ctx, gs) {
     localState.playerId = -1;
     var gameOverMessage = 'Game Over!';
@@ -289,99 +289,114 @@ function drawGameOver(ctx, gs) {
     ctx.fillText(subText, centerX, centerY + 50);
 }
 
-var eventTextInterval = null;
 function setEventText(text){
     localState.eventText = text;
     clearInterval(eventTextInterval);
     eventTextInterval = setTimeout(function() {
         localState.eventText = "";
-    }, 3500);
+    }, 3600);
 }
 
 function drawEventText(ctx, text) {
     var centerX = ctx.canvas.width / 2;
-    ctx.font = '55px ' + font;
+    ctx.font = '50px ' + font;
     ctx.fillStyle = 'white';
     ctx.textAlign = 'center';
-    ctx.fillText(text, centerX, 225);
+    ctx.fillText(text, centerX, 190);
 }
 
+const roomSize = 12;
+const walloffset = 16;
 function drawMap(ctx, gs, map) {
-    const roomSize = 9;
-    const walloffset = 20;
+
     if (map) {
 
-        var noRoom = 'rgba(255, 255, 255, .65)';
-        ctx.fillStyle = noRoom;
-        ctx.fillRect(
-            walloffset, 
-            walloffset, 
-            roomSize * map[0].length, 
-            roomSize * map.length
-        );
 
+        
+        const noPowerRoom = 'rgba(0, 0, 0, 0)';
+        const noRoom = 'rgba(255, 255, 255, .65)';
         const emptyRoom = 'rgba(36, 66, 117, .65)';
         const exitDoor = 'rgba(66, 29, 4, .75)';
+        const myRoom = getMe(gs).color;
+        const otherPlayerInRoom = '#32CD32';
+        const snatcherInRoom = getSnatcher(gs).color;
 
         for (let row = 0; row < map.length; row++) {
             for (let col = map[row].length - 1; col >= 0; col--) { // Reverse the loop for horizontal flipping
                 const room = map[row][col];
-                const roomX = walloffset + 10 + (roomSize * (map[row].length - col));
+                const roomX = walloffset + 5 + (roomSize * (map[row].length - col));
                 const roomY = roomSize * row;
 
-                var roomColor = 'gray';
-                if(isAnyPlayerInThisRoom(gs,row,col)){
-                    if(getSnatcher(gs).currRoom.x == col && getSnatcher(gs).currRoom.y == row)
-                        roomColor = getSnatcher(gs).color;
-                    else if(getMe(gs).currRoom.x == col && getMe(gs).currRoom.y == row){
-                        roomColor = getMe(gs).color;
+                if (getMe(gs).isSnatcher){ //If we are the snatcher
+                    //Snatcher default map vision (with failed skill check check)(me, rooms & doors)
+                    if(getMe(gs).currRoom.x == col && getMe(gs).currRoom.y == row){ //Am I in room
+                        drawRoomTile(ctx, roomX, roomY, myRoom);
+                    }
+                    else if(localState.events['bbq_chili'] && isRunnerInThisRoom(gs,row,col) != -1){ //If a runner is in this room, show them
+                        drawRoomTile(ctx, roomX, roomY, isRunnerInThisRoom(gs,row,col).color); //Show that players color
+                    }
+                    //If a skill check has failed and the player is in the room, show them
+                    else if(localState.events['failedSkillCheck'].length > 0 && localState.events['failedSkillCheck'].includes(isRunnerInThisRoom(gs,row,col).id)){
+                        drawRoomTile(ctx, roomX, roomY, isRunnerInThisRoom(gs,row,col).color); //Show that player to the killer
+                    }
+                    else if(room == 3) // Is it a door room
+                        drawRoomTile(ctx, roomX, roomY, exitDoor);
+                    else if (room == 1) //Draw empty room
+                        drawRoomTile(ctx, roomX, roomY, emptyRoom);
+                    else if (room == 0) // Draw no room
+                        drawRoomTile(ctx, roomX, roomY, noRoom);
+                    
+                }
+                else{ //Else if we are a runner
+                    //Firstly check if this room has been visited so we can add it to our visited rooms list
+                    //This can probably be done somwhere else but oh well
+                    if(getMe(gs).currRoom.x == col && getMe(gs).currRoom.y == row && haveIBeenInThisRoom(row,col) == false)
                         if(!localState.roomsIveBeenIn.some(room => room[0] == row && room[1] == col))
                             localState.roomsIveBeenIn.push([row,col]);
-                    }
-                    else
-                        roomColor = colors.otherPlayer;
-                }
-                else if(room === 0)
-                    continue;
-                else if (room === 1 || room === 2) //Snatcher spawn not important anymore 
-                    roomColor = emptyRoom;
-                else if (room === 3) 
-                    roomColor = exitDoor;
 
-                ctx.fillStyle = roomColor;
-
-                if (!getMe(gs).isSnatcher){
-                    if(localState.events['kill_the_power']){
-                        ctx.fillStyle = 'rgba(0, 0, 0, 0)';
-                        ctx.fillRect(roomX - walloffset, roomY + walloffset, roomSize, roomSize);
+                    if(localState.events['kill_the_power']){ //Turn all rooms white
+                        drawRoomTile(ctx, roomX, roomY, noPowerRoom);
                     }
-                    else if(localState.events['magic_monocle'])
-                        ctx.fillRect(roomX - walloffset, roomY + walloffset, roomSize, roomSize);
-                    else if(haveIBeenInThisRoom(row,col) || (roomColor == getSnatcher(gs).color)){
-                        if(roomColor = colors.otherPlayer){ //We don't show other players on the map unless magic monocle.
-                            roomColor = emptyRoom;
-                            //ctx.fillStyle = roomColor;
+                    else if(localState.events['magic_monocle']){ //Show everything to the runner
+                        if(getSnatcher(gs).currRoom.x == col && getSnatcher(gs).currRoom.y == row) //Is snatcher in room
+                            drawRoomTile(ctx, roomX, roomY, snatcherInRoom);
+                        else if (getMe(gs).currRoom.x == col && getMe(gs).currRoom.y == row) //Am I in room
+                            drawRoomTile(ctx, roomX, roomY, myRoom);
+                        else if (isRunnerInThisRoom(gs,row,col) != -1) // Other player is in room
+                            drawRoomTile(ctx, roomX, roomY, isRunnerInThisRoom(gs,row,col).color); //Show that players color
+                        else if(room == 3) // Is it a door room
+                            drawRoomTile(ctx, roomX, roomY, exitDoor);
+                        else if (room == 1) //Draw empty room
+                            drawRoomTile(ctx, roomX, roomY, emptyRoom);
+                        else if (room == 0) // Draw no room
+                            drawRoomTile(ctx, roomX, roomY, noRoom);
+                    }
+                    else{ //Player default map vision
+                        if(getSnatcher(gs).currRoom.x == col && getSnatcher(gs).currRoom.y == row) //Is snatcher in room
+                            drawRoomTile(ctx, roomX, roomY, snatcherInRoom);
+                        else if (getMe(gs).currRoom.x == col && getMe(gs).currRoom.y == row) //Am I in room
+                            drawRoomTile(ctx, roomX, roomY, myRoom);
+                        else if (haveIBeenInThisRoom(row,col)){
+                            if(room == 1)
+                                drawRoomTile(ctx, roomX, roomY, emptyRoom);
+                            else if (room == 3)
+                                drawRoomTile(ctx, roomX, roomY, exitDoor);
                         }
-                        ctx.fillRect(roomX - walloffset, roomY + walloffset, roomSize, roomSize);
+                        else{
+                            drawRoomTile(ctx, roomX, roomY, noRoom);
+                        }
                     }
                 }
-                else if(getMe(gs).isSnatcher){
 
-                    if(localState.events['bbq_chili']){
-                        //We do nothing here because the default state will show doors and players
-                        //The following blocks will hide players & doors
-                    }else if(localState.events['failedSkillCheck'].length > 0 && localState.events['failedSkillCheck'].includes(getPlayerInRoom(gs,row,col))){
-                        //If a player is in the room and has failed a skill check, draw them
-                        ctx.fillStyle = colors.otherPlayer;
-                    }else if(roomColor != getSnatcher(gs).color){ //Else override any other room color to just be empty (doors included)
-                        ctx.fillStyle = emptyRoom;
-                    }
-                    ctx.fillRect(roomX - walloffset, roomY + walloffset, roomSize, roomSize);
-                }
             }
         }
     }
-}  
+} 
+
+function drawRoomTile(ctx, x, y, color) {
+    ctx.fillStyle = color;
+    ctx.fillRect(x - walloffset, y + walloffset, roomSize, roomSize);
+}
 
 function drawSkillCheck(ctx,player){
     if(localState.skillCheck == false)
@@ -561,7 +576,7 @@ function drawSnatcherDoorInfo(ctx, gs, doorInfo) {
 
     const canvasWidth = ctx.canvas.width;
     const canvasHeight = ctx.canvas.height;
-    const rectWidth = 32;
+    const rectWidth = 48;
     const rectHeight = 96;
     const rectOffset = 0;
     
@@ -754,7 +769,7 @@ function drawItems(ctx, currentRoomX, currentRoomY) {
                     drawSprite(ctx, 'exitdoorOpen', item.currPos.x - 7, item.currPos.y - 7);
                 else{
                     drawSprite(ctx, 'exitdoorClosed', item.currPos.x - 7, item.currPos.y - 7);
-                    ctx.fillStyle = colors.key
+                    ctx.fillStyle = '#f7d707';
                     ctx.font = '17px '+font2;
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
@@ -828,10 +843,10 @@ function drawPing(ctx){
     ctx.textAlign = 'left';
 
     if(localState.ping > 1000000){
-        ctx.fillText("Ping: ?", 20, canvas.height - 20);
+        ctx.fillText("Ping: ", 10, canvas.height - 20);
         return;
     }
-    ctx.fillText("Ping: "+Math.ceil(localState.ping), 20, canvas.height - 20);
+    ctx.fillText("Ping: "+Math.ceil(localState.ping), 10, canvas.height - 20);
 }
 
 function isPlayerSpotTaken(gs, id) {
@@ -895,23 +910,12 @@ function haveIBeenInThisRoom(row,col){
     return false;
 }
 
-function isAnyPlayerInThisRoom(gs, row, col) {
+function isRunnerInThisRoom(gs, row, col) {
     if (gs.players) {
         for (let i = 0; i < gs.players.length; i++) {
             const player = gs.players[i];
-            if (player.currRoom.x == col && player.currRoom.y == row)
-                return true;
-        }
-    }
-    return false;
-}
-
-function getPlayerInRoom(gs, row, col) {
-    if (gs.players) {
-        for (let i = 0; i < gs.players.length; i++) {
-            const player = gs.players[i];
-            if (player.currRoom.x == col && player.currRoom.y == row)
-                return player.id;
+            if (player.currRoom.x == col && player.currRoom.y == row && !player.isSnatcher)
+                return player;
         }
     }
     return -1;

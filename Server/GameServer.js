@@ -167,7 +167,7 @@ function startGame(){
     global.keysNeededToOpenDoor = 1;//((gs.players.length-1) * 2) + 1;
     
     global.solidObjects = new SolidObjects();
-    //global.solidObjects.createMazeWalls(gs, global.map.get());
+    global.solidObjects.createMazeWalls(gs, global.map.get());
 
     new Items().spawnItems(gs);
 

@@ -547,7 +547,6 @@ function drawJoinLeaveButton(ctx, x, y, text, color, id, playerColor) {
 }
 
 function drawSpotlights(ctx, gs, currentRoomX, currentRoomY) {
-    ctx.fillStyle = colors.spotlight;
 
     for (let i = 0, len = gs.players.length; i < len; i++) {
         var player = gs.players[i];
@@ -556,10 +555,10 @@ function drawSpotlights(ctx, gs, currentRoomX, currentRoomY) {
             if (isMe(player.id)){
 
                 // Create black radial gradient
-                const gradSize = player.spotlight + 3; //some padding to prevent a thin line
+                const gradSize = player.spotlight + 1; //some padding to prevent a thin line
                 let grdBlack = ctx.createRadialGradient(player.currPos.x, player.currPos.y, 0, player.currPos.x, player.currPos.y, gradSize);
                 grdBlack.addColorStop(0, 'rgba(0, 0, 0, 0)'); // inner color (fully transparent)
-                grdBlack.addColorStop(1, 'rgba(0, 0, 0, 1)'); // outer color (fully opaque black)
+                grdBlack.addColorStop(1, 'rgba(0, 0, 0, .987)'); // outer color (fully opaque black)
                 // Draw the black gradient
                 ctx.fillStyle = grdBlack;
                 ctx.beginPath();

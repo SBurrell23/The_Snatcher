@@ -118,6 +118,8 @@ Movement.prototype.checkForWallCollision = function(player, destPosX, destPosY) 
 
     // Check for collision with each solid object
     var solidObjects = global.map.getSolidObjectsInRoom(player.currRoom.x, player.currRoom.y);
+    if(solidObjects == undefined)
+        return false;
     for (var i = 0; i < solidObjects.length; i++) {
         var object = solidObjects[i];
 

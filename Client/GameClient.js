@@ -45,13 +45,13 @@ let currentFrame = 0;
 
 var sc = { //Skill Check Variables
     barMoveAmount : 0,
-    barFillSpeed : 2.25,
+    barFillSpeed : 2,
     successAreaStart : 0,
-    successWidth : 13,
+    successWidth : 12,
     successAreaX : 0,
     lineX : 0,
     lineWidth: 2,
-    barWidth : 150,
+    barWidth : 140,
     barHeight : 20,
     successAreaColor: 'green'
 }
@@ -551,18 +551,29 @@ function drawSpotlights(ctx, gs, currentRoomX, currentRoomY) {
 
     for (let i = 0, len = gs.players.length; i < len; i++) {
         var player = gs.players[i];
+        
         if (player.currRoom.x == currentRoomX && player.currRoom.y == currentRoomY) {
-            if (isSnatcher(gs, player.id) && isMe(player.id)){
+            if (isMe(player.id)){
+
+                // Create black radial gradient
+                const gradSize = player.spotlight + 3; //some padding to prevent a thin line
+                let grdBlack = ctx.createRadialGradient(player.currPos.x, player.currPos.y, 0, player.currPos.x, player.currPos.y, gradSize);
+                grdBlack.addColorStop(0, 'rgba(0, 0, 0, 0)'); // inner color (fully transparent)
+                grdBlack.addColorStop(1, 'rgba(0, 0, 0, 1)'); // outer color (fully opaque black)
+                // Draw the black gradient
+                ctx.fillStyle = grdBlack;
                 ctx.beginPath();
-                ctx.rect(0, 0, canvas.width, canvas.height);
-                ctx.arc(player.currPos.x, player.currPos.y, player.spotlight, 0, Math.PI * 2, true);
-                ctx.fill('evenodd');
-                return;
-            }else if(isMe(player.id)){
+                ctx.arc(player.currPos.x, player.currPos.y, gradSize, 0, Math.PI * 2, false);
+                ctx.fill();
+                ctx.closePath();
+
+                //Create the spotlight
                 ctx.beginPath();
-                ctx.rect(0, 0, canvas.width, canvas.height);
                 ctx.arc(player.currPos.x, player.currPos.y, player.spotlight, 0, Math.PI * 2, true);
+                ctx.rect(0, 0, canvas.width, canvas.height);
                 ctx.fill('evenodd');
+                ctx.closePath();
+
                 return;
             }
         }

@@ -37,7 +37,7 @@ var playerObject ={
 };
 
 global.baseSpeed = JSON.stringify(350);
-global.killerBaseSpotlight = JSON.stringify(225);
+global.killerBaseSpotlight = JSON.stringify(245);
 
 var timeouts = [];
 

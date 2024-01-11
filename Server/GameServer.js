@@ -100,6 +100,9 @@ wss.on('connection', (ws) => {
         }
         if(message.type =="startGame"){
             sendAllClients({type: "loadingGame"});
+            gs.state = 'loading';
+            sendAllClients(gs);
+
             startGame();
         }
         if(message.type == "mp"){
@@ -164,7 +167,7 @@ function startGame(){
     global.keysNeededToOpenDoor = ((gs.players.length-1) * 2) + 1;
     
     global.solidObjects = new SolidObjects();
-    global.solidObjects.createMazeWalls(gs, global.map.get());
+    //global.solidObjects.createMazeWalls(gs, global.map.get());
 
     new Items().spawnItems(gs);
 
@@ -230,6 +233,12 @@ global.sendEventToClient = function(type,playerId, data){
 
 global.sendEventToAllClients = function(type, data){
     sendAllClients({type: type, data: data});
+}
+
+global.sendEventToAllRunners = function(type, data){
+    for (let player of gs.players) 
+        if(!player.isSnatcher)
+            sendClient(player.id,{type: type, data: data});
 }
 
 global.sendSnatcherDoorInfo = function(doorInfoObject){

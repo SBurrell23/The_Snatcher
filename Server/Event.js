@@ -1,12 +1,12 @@
 function Event() {
-    this.failedSkillCheckRevealTime = 6000;
+    this.failedSkillCheckRevealTime = 5000;
 
     this.pfFlyersSpeed = 250;
     this.pfFlyersTime = 5000;
 
-    this.magicMonocleRevealTime = 5000;
+    this.magicMonocleRevealTime = 7000;
 
-    this.bbqChiliRevealTime = 3000;
+    this.bbqChiliRevealTime = 3200;
 
     this.spareEyeballsSpotlight = 400;
     this.spareEyeballsTime = 8000;
@@ -44,10 +44,16 @@ Event.prototype.triggerItemEvent = function(gs,player,item) {
         case "magic_monocle":
             var data = {revealTime: this.magicMonocleRevealTime};
             global.sendEventToClient("magic_monocle",player.id,data);
+            global.sendEventToClient("eventMessage",player.id,{
+                text: "Your map tells all..."
+            });
             break;
         case "bbq_chili":
             var data = {revealTime: this.bbqChiliRevealTime};
             global.sendEventToClient("bbq_chili",player.id,data);
+            global.sendEventToAllRunners("eventMessage", {
+                text: "The snatcher has revealed all runners!"
+            });
             break;
         case "spare_eyeballs":
             player.spotlight = this.spareEyeballsSpotlight;
@@ -59,6 +65,9 @@ Event.prototype.triggerItemEvent = function(gs,player,item) {
         case "kill_the_power":
             var data = {unrevealTime: this.killThePowerUnrevealTime};
             global.sendEventToAllClients("kill_the_power",data);
+            global.sendEventToAllRunners("eventMessage", {
+                text: "The snatcher has cut the power!"
+            });
             break;
         default:
             console.log("Item event not found!");
@@ -76,7 +85,20 @@ Event.prototype.triggerFailedSkillCheck = function(gs,player) {
         playerId: player.id,
         revealTime: this.failedSkillCheckRevealTime
     };
-    global.sendEventToClient("failedSkillCheck",snatcher.id,data);
+    
+    if(!player.isSnatcher){
+        global.sendEventToClient("failedSkillCheck",snatcher.id,data);
+        global.sendEventToClient("eventMessage",snatcher.id,{
+            text: "A runner lacks skill..."
+        });
+        global.sendEventToClient("eventMessage",player.id,{
+            text: "You've been revealed to the snatcher!"
+        });
+    }else{ //Snatcher failed skill check, embarass him and tell the players
+        global.sendEventToAllRunners("eventMessage", {
+            text: "The snatcher lacks skill..."
+        });
+    }
 }
 
 Event.prototype.teleportPlayerToRandomRoom = function(gs,player) {

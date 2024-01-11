@@ -21,7 +21,8 @@ var localState = { //A local state needed to store things specific to the client
         magic_monocle:false,
         bbq_chili:false,
         kill_the_power:false
-    }
+    },
+    eventText:""
 };
 
 var joinButtons = {}; //Lobby screen join/leave button x,y,w,h
@@ -42,17 +43,33 @@ let currentFrame = 0;
 
 var sc = { //Skill Check Variables
     barMoveAmount : 0,
-    barFillSpeed : 1,
+    barFillSpeed : 2.25,
     successAreaStart : 0,
     successWidth : 13,
     successAreaX : 0,
     lineX : 0,
-    lineWidth: 3,
+    lineWidth: 2,
     barWidth : 150,
     barHeight : 20,
     successAreaColor: 'green'
 }
 const scReset = JSON.stringify(sc);
+
+const loadingMessages = [
+    "Darkness comes...",
+    "Unleashing horrors...",
+    "Approaching the nightmare...",
+    "Awakening evil...",
+    "Into the abyss...",
+    "Summoning spirits...",
+    "Unleashing hell...",
+    "Entering the haunted realm...",
+    "Awakening the cursed one...",
+    "Sharpening blades...",
+    "Revving chainsaws..."
+];
+
+var randomLoadingMessage = null; //This chosen then the player loads
 
 function connectWebSocket() {
     console.log("Attempting to connect to server...");
@@ -64,7 +81,7 @@ function connectWebSocket() {
 
     //wss://the-snatcher.onrender.com
     //ws://localhost:8080
-    socket = new WebSocket('wss://the-snatcher.onrender.com');  
+    socket = new WebSocket('ws://localhost:8080');  
     socket.addEventListener('open', function () {
         console.log('Server connection established!');
         $("#offlineMessage").css("display", "none");
@@ -74,6 +91,7 @@ function connectWebSocket() {
         socket.addEventListener('message', function (event) {
             recievedServerMessage(event.data);
         });
+        lastFrameTime = performance.now();
         requestAnimationFrame(gameLoop);
 
     });
@@ -97,7 +115,6 @@ function recievedServerMessage(message) {
         localState.playerId = m.id
     }else if(m.type == "map"){
         localState.map = m.map;
-        roomsIveBeenIn = [];
     }else if(m.type == "items"){
         localState.items = m.items;
     }else if(m.type == "doorInfo"){
@@ -135,12 +152,17 @@ function recievedServerMessage(message) {
         setTimeout(function() {
             localState.events['kill_the_power'] = false;
         }, m.data.unrevealTime);
-    }else if(m.type == "pong"){
+    }else if(m.type == "eventMessage"){
+        setEventText(m.data.text);
+    }
+    else if(m.type == "pong"){
         localState.ping = Date.now() - localState.ping;
     }else if(m.type == "gs"){
         serverState = m;
     }else if(m.type == "loadingGame"){
         console.log("Loading game...");
+        randomLoadingMessage = loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
+        roomsIveBeenIn = [];
         isGameLoading = true;
     }
 
@@ -151,12 +173,25 @@ function sendPing() {
     socket.send(JSON.stringify({ type: 'ping', id: localState.playerId }));
 }
 
+var lastFrameTime = 0;
+var deltaTime = 0;
 function gameLoop() {
+    deltaTime = (performance.now() - lastFrameTime) / 1000; // Calculate delta time in seconds
+
+    //Cap the game at ~144 FPS
+    if (deltaTime < .0069444) {
+        requestAnimationFrame(gameLoop);
+        return;
+    }
+
     currentFrame++;
-    if (serverState){
+
+    if (serverState) {
         drawGameState(serverState);
         handlePlayerMovement();
     }
+
+    lastFrameTime = performance.now();
     requestAnimationFrame(gameLoop); // schedule next game loop
 }
 
@@ -167,6 +202,8 @@ function drawGameState(gs) {
     //Draw the lobby
     if(gs.state == "lobby")
         drawLobby(ctx,gs);
+    else if(gs.state == "loading")
+        drawLoading(ctx,gs);
     //Draw the game
     else if(gs.state == "playing" && getMe(gs).isAlive){
         isGameLoading = false;
@@ -183,9 +220,9 @@ function drawGameState(gs) {
         drawSkillCheck(ctx,getMe(gs));
 
         //This needs to come after objects that are under the spotlight and before things over it
-        drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
+        //drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
 
-        drawEventText(ctx,gs,"");
+        drawEventText(ctx,localState.eventText);
         
         drawMap(ctx,gs,localState.map);
         drawPlayerInventory(ctx, gs);
@@ -201,19 +238,26 @@ function drawGameState(gs) {
 }   
 
 function drawGameInProgress(ctx) {
-    var canvas = document.getElementById('canvas');
-    var centerX = canvas.width / 2;
-    var centerY = canvas.height / 2;
-
-    // Fill the canvas with black
     ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    ctx.font = '40px '+font2;
+    ctx.font = '45px '+font;
     ctx.fillStyle = 'white';
     ctx.textAlign = 'center';
-    ctx.fillText('Game is currently in progress...', centerX, centerY);
+    ctx.fillText('Game is currently in progress...', ctx.canvas.width / 2, ctx.canvas.height / 2);
 }
+
+function drawLoading(ctx) {
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+    ctx.font = '45px '+font;
+    ctx.fillStyle = 'white';
+    ctx.textAlign = 'center';
+
+    ctx.fillText(randomLoadingMessage, ctx.canvas.width / 2, ctx.canvas.height / 2);
+}
+
 
 function drawGameOver(ctx, gs) {
     localState.playerId = -1;
@@ -245,13 +289,21 @@ function drawGameOver(ctx, gs) {
     ctx.fillText(subText, centerX, centerY + 50);
 }
 
-function drawEventText(ctx,gs,text){
+var eventTextInterval = null;
+function setEventText(text){
+    localState.eventText = text;
+    clearInterval(eventTextInterval);
+    eventTextInterval = setTimeout(function() {
+        localState.eventText = "";
+    }, 3500);
+}
+
+function drawEventText(ctx, text) {
     var centerX = ctx.canvas.width / 2;
-    var centerY = ctx.canvas.height / 2;
-    ctx.font = '55px '+ font;
+    ctx.font = '55px ' + font;
     ctx.fillStyle = 'white';
     ctx.textAlign = 'center';
-    ctx.fillText(text, centerX, centerY - 90);
+    ctx.fillText(text, centerX, 225);
 }
 
 function drawMap(ctx, gs, map) {
@@ -749,17 +801,18 @@ function drawSolidObjects(ctx, currentRoomX, currentRoomY) {
     const solidObjects = localState.solidObjects;
     if (solidObjects) {
         var roomObjects = solidObjects[currentRoomX + "," + currentRoomY];
-        for (let i = 0; i < roomObjects.length; i++) {
-            const solidObject = roomObjects[i];
+        if(roomObjects)
+            for (let i = 0; i < roomObjects.length; i++) {
+                const solidObject = roomObjects[i];
 
-            if (solidObject.type == "block") {
-                drawSprite(ctx, 'block', solidObject.x, solidObject.y);
-            } else if (solidObject.type == "gate") {
-                var aFrames = ['1', '2', '3', '4'];
-                let frameIndex = Math.floor((currentFrame + i * 10) / 55) % aFrames.length;
-                drawSprite(ctx, 'fireBlock' + aFrames[frameIndex], solidObject.x, solidObject.y);
+                if (solidObject.type == "block") {
+                    drawSprite(ctx, 'block', solidObject.x, solidObject.y);
+                } else if (solidObject.type == "gate") {
+                    var aFrames = ['1', '2', '3', '4'];
+                    let frameIndex = Math.floor((currentFrame + i * 10) / 55) % aFrames.length;
+                    drawSprite(ctx, 'fireBlock' + aFrames[frameIndex], solidObject.x, solidObject.y);
+                }
             }
-        }
     }
 }
 

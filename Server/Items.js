@@ -161,18 +161,25 @@ Items.prototype.pickupItemIfAllowed = function(player, item, pickupRequested) {
                 console.log("Player added key to the exit door at " + item.currRoom.x + ", " + item.currRoom.y + "!");
                 console.log(JSON.stringify(item));
                 global.sendItemsToClientsInRoom(pRoomX,pRoomY);
-                if(item.specialCount >= global.keysNeededToOpenDoor )
+                if(item.specialCount >= global.keysNeededToOpenDoor){
+                    global.sendEventToAllClients("eventMessage", {
+                        text: player.name + " has opened an exit door!"
+                    });
                     break;
+                }
             }
             
         }
 
-        if(item.specialCount >= global.keysNeededToOpenDoor  && player.isAlive){
+        if(item.specialCount >= global.keysNeededToOpenDoor && player.isAlive && pickupRequested && !player.isSnatcher){
             player.currPos.x = -1000;
             player.currPos.y = -1000;
             player.isAlive = false;
             player.points += global.pointsForEscape;
             console.log("Player " + player.name + " has escaped through the exit door at " + item.currRoom.x + ", " + item.currRoom.y + "!");
+            global.sendEventToAllClients("eventMessage", {
+                text: player.name + " has escaped through an exit door!"
+            });
             global.sendItemsToClientsInRoom(pRoomX,pRoomY);
             global.checkForGameOver('escaped');
         }
@@ -242,7 +249,11 @@ Items.prototype.isItemStillInChest = function(player){
                 player.currPos.y + player.radius >= item.currPos.y &&
                 player.currPos.y - player.radius <= item.currPos.y + item.height
             ) {
-                if(item.skillCheckInProgress == false){
+                if(
+                    item.skillCheckInProgress == false &&
+                    (player.isSnatcher == false && item.whoIsFor == 'runner') ||
+                    (player.isSnatcher == true && item.whoIsFor == 'snatcher')
+                ){
                     console.log("Player " + player.name + " started skillcheck for item " + item.id);
                     wellIsItBuddy = true;
                     item.skillCheckInProgress = true;

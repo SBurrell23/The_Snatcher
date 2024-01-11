@@ -6,75 +6,76 @@ function Movement() {
 
 Movement.prototype.movePlayer = function(gs,map, id, direction,deltaTime) {
     var player = gs.players.find(player => player.id == id);
-    if(player){
-        let moveAmount = player.speed * deltaTime; // Units per second
-        //console.log("Moving player " + player.name + " at speed " + moveAmount);
 
-        if(direction == "u" || direction == "ul" || direction == "ur"){
-                player.lastDirection = "north";
-                if((player.currPos.y - moveAmount >= 0)){
-                    var destPosY = player.currPos.y - moveAmount;
-                    var destPosX = player.currPos.x;
-                    if(!this.checkForWallCollision(player,destPosX,destPosY)){
-                        player.currPos.y = destPosY;
-                        new Items().checkForItemCollision(player,false);
-                        this.checkForPlayerCollision(gs,player);
-                    }
-                } else {
-                    this.movePlayerToNewRoom(gs,player,map,player.currRoom.x,player.currRoom.y-1,"south");
+    if(!player || !player.isAlive) return;
+
+    let moveAmount = player.speed * deltaTime; // Units per second
+    //console.log("Moving player " + player.name + " at speed " + moveAmount);
+
+    if(direction == "u" || direction == "ul" || direction == "ur"){
+            player.lastDirection = "north";
+            if((player.currPos.y - moveAmount >= 0)){
+                var destPosY = player.currPos.y - moveAmount;
+                var destPosX = player.currPos.x;
+                if(!this.checkForWallCollision(player,destPosX,destPosY)){
+                    player.currPos.y = destPosY;
+                    new Items().checkForItemCollision(player,false);
+                    this.checkForPlayerCollision(gs,player);
                 }
-        }
-        if(direction == "d" || direction == "dl" || direction == "dr"){
-                player.lastDirection = "south";
-                if((player.currPos.y + moveAmount <= global.canvasHeight)){
-                    var destPosY = player.currPos.y + moveAmount;
-                    var destPosX = player.currPos.x;
-                    if(!this.checkForWallCollision(player,destPosX,destPosY)){
-                        player.currPos.y = destPosY;
-                        new Items().checkForItemCollision(player,false);
-                        this.checkForPlayerCollision(gs,player);
-                    }
-                } else {
-                    this.movePlayerToNewRoom(gs,player,map,player.currRoom.x,player.currRoom.y+1,"north");
-                }
-        }
-        if(direction == "l" || direction == "ul" || direction == "dl"){
-                player.lastDirection = "west";
-                if((player.currPos.x - moveAmount >= 0)){
-                    var destPosX = player.currPos.x - moveAmount;
-                    var destPosY = player.currPos.y;
-                    if(!this.checkForWallCollision(player,destPosX,destPosY)){
-                        player.currPos.x = destPosX;
-                        new Items().checkForItemCollision(player,false);
-                        this.checkForPlayerCollision(gs,player);
-                    }
-                } else {
-                    this.movePlayerToNewRoom(gs,player,map,player.currRoom.x+1,player.currRoom.y,"east");
-                }
-        }
-        if(direction == "r" || direction == "ur" || direction == "dr"){
-                player.lastDirection = "east";
-                if((player.currPos.x + moveAmount <= global.canvasWidth)){
-                    var destPosX = player.currPos.x + moveAmount
-                    var destPosY = player.currPos.y;
-                    if(!this.checkForWallCollision(player,destPosX,destPosY)){
-                        player.currPos.x = destPosX;
-                        new Items().checkForItemCollision(player,false);
-                        this.checkForPlayerCollision(gs,player);
-                    }
-                } else {
-                    this.movePlayerToNewRoom(gs,player,map,player.currRoom.x-1,player.currRoom.y,"west");
-                }
-        }
-        
+            } else {
+                this.movePlayerToNewRoom(gs,player,map,player.currRoom.x,player.currRoom.y-1,"south");
+            }
     }
+    if(direction == "d" || direction == "dl" || direction == "dr"){
+            player.lastDirection = "south";
+            if((player.currPos.y + moveAmount <= global.canvasHeight)){
+                var destPosY = player.currPos.y + moveAmount;
+                var destPosX = player.currPos.x;
+                if(!this.checkForWallCollision(player,destPosX,destPosY)){
+                    player.currPos.y = destPosY;
+                    new Items().checkForItemCollision(player,false);
+                    this.checkForPlayerCollision(gs,player);
+                }
+            } else {
+                this.movePlayerToNewRoom(gs,player,map,player.currRoom.x,player.currRoom.y+1,"north");
+            }
+    }
+    if(direction == "l" || direction == "ul" || direction == "dl"){
+            player.lastDirection = "west";
+            if((player.currPos.x - moveAmount >= 0)){
+                var destPosX = player.currPos.x - moveAmount;
+                var destPosY = player.currPos.y;
+                if(!this.checkForWallCollision(player,destPosX,destPosY)){
+                    player.currPos.x = destPosX;
+                    new Items().checkForItemCollision(player,false);
+                    this.checkForPlayerCollision(gs,player);
+                }
+            } else {
+                this.movePlayerToNewRoom(gs,player,map,player.currRoom.x+1,player.currRoom.y,"east");
+            }
+    }
+    if(direction == "r" || direction == "ur" || direction == "dr"){
+            player.lastDirection = "east";
+            if((player.currPos.x + moveAmount <= global.canvasWidth)){
+                var destPosX = player.currPos.x + moveAmount
+                var destPosY = player.currPos.y;
+                if(!this.checkForWallCollision(player,destPosX,destPosY)){
+                    player.currPos.x = destPosX;
+                    new Items().checkForItemCollision(player,false);
+                    this.checkForPlayerCollision(gs,player);
+                }
+            } else {
+                this.movePlayerToNewRoom(gs,player,map,player.currRoom.x-1,player.currRoom.y,"west");
+            }
+    }
+        
+    
 }
 
 Movement.prototype.movePlayerToNewRoom = function(gs,player,map, newXRoom, newYRoom, directionToSpawn) {
 
-    if(player.isAlive == false)
-        return;
-    
+    if(!player || !player.isAlive) return;
+
     if (map[newYRoom][newXRoom] > 0) { // Room is not empty.
         //console.log("Player " + player.name + " moved to " + newYRoom + ", " + newXRoom);
         player.currRoom.x = newXRoom;
@@ -113,6 +114,8 @@ Movement.prototype.movePlayerToNewRoom = function(gs,player,map, newXRoom, newYR
 
 Movement.prototype.checkForWallCollision = function(player, destPosX, destPosY) {
     
+    if(!player || !player.isAlive) return false;
+
     // Calculate the boundaries of the player's circle
     var playerLeft = destPosX - player.radius;
     var playerRight = destPosX + player.radius;
@@ -160,13 +163,16 @@ Movement.prototype.checkForPlayerCollision = function(gs, player) {
             if(snatchedPlayer.hasItem)
                 new Items().dropItem(gs,snatchedPlayer.id,false);
             
+            snatchedPlayer.isAlive = false;
             snatchedPlayer.currPos.x = -1000;
             snatchedPlayer.currPos.y = -1000;
             snatchedPlayer.currRoom.x = -1000;
             snatchedPlayer.currRoom.y = -1000;
-            snatchedPlayer.isAlive = false;
             player.points += global.pointsForSnatching;
             console.log("The snatcher has SNATCHED " + snatchedPlayer.name + "!!! RIP!!!");
+            global.sendEventToAllRunners("eventMessage", {
+                text: snatchedPlayer.name.toUpperCase() + " has been snatched! RIP..."
+            });
             global.map.sendSnatcherDoorInfo(gs);
             global.checkForGameOver('snatched');
         }

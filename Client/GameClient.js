@@ -22,7 +22,8 @@ var localState = { //A local state needed to store things specific to the client
         bbq_chili:false,
         kill_the_power:false
     },
-    eventText:""
+    eventText:"",
+    exitDoors:[]
 };
 
 var joinButtons = {}; //Lobby screen join/leave button x,y,w,h
@@ -155,6 +156,8 @@ function recievedServerMessage(message) {
         }, m.data.unrevealTime);
     }else if(m.type == "eventMessage"){
         setEventText(m.data.text);
+    }else if(m.type == "exitDoorData"){
+        localState.exitDoors.push(m.data);
     }
     else if(m.type == "pong"){
         localState.ping = Date.now() - localState.ping;
@@ -311,14 +314,11 @@ function drawMap(ctx, gs, map) {
 
     if (map) {
 
-
-        
         const noPowerRoom = 'rgba(0, 0, 0, 0)';
         const noRoom = 'rgba(255, 255, 255, .65)';
         const emptyRoom = 'rgba(36, 66, 117, .65)';
         const exitDoor = 'rgba(66, 29, 4, .75)';
         const myRoom = getMe(gs).color;
-        const otherPlayerInRoom = '#32CD32';
         const snatcherInRoom = getSnatcher(gs).color;
 
         for (let row = 0; row < map.length; row++) {
@@ -339,9 +339,9 @@ function drawMap(ctx, gs, map) {
                     else if(localState.events['failedSkillCheck'].length > 0 && localState.events['failedSkillCheck'].includes(isRunnerInThisRoom(gs,row,col).id)){
                         drawRoomTile(ctx, roomX, roomY, isRunnerInThisRoom(gs,row,col).color); //Show that player to the killer
                     }
-                    else if(room == 3) // Is it a door room
+                    else if(room == 3 && isExitDoorInRoomOpen(row,col)) // if this door is opened, the snatcher can see it on their map
                         drawRoomTile(ctx, roomX, roomY, exitDoor);
-                    else if (room == 1) //Draw empty room
+                    else if (room == 1 || room == 3) //Draw empty rooms and also hide the door if it hasn't been opened
                         drawRoomTile(ctx, roomX, roomY, emptyRoom);
                     else if (room == 0) // Draw no room
                         drawRoomTile(ctx, roomX, roomY, noRoom);
@@ -380,7 +380,7 @@ function drawMap(ctx, gs, map) {
                             if(room == 1)
                                 drawRoomTile(ctx, roomX, roomY, emptyRoom);
                             else if (room == 3)
-                                drawRoomTile(ctx, roomX, roomY, exitDoor);
+                                drawRoomTile(ctx, roomX, roomY, exitDoor); //Runners can see doors once found
                         }
                         else{
                             drawRoomTile(ctx, roomX, roomY, noRoom);
@@ -919,6 +919,20 @@ function isRunnerInThisRoom(gs, row, col) {
         }
     }
     return -1;
+}
+
+function isExitDoorInRoomOpen(row, col){
+    //localState.exitDoors is populated once a door is opened from the server side
+    for (let i = 0; i < localState.exitDoors.length; i++) {
+        const exitdoor = localState.exitDoors[i];
+        if (exitdoor.currRoom.x == col && exitdoor.currRoom.y == row) {
+            if(exitdoor.specialCount >= exitdoor.specialCount2)
+                return true;
+            else
+                return false;
+        }
+    }
+    return false;
 }
 
 function getSnatcher(gs) {

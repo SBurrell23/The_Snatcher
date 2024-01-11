@@ -165,6 +165,8 @@ Items.prototype.pickupItemIfAllowed = function(player, item, pickupRequested) {
                     global.sendEventToAllClients("eventMessage", {
                         text: player.name + " has opened an exit door!"
                     });
+                    //This is really to just show the exit door on the snatchers map
+                    global.sendEventToAllClients("exitDoorData", item);    
                     break;
                 }
             }

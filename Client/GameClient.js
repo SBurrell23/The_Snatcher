@@ -308,7 +308,7 @@ function drawMap(ctx, gs, map) {
                     else if(haveIBeenInThisRoom(row,col) || (roomColor == getSnatcher(gs).color)){
                         if(roomColor = colors.otherPlayer){ //We don't show other players on the map unless magic monocle.
                             roomColor = emptyRoom;
-                            ctx.fillStyle = roomColor;
+                            //ctx.fillStyle = roomColor;
                         }
                         ctx.fillRect(roomX - walloffset, roomY + walloffset, roomSize, roomSize);
                     }

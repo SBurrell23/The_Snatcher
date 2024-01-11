@@ -64,7 +64,7 @@ function connectWebSocket() {
 
     //wss://the-snatcher.onrender.com
     //ws://localhost:8080
-    socket = new WebSocket('ws://localhost:8080');  
+    socket = new WebSocket('wss://the-snatcher.onrender.com');  
     socket.addEventListener('open', function () {
         console.log('Server connection established!');
         $("#offlineMessage").css("display", "none");
@@ -183,7 +183,9 @@ function drawGameState(gs) {
         drawSkillCheck(ctx,getMe(gs));
 
         //This needs to come after objects that are under the spotlight and before things over it
-        //drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
+        drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
+
+        drawEventText(ctx,gs,"");
         
         drawMap(ctx,gs,localState.map);
         drawPlayerInventory(ctx, gs);
@@ -243,6 +245,15 @@ function drawGameOver(ctx, gs) {
     ctx.fillText(subText, centerX, centerY + 50);
 }
 
+function drawEventText(ctx,gs,text){
+    var centerX = ctx.canvas.width / 2;
+    var centerY = ctx.canvas.height / 2;
+    ctx.font = '55px '+ font;
+    ctx.fillStyle = 'white';
+    ctx.textAlign = 'center';
+    ctx.fillText(text, centerX, centerY - 90);
+}
+
 function drawMap(ctx, gs, map) {
     const roomSize = 9;
     const walloffset = 20;
@@ -295,8 +306,10 @@ function drawMap(ctx, gs, map) {
                     else if(localState.events['magic_monocle'])
                         ctx.fillRect(roomX - walloffset, roomY + walloffset, roomSize, roomSize);
                     else if(haveIBeenInThisRoom(row,col) || (roomColor == getSnatcher(gs).color)){
-                        if(roomColor = colors.otherPlayer) //We don't show other players on the map unless magic monocle.
+                        if(roomColor = colors.otherPlayer){ //We don't show other players on the map unless magic monocle.
                             roomColor = emptyRoom;
+                            ctx.fillStyle = roomColor;
+                        }
                         ctx.fillRect(roomX - walloffset, roomY + walloffset, roomSize, roomSize);
                     }
                 }

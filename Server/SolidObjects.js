@@ -244,6 +244,7 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
     }
 }
 
+//This function is used to determine what a block type is based on its location and surroundings
 SolidObjects.prototype.getBlockType = function(maze,x,y){
 
     if(y == 0 || y == maze.length-1 || x == 0 || x == maze[y].length-1)

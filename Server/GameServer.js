@@ -87,16 +87,17 @@ wss.on('connection', (ws) => {
             }
         }
         if(message.type == "playerLeave"){
-            console.log("Player left " + message.id);
             gs.players = gs.players.filter(player => player.id !== message.id);
+            console.log('Player left: ' + clients.get(ws));
+            clients.delete(ws);
         }
         //This needs to be removed once game is live
         if(message.type == "generateMap"){
-        startGame();
-        //    for (let i = 0; i < gs.players.length; i++) {
-        //         if(gs.players[i].id == message.id)
-        //             new Event().teleportPlayerToRandomRoom(gs, gs.players[i]);
-        //     }
+        //startGame();
+           for (let i = 0; i < gs.players.length; i++) {
+                if(gs.players[i].id == message.id)
+                    new Event().teleportPlayerToRandomRoom(gs, gs.players[i]);
+            }
         }
         if(message.type =="startGame"){
             sendAllClients({type: "loadingGame"});
@@ -132,14 +133,18 @@ wss.on('connection', (ws) => {
         const disconnectedUserId = clients.get(ws);
         clients.delete(ws);
 
-        //Need a final check to see if the snatcher is the only one left
-        //If nobody is left or the snatcher leaves, reset the game
+        if(disconnectedUserId == undefined){
+            return;
+        }
+
+        //If nobody is left reset the game
         if(clients.size === 0) {
             gs.players = gs.players.filter(player => player.id !== disconnectedUserId);
             console.log('All clients disconnected...');
             clearAllTimeouts();
             resetGameState();
         }
+        //If the snatcher is the one who left, end the game 
         else if(isSnatcher(disconnectedUserId)){
             gs.players = gs.players.filter(player => player.id !== disconnectedUserId);
             gs.players.forEach(player => {
@@ -147,6 +152,11 @@ wss.on('connection', (ws) => {
             });
             console.log('The snatcher has disconnected...');
             setGameOver('ragequit');
+        //Else a player has left
+        }else{
+            gs.players = gs.players.filter(player => player.id !== disconnectedUserId);
+            console.log('A runner has disconnected...' + disconnectedUserId);
+            global.checkForGameOver('runnerdc');
         }
     });
 
@@ -181,16 +191,23 @@ function startGame(){
     global.map.sendSnatcherDoorInfo(gs);
 }
 
-//Last action can be 'escaped' or 'snatched
+//Last action can be 'escaped' or 'snatched or 'runnerdc'
+//These messages are mapped in the client
 global.checkForGameOver = function(lastAction){
-    var alivePlayers = gs.players.filter(player => !player.isSnatcher && player.isAlive);
-    if (alivePlayers.length == 0 && lastAction == 'snatched') {
-        setGameOver('snatched');
-        console.log("All players have been snatched! GAME OVER!");
-    }
-    else if (alivePlayers.length == 0 && lastAction == 'escaped') {
-        setGameOver('escaped');
-        console.log("All still alive players have escaped! GAME OVER!");
+    if(gs.state == 'playing'){
+        var alivePlayers = gs.players.filter(player => !player.isSnatcher && player.isAlive);
+        if (alivePlayers.length == 0 && lastAction == 'snatched') {
+            setGameOver('snatched');
+            console.log("all players have been snatched! GAME OVER!");
+        }
+        else if (alivePlayers.length == 0 && lastAction == 'escaped') {
+            setGameOver('escaped');
+            console.log("all still alive players have escaped! GAME OVER!");
+        }
+        else if (alivePlayers.length == 0 && lastAction == 'runnerdc') {
+            setGameOver('runnerdc');
+            console.log("the last runner has disconnected! GAME OVER!");
+        }
     }
 }
 
@@ -275,7 +292,6 @@ function setGameOver(whyIsGameOver) {
 function setSnatcher(){
     if(gs.players.length == 0)
         return;
-
     
     var snatcherSpeedMod = 1.12; // :)
     var snatcher = gs.players.find(player => player.name === 'snatcher');

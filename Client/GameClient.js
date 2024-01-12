@@ -52,7 +52,7 @@ var sc = { //Skill Check Variables
     lineX : 0,
     lineWidth: 2,
     barWidth : 140,
-    barHeight : 20,
+    barHeight : 25,
     successAreaColor: 'green'
 }
 const scReset = JSON.stringify(sc);
@@ -271,13 +271,15 @@ function drawGameOver(ctx, gs) {
     var subText = "Returning to lobby in " + timeBeforeReset + "..."
 
     if (reason == "snatched") {
-        gameOverMessage = 'The Snatcher has snatched all players!';
+        gameOverMessage = 'The Snatcher has snatched all runners!';
     } else if (reason == "escaped") {
-        gameOverMessage = 'All players have escaped and won!';
+        gameOverMessage = 'all runners have escaped and won!';
     } else if (reason == "ragequit") {
         gameOverMessage = 'The Snatcher has rage quit!';
+    } else if (reason == "runnerdc") {
+        gameOverMessage = 'the last runner has disconnected!';
     }
-
+    
     // Fill the canvas with black
     ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -303,13 +305,15 @@ function setEventText(text){
 
 function drawEventText(ctx, text) {
     var centerX = ctx.canvas.width / 2;
-    ctx.font = '45px ' + font;
+    ctx.font = '45px ' + font; // Add 'bold' for font weight
     ctx.fillStyle = 'red';
     ctx.textAlign = 'center';
     ctx.strokeStyle = 'black'; // set stroke color to black
-    ctx.lineWidth = 1.5; // set stroke width
-    ctx.fillText(text.toLowerCase(), centerX, 210);
+    ctx.lineWidth = 2; // set stroke width
+    ctx.lineJoin = 'round'; // set line join to round
+    ctx.miterLimit = 2; // set miter limit
     ctx.strokeText(text.toLowerCase(), centerX, 210);
+    ctx.fillText(text.toLowerCase(), centerX, 210);
 }
 
 const roomSize = 12;
@@ -436,70 +440,66 @@ function drawSkillCheck(ctx,player){
 }
 
 function drawLobby(ctx, gs) {
-    // Fill the canvas with black
+
+    // Draw the red THE SNATCHER Title
     ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-    // Draw red text in the center
     ctx.fillStyle = '#FF0000';
-    ctx.font = 'bold 85px ' + font;
+    ctx.font = 'bold 90px ' + font;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('THE SNATCHER', ctx.canvas.width / 2, (ctx.canvas.height / 2) - 245);
-
-    // Draw Snatcher
-    var centerX = ctx.canvas.width / 2;
-    var centerY = (ctx.canvas.height / 2);
-    ctx.beginPath();
-    ctx.arc(centerX, centerY - 80, 19, 0, 2 * Math.PI);
-    ctx.fillStyle = '#d90f0f';
-    ctx.fill();
-
-    // Draw snatcher's name
-    ctx.fillStyle = '#d90f0f';
-    ctx.font = 'bold 20px '+ font;
-    ctx.textAlign = 'center'; ;
-    ctx.fillText("Snatcher", centerX, centerY - 80 - 42);
-
-    if(!isPlayerSpotTaken(gs, "snatcher") && !alreadyConnected(gs, localState.playerId))
-        drawJoinLeaveButton(ctx, centerX, centerY - 80 + 45, "JOIN", 'green', "snatcher", "red");
-    else if(isMe("snatcher"))
-        drawJoinLeaveButton(ctx, centerX, centerY - 80 + 45, "LEAVE", 'red', "snatcher", "red");
-    else
-        joinButtons['snatcher'] = {};
+    ctx.fillText('THE SNATCHER', ctx.canvas.width / 2, (ctx.canvas.height / 2) - 255);
 
     // Draw Players
-    var spacing = 135;
-    var colors = ['#0866c4', 'orange', '#cf3fd1', '#43d925','#fce021'];
-    var names = ['george', 'vincent', 'rose', 'daniel', 'taylor'];
+    var spacing = 156;
+    var colors = ['#d90f0f','#0866c4', 'orange', '#cf3fd1', '#43d925','#fce021'];
+    var names = ['snatcher','george', 'vincent', 'rose', 'daniel', 'taylor'];
 
-    for (var i = 0; i < 5; i++) {
-        var x = centerX + (i - 2) * spacing;
-        var y = centerY + 120;
+    for (var i = 0; i < 6; i++) {
 
-        ctx.beginPath();
-        ctx.arc(x, y, 19, 0, 2 * Math.PI);
-        ctx.fillStyle = colors[i];
-        ctx.fill();
+        var x =  (ctx.canvas.width / 2) + (i - 3) * spacing;
+        var y = (ctx.canvas.height / 2) + 120;
+        ctx.font = 'bold 20px '+ font;
+        ctx.textAlign = 'center';
+        var sOffset = 0;
 
-        // Draw player's name
-        ctx.fillStyle = colors[i];
-        ctx.font = '20px '+ font;
-        ctx.textAlign = 'center'; ;
-        ctx.fillText(names[i].charAt(0).toUpperCase() + names[i].slice(1), x, y - 42);
+        if(names[i] == "snatcher"){
+            // Draw Snatcher
+            sOffset = 80;
+            x = (ctx.canvas.width / 2);
+            y = (ctx.canvas.height / 2);
+            ctx.beginPath();
+            ctx.arc(x, y - 80, 19, 0, 2 * Math.PI);
+            ctx.fillStyle = '#d90f0f';
+            ctx.fill();
+            // Draw snatcher's name
+            ctx.fillStyle = '#d90f0f';
+            ctx.fillText("Snatcher", x, y - 80 - 44);
+        }else{
+            //Draw players
+            ctx.beginPath();
+            ctx.arc(x, y, 19, 0, 2 * Math.PI);
+            ctx.fillStyle = colors[i];
+            ctx.fill();
+            // Draw player's name
+            ctx.fillStyle = colors[i];
+            ctx.fillText(names[i].charAt(0).toUpperCase() + names[i].slice(1), x, y - 44);
+        }
 
-
-        if(!isPlayerSpotTaken(gs, names[i]) && !alreadyConnected(gs, localState.playerId))
-            drawJoinLeaveButton(ctx, x, y + 45, "JOIN",'green', names[i], colors[i]);
+        if(!isPlayerSpotTaken(gs, names[i]) && localState.playerId == -1)
+            drawJoinLeaveButton(ctx, x, y + 45 - sOffset, "JOIN",'#0f6228', names[i], colors[i]);
         else if(isMe(names[i]))
-            drawJoinLeaveButton(ctx, x, y + 45, "LEAVE",'red', names[i], colors[i]);
-        else
+            drawJoinLeaveButton(ctx, x, y + 45 - sOffset, "LEAVE",'#cf4f3b', names[i], colors[i]);
+        else{
+            if(isPlayerSpotTaken(gs, names[i]))
+                drawJoinLeaveButton(ctx, x, y + 45 - sOffset, "ready",colors[i], names[i], colors[i]);
             joinButtons[names[i]] = {};
+        }
     }
 
     // Draw Start Game Button
     if (gs.players.length >= 1 && gs.players.length <= 6 && isMe("snatcher") && !isGameLoading) {
-        drawStartGameButton(ctx, centerX, centerY + 260, "START GAME", 'green', 200,50);
+        drawStartGameButton(ctx, (ctx.canvas.width / 2), (ctx.canvas.height / 2) + 280, "START GAME", '#0f6228', 230,80);
     } else {
         startGameButton = {};
     }
@@ -511,7 +511,7 @@ function drawStartGameButton(ctx, x, y, text, color, width, height) {
     ctx.fillRect(x - (width / 2), y - (height / 2), width, height);
     
     ctx.fillStyle = 'white';
-    ctx.font = '32px '+ font;
+    ctx.font = '38px '+ font;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(text, x, y+2);
@@ -528,16 +528,21 @@ function drawJoinLeaveButton(ctx, x, y, text, color, id, playerColor) {
     if(isGameLoading)
         return;
 
-    var width = 80;
-    var height = 30;
-    var x = x - 40;
+    var width = 104;
+    var height = 34;
+    var x = x - 52;
     var y = y - 10;
 
-    ctx.fillStyle = color;
-    ctx.fillRect(x, y, width, height);
+    if (text.includes("ready")) {
+        ctx.fillStyle = playerColor;
+        ctx.font = '28px '+ font;
+    } else {
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y, width, height);
+        ctx.fillStyle = 'white';
+        ctx.font = '22px '+ font;
+    }
 
-    ctx.fillStyle = 'white';
-    ctx.font = '20px '+ font;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(text, x + width/2, 1+y+height/2);

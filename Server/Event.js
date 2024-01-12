@@ -65,6 +65,9 @@ Event.prototype.triggerItemEvent = function(gs,player,item) {
         case "kill_the_power":
             var data = {unrevealTime: this.killThePowerUnrevealTime};
             global.sendEventToAllClients("kill_the_power",data);
+            global.sendEventToClient("eventMessage",player.id,{
+                text: "The runners maps have gone dark..."
+            });
             global.sendEventToAllRunners("eventMessage", {
                 text: "The snatcher has cut the power!"
             });

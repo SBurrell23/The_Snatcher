@@ -37,9 +37,22 @@ function loadMasterTileset(ts) {
 
     loadPlayerAnimations(ts);
     loadFireBlockAnimation(ts);
+    loadGates(ts);
     
     console.log("Assets loaded");
     console.log(sprites);
+}
+
+function loadGates(ts){
+    sprites['gnw'] = getTileSourceRect(ts,0, 16);
+    sprites['gne'] = getTileSourceRect(ts,1, 16);
+    sprites['gsw'] = getTileSourceRect(ts,0, 18);
+    sprites['gse'] = getTileSourceRect(ts,1, 18);
+
+    sprites['gn'] = getTileSourceRect(ts,1, 17);
+    sprites['gs'] = getTileSourceRect(ts,1, 17);
+    sprites['gw'] = getTileSourceRect(ts,0, 17);
+    sprites['ge'] = getTileSourceRect(ts,0, 17);
 }
 
 function loadFireBlockAnimation(ts){

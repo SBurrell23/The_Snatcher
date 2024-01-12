@@ -234,7 +234,7 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
                             width: global.map.getBlockSize(),
                             height: global.map.getBlockSize(),
                             color: this.color,
-                            type: this.getBlockType(maze,l,k)
+                            type: this.getBlockType(maze,k,l)
                         });
                     }
                 }
@@ -247,10 +247,49 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
 //This function is used to determine what a block type is based on its location and surroundings
 SolidObjects.prototype.getBlockType = function(maze,x,y){
 
-    if(y == 0 || y == maze.length-1 || x == 0 || x == maze[y].length-1)
-        return "gate";
+    // if(x == 0 || x == maze.length-1 || y == 0 || y == maze[x].length-1)
+    //     return "g";
 
-    return 'block';
+    if(x == 0 && y == 0)
+        return "gnw";
+    else if(x == 0 && y == maze[x].length-1)
+        return "gne";
+    else if(x == maze.length-1 && y == 0)
+        return "gsw";
+    else if(x == maze.length-1 && y == maze[x].length-1)
+        return "gse";
+    else if(x == 0)
+        return "gn";
+    else if(x == maze.length-1)
+        return "gs";
+    else if(y == 0)
+        return "gw";
+    else if(y == maze[x].length-1)
+        return "ge";
+
+    var blockType = 'b';
+
+    // Check north block
+    if (x > 0 && maze[x-1][y] === '■') {
+        blockType += 'N';
+    }
+
+    // Check south block
+    if (x < maze.length-1 && maze[x+1][y] === '■') {
+        blockType += 'S';
+    }
+
+    // Check west block
+    if (y > 0 && maze[x][y-1] === '■') {
+        blockType += 'W';
+    }
+
+    // Check east block
+    if (y < maze[x].length-1 && maze[x][y+1] === '■') {
+        blockType += 'E';
+    }
+    
+    return blockType;
 }
 
 SolidObjects.prototype.createRandomPath = function(maze, from, to) {

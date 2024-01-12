@@ -42,6 +42,7 @@ var eventTextInterval = null;
 
 var sprites = {};
 let currentFrame = 0;
+var initRainFlag = true;
 
 var sc = { //Skill Check Variables
     barMoveAmount : 0,
@@ -54,7 +55,7 @@ var sc = { //Skill Check Variables
     barWidth : 140,
     barHeight : 25,
     successAreaColor: 'green'
-}
+};
 const scReset = JSON.stringify(sc);
 
 const loadingMessages = [
@@ -158,8 +159,7 @@ function recievedServerMessage(message) {
         setEventText(m.data.text);
     }else if(m.type == "exitDoorData"){
         localState.exitDoors.push(m.data);
-    }
-    else if(m.type == "pong"){
+    }else if(m.type == "pong"){
         localState.ping = Date.now() - localState.ping;
     }else if(m.type == "gs"){
         serverState = m;
@@ -199,13 +199,18 @@ function gameLoop() {
     requestAnimationFrame(gameLoop); // schedule next game loop
 }
 
+
 function drawGameState(gs) {
     
     var ctx = document.getElementById('canvas').getContext('2d');
-    
+
+    if(initRainFlag)
+        initRain();
+
     //Draw the lobby
-    if(gs.state == "lobby")
+    if(gs.state == "lobby"){
         drawLobby(ctx,gs);
+    }
     else if(gs.state == "loading")
         drawLoading(ctx,gs);
     //Draw the game
@@ -223,7 +228,7 @@ function drawGameState(gs) {
         drawPlayers(ctx, gs, currentRoomX, currentRoomY);
         
         //This needs to come after objects that are under the spotlight and before things over it
-        drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
+        //drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
 
         drawEventText(ctx,localState.eventText);
 
@@ -241,6 +246,60 @@ function drawGameState(gs) {
     }
 
 }   
+
+var raindrops = [];
+function drawRain(ctx) {
+
+    // Set the color of the raindrops
+    ctx.fillStyle = 'red';
+
+    // Draw each raindrop
+    for (let i = 0; i < raindrops.length; i++) {
+        let raindrop = raindrops[i];
+
+        // Calculate the teardrop coordinates
+        let x = raindrop.x;
+        let y = raindrop.y;
+        ctx.lineWidth = 5;
+
+        // Draw the teardrop shape
+        ctx.beginPath();
+        ctx.moveTo(x, y - raindrop.length / 2); // Top point
+        ctx.bezierCurveTo(
+        x + raindrop.length / 2,
+        y + raindrop.length / 2,
+        x - raindrop.length / 2,
+        y + raindrop.length / 2,
+        x,
+        y - raindrop.length / 2
+        );
+        ctx.closePath();
+        ctx.fill();
+
+        // Update the raindrop's position
+        raindrop.y += raindrop.speed;
+
+        // If the raindrop is off the bottom of the canvas, move it back to the top
+        if (raindrop.y > canvas.height) {
+            raindrop.y = 0 - raindrop.length;
+            raindrop.x = Math.random() * canvas.width;
+            raindrop.speed = Math.random() * 1.4 + 1.25;
+            raindrop.length = Math.random() * 12 + 5;
+        }
+    }
+}
+
+function initRain(){
+    for (let i = 0; i < 155; i++) {
+        raindrops.push({
+            x: Math.random() * canvas.width,  // Random x position
+            y: Math.random() * canvas.height, // Random y position
+            speed: Math.random() * 1.4 + 1.25,     // Random speed
+            length: Math.random() * 12 + 5   // Random length
+        });
+    }
+    initRainFlag = false;
+}
 
 function drawGameInProgress(ctx) {
     ctx.fillStyle = '#000000';
@@ -440,10 +499,13 @@ function drawSkillCheck(ctx,player){
 }
 
 function drawLobby(ctx, gs) {
-
-    // Draw the red THE SNATCHER Title
+    
     ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+    drawRain(ctx);
+
+    // Draw the red THE SNATCHER Title
     ctx.fillStyle = '#FF0000';
     ctx.font = 'bold 90px ' + font;
     ctx.textAlign = 'center';
@@ -492,7 +554,7 @@ function drawLobby(ctx, gs) {
             drawJoinLeaveButton(ctx, x, y + 45 - sOffset, "LEAVE",'#cf4f3b', names[i], colors[i]);
         else{
             if(isPlayerSpotTaken(gs, names[i]))
-                drawJoinLeaveButton(ctx, x, y + 45 - sOffset, "ready",colors[i], names[i], colors[i]);
+                drawJoinLeaveButton(ctx, x, y + 45 - sOffset, "connected",colors[i], names[i], colors[i]);
             joinButtons[names[i]] = {};
         }
     }
@@ -533,7 +595,7 @@ function drawJoinLeaveButton(ctx, x, y, text, color, id, playerColor) {
     var x = x - 52;
     var y = y - 10;
 
-    if (text.includes("ready")) {
+    if (text.includes("connected")) {
         ctx.fillStyle = playerColor;
         ctx.font = '28px '+ font;
     } else {
@@ -839,15 +901,27 @@ function drawSolidObjects(ctx, currentRoomX, currentRoomY) {
             for (let i = 0; i < roomObjects.length; i++) {
                 const solidObject = roomObjects[i];
 
-                if (solidObject.type == "block") {
-                    drawSprite(ctx, 'block', solidObject.x, solidObject.y);
-                } else if (solidObject.type == "gate") {
+                ctx.fillStyle = 'red';
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'left';
+                if(solidObject.type == "b"){
+                    // //Draw flaming pylon
                     var aFrames = ['1', '2', '3', '4'];
                     let frameIndex = Math.floor((currentFrame + i * 10) / 55) % aFrames.length;
                     drawSprite(ctx, 'fireBlock' + aFrames[frameIndex], solidObject.x, solidObject.y);
+                    //ctx.fillText(`${solidObject.type}`, solidObject.x + 15, solidObject.y + 24);
+                }
+                else if (solidObject.type.startsWith("b")) {
+                    drawSprite(ctx, 'block', solidObject.x, solidObject.y);
+                    //ctx.fillText(`${solidObject.type}`, solidObject.x + 15, solidObject.y + 24);
+                } else if (solidObject.type.startsWith("g")) {
+                    drawSprite(ctx, solidObject.type, solidObject.x, solidObject.y);
                 }
             }
     }
+
+
+
 }
 
 function drawPing(ctx){
@@ -869,14 +943,6 @@ function drawPing(ctx){
 }
 
 function isPlayerSpotTaken(gs, id) {
-    for (let i = 0; i < gs.players.length; i++) {
-        if (gs.players[i].id == id)
-            return true;
-    }
-    return false;
-}
-
-function alreadyConnected(gs, id) {
     for (let i = 0; i < gs.players.length; i++) {
         if (gs.players[i].id == id)
             return true;

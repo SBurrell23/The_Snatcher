@@ -904,19 +904,30 @@ function drawSolidObjects(ctx, currentRoomX, currentRoomY) {
                 ctx.fillStyle = 'red';
                 ctx.font = 'bold 14px Arial';
                 ctx.textAlign = 'left';
+                if (solidObject.type.startsWith("g")) {
+                    drawSprite(ctx, solidObject.type, solidObject.x, solidObject.y);
+                    continue;
+                }
+
                 if(solidObject.type == "b"){
                     // //Draw flaming pylon
                     var aFrames = ['1', '2', '3', '4'];
                     let frameIndex = Math.floor((currentFrame + i * 10) / 55) % aFrames.length;
                     drawSprite(ctx, 'fireBlock' + aFrames[frameIndex], solidObject.x, solidObject.y);
                     //ctx.fillText(`${solidObject.type}`, solidObject.x + 15, solidObject.y + 24);
+                    continue;
                 }
+
+                
+                if (solidObject.type == "bs")
+                    drawSprite(ctx, 'grave', solidObject.x, solidObject.y);
                 else if (solidObject.type.startsWith("b")) {
                     drawSprite(ctx, 'block', solidObject.x, solidObject.y);
                     //ctx.fillText(`${solidObject.type}`, solidObject.x + 15, solidObject.y + 24);
-                } else if (solidObject.type.startsWith("g")) {
-                    drawSprite(ctx, solidObject.type, solidObject.x, solidObject.y);
                 }
+
+
+
             }
     }
 

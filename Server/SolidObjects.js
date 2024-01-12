@@ -269,25 +269,27 @@ SolidObjects.prototype.getBlockType = function(maze,x,y){
 
     var blockType = 'b';
 
-    // Check north block
-    if (x > 0 && maze[x-1][y] === '■') {
-        blockType += 'N';
-    }
-
     // Check south block
     if (x < maze.length-1 && maze[x+1][y] === '■') {
-        blockType += 'S';
+        blockType += 's';
     }
 
-    // Check west block
-    if (y > 0 && maze[x][y-1] === '■') {
-        blockType += 'W';
+    // Check north block
+    if (x > 0 && maze[x-1][y] === '■') {
+        blockType += 'n';
     }
 
     // Check east block
     if (y < maze[x].length-1 && maze[x][y+1] === '■') {
-        blockType += 'E';
+        blockType += 'e';
     }
+    
+    // Check west block
+    if (y > 0 && maze[x][y-1] === '■') {
+        blockType += 'w';
+    }
+
+
     
     return blockType;
 }

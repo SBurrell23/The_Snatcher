@@ -166,7 +166,7 @@ function recievedServerMessage(message) {
     }else if(m.type == "loadingGame"){
         console.log("Loading game...");
         randomLoadingMessage = loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
-        roomsIveBeenIn = [];
+        localState.roomsIveBeenIn = [];
         isGameLoading = true;
     }
 
@@ -221,12 +221,13 @@ function drawGameState(gs) {
         if(getMe(gs).isSnatcher)
             drawSnatcherDoorInfo(ctx,gs,localState.doorInfo);
         drawPlayers(ctx, gs, currentRoomX, currentRoomY);
-        drawSkillCheck(ctx,getMe(gs));
-
+        
         //This needs to come after objects that are under the spotlight and before things over it
         drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
 
         drawEventText(ctx,localState.eventText);
+
+        drawSkillCheck(ctx,getMe(gs));
         
         drawMap(ctx,gs,localState.map);
         drawPlayerInventory(ctx, gs);
@@ -302,10 +303,13 @@ function setEventText(text){
 
 function drawEventText(ctx, text) {
     var centerX = ctx.canvas.width / 2;
-    ctx.font = '50px ' + font;
-    ctx.fillStyle = 'white';
+    ctx.font = '45px ' + font;
+    ctx.fillStyle = 'red';
     ctx.textAlign = 'center';
-    ctx.fillText(text, centerX, 190);
+    ctx.strokeStyle = 'black'; // set stroke color to black
+    ctx.lineWidth = 1.5; // set stroke width
+    ctx.fillText(text.toLowerCase(), centerX, 210);
+    ctx.strokeText(text.toLowerCase(), centerX, 210);
 }
 
 const roomSize = 12;
@@ -316,7 +320,7 @@ function drawMap(ctx, gs, map) {
 
         const noPowerRoom = 'rgba(0, 0, 0, 0)';
         const noRoom = 'rgba(255, 255, 255, .65)';
-        const emptyRoom = 'rgba(36, 66, 117, .65)';
+        const emptyRoom = 'rgba(36, 66, 108, .60)';
         const exitDoor = 'rgba(66, 29, 4, .75)';
         const myRoom = getMe(gs).color;
         const snatcherInRoom = getSnatcher(gs).color;
@@ -339,7 +343,7 @@ function drawMap(ctx, gs, map) {
                     else if(localState.events['failedSkillCheck'].length > 0 && localState.events['failedSkillCheck'].includes(isRunnerInThisRoom(gs,row,col).id)){
                         drawRoomTile(ctx, roomX, roomY, isRunnerInThisRoom(gs,row,col).color); //Show that player to the killer
                     }
-                    else if(room == 3 && isExitDoorInRoomOpen(row,col))// if this door is opened, the snatcher can see it on their map
+                    else if(room == 3 && isExitDoorInRoomOpen(row,col)) // if this door is opened, the snatcher can see it on their map
                         drawRoomTile(ctx, roomX, roomY, exitDoor);
                     else if (room == 1 || room == 3) //Draw empty rooms and also hide the door if it hasn't been opened
                         drawRoomTile(ctx, roomX, roomY, emptyRoom);
@@ -466,7 +470,7 @@ function drawLobby(ctx, gs) {
 
     // Draw Players
     var spacing = 135;
-    var colors = ['#0f2abf', 'orange', '#d616e0', '#51de14','#edda0c'];
+    var colors = ['#0866c4', 'orange', '#cf3fd1', '#43d925','#fce021'];
     var names = ['george', 'vincent', 'rose', 'daniel', 'taylor'];
 
     for (var i = 0; i < 5; i++) {

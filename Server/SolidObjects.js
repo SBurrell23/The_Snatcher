@@ -7,7 +7,7 @@ function SolidObjects() {
     //The canvas and block size must divide into an EVEN number
 
     this.minNumberOfBlocks = 100;
-    this.maxNumberOfBlocks = 250;
+    this.maxNumberOfBlocks = 200;
 }
 
 SolidObjects.prototype.get = function() {
@@ -228,18 +228,13 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
                 for (let l = 0; l < maze[k].length; l++) {
                     const value = maze[k][l];
                     if (value == '■') {
-                        //console.log("Creating maze wall at " + l + ", " + k);
-                        var type = "block";
-                        if(k == 0 || k == maze.length-1 || l == 0 || l == maze[k].length-1)
-                            type = "gate";
-
                         this.solidObjects[rX+","+rY].push({
                             x: (l * global.map.getBlockSize()),
                             y: (k * global.map.getBlockSize()),
                             width: global.map.getBlockSize(),
                             height: global.map.getBlockSize(),
                             color: this.color,
-                            type:type
+                            type: this.getBlockType(maze,l,k)
                         });
                     }
                 }
@@ -247,6 +242,14 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
 
         }
     }
+}
+
+SolidObjects.prototype.getBlockType = function(maze,x,y){
+
+    if(y == 0 || y == maze.length-1 || x == 0 || x == maze[y].length-1)
+        return "gate";
+
+    return 'block';
 }
 
 SolidObjects.prototype.createRandomPath = function(maze, from, to) {

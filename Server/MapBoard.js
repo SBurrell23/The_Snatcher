@@ -214,74 +214,8 @@ MapBoard.prototype.generateNewMap = function() {
         }
     }
 
-
-    //Decide if we want to spawn the doors N/S or E/W
-    const leftOrRightDoorSpawns = Math.floor(Math.random() * 2) + 1;
-
-    //Spawn the doors on the top and bottom of the map
-    if(leftOrRightDoorSpawns == 1){
-        // Find the topmost 1 room and set it to 3
-        let topmostRoomFound = false;
-        for (let i = 0; i < rows; i++) {
-            for (let j = 0; j < cols; j++) {
-                if (map[i][j] === 1) {
-                    map[i][j] = 3;
-                    topmostRoomFound = true;
-                    break;
-                }
-            }
-            if (topmostRoomFound) {
-                break;
-            }
-        }
-        // Find the bottommost 1 room and set it to 3
-        let bottommostRoomFound = false;
-        for (let i = rows - 1; i >= 0; i--) {
-            for (let j = 0; j < cols; j++) {
-                if (map[i][j] === 1) {
-                    map[i][j] = 3;
-                    bottommostRoomFound = true;
-                    break;
-                }
-            }
-            if (bottommostRoomFound) {
-                break;
-            }
-        }
-    }
-
-    //Spawn the doors on the left and right of the map
-    if(leftOrRightDoorSpawns == 2){
-        // Find the leftmost 1 room and set it to 3
-        let leftmostRoomFound = false;
-        for (let j = 0; j < cols; j++) {
-            for (let i = 0; i < rows; i++) {
-                if (map[i][j] === 1) {
-                    map[i][j] = 3;
-                    leftmostRoomFound = true;
-                    break;
-                }
-            }
-            if (leftmostRoomFound) {
-                break;
-            }
-        }
-
-        // Find the rightmost 1 room and set it to 3
-        let rightmostRoomFound = false;
-        for (let j = cols - 1; j >= 0; j--) {
-            for (let i = 0; i < rows; i++) {
-                if (map[i][j] === 1) {
-                    map[i][j] = 3;
-                    rightmostRoomFound = true;
-                    break;
-                }
-            }
-            if (rightmostRoomFound) {
-                break;
-            }
-        }
-    }
+    //Some really clever logic to determine and set the exit doors
+    this.setExitRooms(map,rows,cols);
 
     for (let i = 0; i < rows; i++) {
         for (let j = 0; j < cols; j++) {
@@ -295,6 +229,98 @@ MapBoard.prototype.generateNewMap = function() {
     //Finally, a good lookin' map!
     this.gameMap = map;
     return map;
+}
+
+MapBoard.prototype.setExitRooms = function(map,rows,cols) {
+    //Flips a coin, and either puts the exit on the top/bottom or left/right
+    //The algorithm makes (attemptsMax) attempts to find a random open(1) room in a topmost/leftmost etc row/column
+    //If it fails all attemptsMax attempts, it will try again on the next row/column moving inwards
+    const attemptsMax = 2;
+    //A lower attemptsMax value means the exits might not be on the very edge of the map (but usually are)
+    //A value 5 or higher ALMOST ALWAYS guarantees the exits will be on the edge of the map
+    //The 2 value will place exits on the edge 70% of the time, else they are usually 1 or 2 row/column in
+    if ((Math.floor(Math.random() * 2) + 1) == 1) {
+        let found = false;
+        let row = 0;
+        let randomColumn;
+        let attempts = 0;
+
+        // Find top room
+        while (!found && row < rows) {
+            attempts = 0;
+            while (!found && attempts < attemptsMax) {
+                randomColumn = Math.floor(Math.random() * cols);
+                if (map[row][randomColumn] === 1) {
+                    map[row][randomColumn] = 3;
+                    found = true;
+                } else {
+                    attempts++;
+                }
+            }
+            if (!found) {
+                row++;
+            }
+        }
+
+        found = false;
+        row = rows - 1;
+        // Find bottom room
+        while (!found && row >= 0) {
+            attempts = 0;
+            while (!found && attempts < attemptsMax) {
+                randomColumn = Math.floor(Math.random() * cols);
+                if (map[row][randomColumn] === 1) {
+                    map[row][randomColumn] = 3;
+                    found = true;
+                } else {
+                    attempts++;
+                }
+            }
+            if (!found) {
+                row--;
+            }
+        }
+    } else {
+        found = false;
+        let column = 0;
+        let randomRow;
+        let attempts = 0;
+        // Find leftmost room
+        while (!found && column < cols) {
+            attempts = 0;
+            while (!found && attempts < attemptsMax) {
+                randomRow = Math.floor(Math.random() * rows);
+                if (map[randomRow][column] === 1) {
+                    map[randomRow][column] = 3;
+                    found = true;
+                } else {
+                    attempts++;
+                }
+            }
+            if (!found) {
+                column++;
+            }
+        }
+
+        found = false;
+        column = cols - 1;
+        // Find rightmost room
+        while (!found && column >= 0) {
+            attempts = 0;
+            while (!found && attempts < attemptsMax) {
+                randomRow = Math.floor(Math.random() * rows);
+                if (map[randomRow][column] === 1) {
+                    map[randomRow][column] = 3;
+                    found = true;
+                } else {
+                    attempts++;
+                }
+            }
+            if (!found) {
+                column--;
+            }
+        }
+    }
 }
 
 MapBoard.prototype.spawnPlayers = function(players) {

@@ -58,17 +58,17 @@ var sc = { //Skill Check Variables
 const scReset = JSON.stringify(sc);
 
 const loadingMessages = [
-    "Darkness comes...",
-    "Unleashing horrors...",
-    "Approaching the nightmare...",
-    "Awakening evil...",
-    "Into the abyss...",
-    "Summoning spirits...",
-    "Unleashing hell...",
-    "Entering the haunted realm...",
-    "Awakening the cursed one...",
-    "Sharpening blades...",
-    "Revving chainsaws..."
+    "darkness comes...",
+    "unleashing horrors...",
+    "approaching the nightmare...",
+    "awakening evil...",
+    "into the abyss...",
+    "summoning spirits...",
+    "unleashing hell...",
+    "entering the haunted realm...",
+    "awakening the cursed one...",
+    "sharpening blades...",
+    "revving chainsaws..."
 ];
 
 var randomLoadingMessage = null; //This chosen then the player loads
@@ -339,7 +339,7 @@ function drawMap(ctx, gs, map) {
                     else if(localState.events['failedSkillCheck'].length > 0 && localState.events['failedSkillCheck'].includes(isRunnerInThisRoom(gs,row,col).id)){
                         drawRoomTile(ctx, roomX, roomY, isRunnerInThisRoom(gs,row,col).color); //Show that player to the killer
                     }
-                    else if(room == 3 && isExitDoorInRoomOpen(row,col)) // if this door is opened, the snatcher can see it on their map
+                    else if(room == 3 )//&& isExitDoorInRoomOpen(row,col)) // if this door is opened, the snatcher can see it on their map
                         drawRoomTile(ctx, roomX, roomY, exitDoor);
                     else if (room == 1 || room == 3) //Draw empty rooms and also hide the door if it hasn't been opened
                         drawRoomTile(ctx, roomX, roomY, emptyRoom);

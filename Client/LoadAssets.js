@@ -16,7 +16,13 @@ function loadMasterTileset(ts) {
     sprites['ground4'] = getTileSourceRect(ts,1,11);
 
     sprites['block'] = getTileSourceRect(ts,25, 0);
-    sprites['grave'] = getTileSourceAdjustable(ts,21, 8 ,48,96);
+    sprites['grave1'] = getTileSourceAdjustable(ts,4, 15 ,48,96);
+    sprites['grave2'] = getTileSourceAdjustable(ts,5, 15 ,48,96);
+    sprites['sidewaysStone1'] = getTileSourceAdjustable(ts,6, 15 ,96,48);
+    sprites['sidewaysStone2'] = getTileSourceAdjustable(ts,6, 16 ,96,48);
+
+    sprites['pool1'] = getTileSourceRect(ts,8, 15);
+    sprites['pool2'] = getTileSourceRect(ts,9, 15);
 
     sprites['chest1'] = getTileSourceRect(ts,2, 0);
     sprites['chest2'] = getTileSourceRect(ts,4, 0);

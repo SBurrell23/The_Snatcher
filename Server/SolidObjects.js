@@ -59,7 +59,7 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
                 for (let i = 0; i < this.mazeHeight; i++) {
                     maze[i] = [];
                     for (let j = 0; j < this.mazeWidth; j++) {
-                        maze[i][j] = 'B';
+                        maze[i][j] = '■';
                     }
                 }
                 //Ratio is 10 to 14, each door must be 2 75px blocks wide
@@ -211,7 +211,7 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
                 let blockCount = 0; 
                 for (let k = 0; k < maze.length; k++)
                     for (let l = 0; l < maze[k].length; l++) 
-                        if (maze[k][l] == 'B') 
+                        if (maze[k][l] == '■') 
                             blockCount++; 
 
                 //THESE ARE THE MOST IMPORTANT VARIABLES TO TWEAK FOR MAZE DIFFICULTY
@@ -223,11 +223,11 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
                 //Add another check here for large open areas. if a room is a yin-yang, its not fun.
             }
 
-            //Finally after all the pathing is done turn any leftover 'B' into solidObjects to build the room
+            //Finally after all the pathing is done turn any leftover '■' into solidObjects to build the room
             for (let k = 0; k < maze.length; k++) {
                 for (let l = 0; l < maze[k].length; l++) {
                     const value = maze[k][l];
-                    if (value == 'B') {
+                    if (value == '■') {
                         this.solidObjects[rX+","+rY].push({
                             x: (l * global.map.getBlockSize()),
                             y: (k * global.map.getBlockSize()),
@@ -247,6 +247,7 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
 //This function is used to determine what a block type is based on its location and surroundings
 SolidObjects.prototype.getBlockType = function(maze,x,y){
 
+
     if(x == 0 && y == 0)
         return "gnw";
     else if(x == 0 && y == maze[x].length-1)
@@ -264,25 +265,32 @@ SolidObjects.prototype.getBlockType = function(maze,x,y){
     else if(y == maze[x].length-1)
         return "ge";
 
+    var blockType = 'b';
 
-    var surroundingBlocks = [];
-
-    for (var i = x - 1; i <= x + 1; i++) {
-        var row = [];
-        for (var j = y - 1; j <= y + 1; j++) {
-            if (i >= 0 && i < maze.length && j >= 0 && j < maze[i].length) {
-                row.push(maze[i][j]);
-            } else {
-                row.push(null); // or any default value for blocks outside the maze
-            }
-        }
-        surroundingBlocks.push(row);
+    // Check south block
+    if (x < maze.length-1 && maze[x+1][y] === '■') {
+        blockType += 's';
     }
-    console.log(surroundingBlocks);
-    return surroundingBlocks;
 
+    // Check north block
+    if (x > 0 && maze[x-1][y] === '■') {
+        blockType += 'n';
+    }
+
+    // Check east block
+    if (y < maze[x].length-1 && maze[x][y+1] === '■') {
+        blockType += 'e';
+    }
+    
+    // Check west block
+    if (y > 0 && maze[x][y-1] === '■') {
+        blockType += 'w';
+    }
+
+
+    
+    return blockType;
 }
-
 
 SolidObjects.prototype.createRandomPath = function(maze, from, to) {
 

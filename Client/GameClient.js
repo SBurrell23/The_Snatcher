@@ -898,78 +898,43 @@ function drawSolidObjects(ctx, currentRoomX, currentRoomY) {
     if (solidObjects) {
         var roomObjects = solidObjects[currentRoomX + "," + currentRoomY];
         if(roomObjects)
-            for (let i = 0; i < roomObjects.length; i++) {
+            for (let i = roomObjects.length - 1; i >= 0; i--) {
                 const solidObject = roomObjects[i];
 
                 ctx.fillStyle = 'red';
                 ctx.font = 'bold 14px Arial';
                 ctx.textAlign = 'left';
 
-                if (typeof solidObject.type === "string" && solidObject.type.startsWith("g")) {
+                if (solidObject.type.startsWith("g")) {
                     drawSprite(ctx, solidObject.type, solidObject.x, solidObject.y);
                     continue;
                 }
-                
-                var soloBlock1 = [
-                    [" ", " ", " "],
-                    [" ", "B", " "],
-                    [" ", " ", " "]
-                ];
-                var soloBlock2 = [
-                    [" ", " ", " "],
-                    [" ", "B", " "],
-                    ["B", " ", " "]
-                ];
-                var soloBlock3 = [
-                    [" ", " ", "B"],
-                    [" ", "B", " "],
-                    [" ", " ", " "]
-                ];
-                var soloBlock4 = [
-                    ["B", " ", " "],
-                    [" ", "B", " "],
-                    [" ", " ", " "]
-                ];
-                var soloBlock5 = [
-                    [" ", " ", " "],
-                    [" ", "B", " "],
-                    [" ", " ", "B"]
-                ];
-                var soloGrave = [
-                    [" ", " ", " "],
-                    [" ", "B", " "],
-                    [" ", "B", " "]
-                ];
-                var soloGrave2 = [
-                    [" ", "B", " "],
-                    [" ", "B", " "],
-                    [" ", " ", " "]
-                ];
-                var soloGrave3 = [
-                    [" ", "B", " "],
-                    [" ", "B", " "],
-                    [" ", "B", " "]
-                ];
-                
 
-                if (arraysMatch(solidObject.type, soloBlock1) || arraysMatch(solidObject.type, soloBlock2) || arraysMatch(solidObject.type, soloBlock3) || arraysMatch(solidObject.type, soloBlock4) || arraysMatch(solidObject.type, soloBlock5)) {
+                if(solidObject.type == "b"){
                     // //Draw flaming pylon
                     var aFrames = ['1', '2', '3', '4'];
                     let frameIndex = Math.floor((currentFrame + i * 10) / 55) % aFrames.length;
                     drawSprite(ctx, 'fireBlock' + aFrames[frameIndex], solidObject.x, solidObject.y);
-                }
-                else if (arraysMatch(solidObject.type, soloGrave)) {
-                    drawSprite(ctx, 'grave', solidObject.x, solidObject.y);
-                }
-                else if (arraysMatch(solidObject.type, soloGrave2) || arraysMatch(solidObject.type, soloGrave3)) {
+                    //ctx.fillText(`${solidObject.type}`, solidObject.x + 15, solidObject.y + 24);
                     continue;
                 }
-                else{
+
+                const oneOrTwo = seededRandom(solidObject.x + solidObject.y, 1, 3);//1 or 2
+
+                if (solidObject.type == "bs" && solidObject.y != canvas.height - 96)
+                    drawSprite(ctx, 'grave'+oneOrTwo, solidObject.x, solidObject.y);
+                else if (solidObject.type == "be" && !spriteExistsAt(solidObject.x + 48, solidObject.y - 48, roomObjects) && solidObject.x != canvas.width - 96){
+                    drawSprite(ctx, 'sidewaysStone'+oneOrTwo, solidObject.x, solidObject.y);
+                }
+                else if(solidObject.type == 'bne' || solidObject.type == 'bsw'){
+                    drawSprite(ctx, 'pool'+oneOrTwo, solidObject.x, solidObject.y);
+                }
+                else {
                     drawSprite(ctx, 'block', solidObject.x, solidObject.y);
+                    //ctx.fillText(`${solidObject.type}`, solidObject.x + 15, solidObject.y + 24);
                 }
 
 
-                //     //ctx.fillText(`${solidObject.type}`, solidObject.x + 15, solidObject.y + 24);
             }
     }
 
@@ -977,23 +942,14 @@ function drawSolidObjects(ctx, currentRoomX, currentRoomY) {
 
 }
 
-function arraysMatch(arr1, arr2) {
-    // Check if the dimensions are the same
-    if (arr1.length !== arr2.length || arr1[0].length !== arr2[0].length) {
-        return false;
-    }
-
-    // Check if all items exist and are in the correct order
-    for (let i = 0; i < arr1.length; i++) {
-        for (let j = 0; j < arr1[0].length; j++) {
-            if (arr1[i][j] !== arr2[i][j]) {
-                return false;
-            }
+function spriteExistsAt(x, y, roomObjects) {
+    for (let i = 0; i < roomObjects.length; i++) {
+        const solidObject = roomObjects[i];
+        if (solidObject.x === x && solidObject.y === y) {
+            return true;
         }
     }
-
-    // Otherwise, return true
-    return true;
+    return false;
 }
 
 function drawPing(ctx){
@@ -1124,6 +1080,10 @@ $(document).ready(function() {
 
     // Add the event listener here
     canvas.addEventListener('click', function(event) {
+
+        if(serverState.state != "lobby")
+            return;
+
         var rect = canvas.getBoundingClientRect();
         var x = event.clientX - rect.left;
         var y = event.clientY - rect.top;

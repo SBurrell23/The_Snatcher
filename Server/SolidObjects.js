@@ -6,8 +6,8 @@ function SolidObjects() {
     this.mazeWidth = (global.canvasWidth / global.map.getBlockSize());
     //The canvas and block size must divide into an EVEN number
 
-    this.minNumberOfBlocks = 100;
-    this.maxNumberOfBlocks = 200;
+    this.minNumberOfBlocks = 60;
+    this.maxNumberOfBlocks = 180;
 }
 
 SolidObjects.prototype.get = function() {
@@ -37,6 +37,8 @@ SolidObjects.prototype.isRoom = function(map,location,col,row){
 
 SolidObjects.prototype.createMazeWalls = function(gs, map) {
     console.log("Creating maze walls...");
+
+    var roomNumber = 1;
 
     for (let i = 0; i < map.length; i++) {
         for (let j = 0; j < map[i].length; j++) {
@@ -217,11 +219,16 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
                 //THESE ARE THE MOST IMPORTANT VARIABLES TO TWEAK FOR MAZE DIFFICULTY
                 //TOO LOW MIN AND SOME LEVELS ARE EMPTY
                 //TOO HIGH MAX AND TOO MANY LEVELS ARE SINGLE PATHS
-                if(blockCount > this.minNumberOfBlocks && blockCount < this.maxNumberOfBlocks)
+                if(blockCount > this.minNumberOfBlocks && 
+                    blockCount < this.maxNumberOfBlocks &&
+                    this.largeSpots(maze, ' ', 5) == false && 
+                    this.largeSpots(maze, '■' , 6) == false
+                    )
                     isMazeFun = true;
 
-                //Add another check here for large open areas. if a room is a yin-yang, its not fun.
             }
+            
+            console.log("Creating room "+  roomNumber + " / " + (global.map.getAvailableRooms() + 2) );
 
             //Finally after all the pathing is done turn any leftover '■' into solidObjects to build the room
             for (let k = 0; k < maze.length; k++) {
@@ -239,9 +246,42 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
                     }
                 }
             }  
+            roomNumber++;
 
         }
     }
+}
+
+SolidObjects.prototype.largeSpots = function(maze, spotType, spotSize){
+    let hasEmptyBlocks = false;
+    //This has the potential to SERIOUSLY slow down room generation time...
+
+    for (let i = 0; i < maze.length - spotSize; i++) {
+        for (let j = 0; j < maze[i].length - spotSize; j++) {
+            let isEmptyBlock = true;
+
+            for (let k = i; k < i + spotSize; k++) {
+                for (let l = j; l < j + spotSize; l++) {
+                    if (maze[k][l] !== spotType) {
+                        isEmptyBlock = false;
+                        break;
+                    }
+                }
+                if (!isEmptyBlock) {
+                    break;
+                }
+            }
+
+            if (isEmptyBlock) {
+                return true;
+            }
+        }
+        if (hasEmptyBlocks) {
+            break;
+        }
+    }
+
+    return hasEmptyBlocks;
 }
 
 //This function is used to determine what a block type is based on its location and surroundings

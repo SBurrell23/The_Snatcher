@@ -176,7 +176,7 @@ function startGame(){
     global.map.spawnPlayers(gs.players);
 
     //Set winning keys # 
-    global.keysNeededToOpenDoor = 1;//((gs.players.length-1) * 2) + 1;
+    global.keysNeededToOpenDoor = ((gs.players.length-1) * 2) + 1;
     
     global.solidObjects = new SolidObjects();
     global.solidObjects.createMazeWalls(gs, global.map.get());

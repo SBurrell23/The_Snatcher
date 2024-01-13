@@ -910,16 +910,16 @@ function drawSolidObjects(ctx, currentRoomX, currentRoomY) {
                     continue;
                 }
 
+                const oneOrTwo = seededRandom(solidObject.x + solidObject.y, 1, 3);//1 or 2
+
                 if(solidObject.type == "b"){
                     // //Draw flaming pylon
                     var aFrames = ['1', '2', '3', '4'];
                     let frameIndex = Math.floor((currentFrame + i * 10) / 55) % aFrames.length;
-                    drawSprite(ctx, 'fireBlock' + aFrames[frameIndex], solidObject.x, solidObject.y);
+                    drawSprite(ctx, 'fireBlock'+ oneOrTwo + "_" + aFrames[frameIndex], solidObject.x, solidObject.y);
                     //ctx.fillText(`${solidObject.type}`, solidObject.x + 15, solidObject.y + 24);
                     continue;
                 }
-
-                const oneOrTwo = seededRandom(solidObject.x + solidObject.y, 1, 3);//1 or 2
 
                 if (solidObject.type == "bs" && solidObject.y != canvas.height - 96)
                     drawSprite(ctx, 'grave'+oneOrTwo, solidObject.x, solidObject.y);

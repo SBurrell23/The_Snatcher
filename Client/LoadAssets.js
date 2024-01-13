@@ -63,10 +63,15 @@ function loadGates(ts){
 }
 
 function loadFireBlockAnimation(ts){
-    sprites['fireBlock1'] = getTileSourceRect(ts,9, 11);
-    sprites['fireBlock2'] = getTileSourceRect(ts,10, 11);
-    sprites['fireBlock3'] = getTileSourceRect(ts,11, 11);
-    sprites['fireBlock4'] = getTileSourceRect(ts,12, 11);
+    sprites['fireBlock1_1'] = getTileSourceRect(ts,9, 11);
+    sprites['fireBlock1_2'] = getTileSourceRect(ts,10, 11);
+    sprites['fireBlock1_3'] = getTileSourceRect(ts,11, 11);
+    sprites['fireBlock1_4'] = getTileSourceRect(ts,12, 11);
+
+    sprites['fireBlock2_1'] = getTileSourceRect(ts,9, 10);
+    sprites['fireBlock2_2'] = getTileSourceRect(ts,10, 10);
+    sprites['fireBlock2_3'] = getTileSourceRect(ts,11, 10);
+    sprites['fireBlock2_4'] = getTileSourceRect(ts,12, 10);
 }
 
 function loadPlayerAnimations(ts){

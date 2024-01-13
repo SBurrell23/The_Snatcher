@@ -15,14 +15,22 @@ function loadMasterTileset(ts) {
     sprites['ground3'] = getTileSourceRect(ts,0, 11);
     sprites['ground4'] = getTileSourceRect(ts,1,11);
 
-    sprites['block'] = getTileSourceRect(ts,25, 0);
-    sprites['grave1'] = getTileSourceAdjustable(ts,4, 15 ,48,96);
-    sprites['grave2'] = getTileSourceAdjustable(ts,5, 15 ,48,96);
-    sprites['sidewaysStone1'] = getTileSourceAdjustable(ts,6, 15 ,96,48);
-    sprites['sidewaysStone2'] = getTileSourceAdjustable(ts,6, 16 ,96,48);
+    sprites['block1'] = getTileSourceRect(ts,9, 13);
+    sprites['block2'] = getTileSourceRect(ts,10, 13);
 
-    sprites['pool1'] = getTileSourceRect(ts,8, 15);
-    sprites['pool2'] = getTileSourceRect(ts,9, 15);
+    sprites['twoWide1'] = getTileSourceAdjustable(ts,6, 15 ,96,48);
+    sprites['twoWide2'] = getTileSourceAdjustable(ts,6, 16 ,96,48);
+    sprites['twoWide3'] = getTileSourceAdjustable(ts,6, 17 ,96,48);
+    sprites['twoWide4'] = getTileSourceAdjustable(ts,6, 18 ,96,48);
+
+    sprites['corner1'] = getTileSourceRect(ts,8, 15);
+    sprites['corner2'] = getTileSourceRect(ts,9, 15);
+    sprites['corner3'] = getTileSourceRect(ts,10, 15);
+    sprites['corner4'] = getTileSourceRect(ts,11, 15);
+    sprites['corner5'] = getTileSourceRect(ts,8, 16);
+    sprites['corner6'] = getTileSourceRect(ts,9, 16);
+    sprites['corner7'] = getTileSourceRect(ts,10, 16);
+    sprites['corner8'] = getTileSourceRect(ts,11, 16);
 
     sprites['chest1'] = getTileSourceRect(ts,2, 0);
     sprites['chest2'] = getTileSourceRect(ts,4, 0);
@@ -44,11 +52,41 @@ function loadMasterTileset(ts) {
 
     loadPlayerAnimations(ts);
     loadFireBlockAnimation(ts);
+    loadTwoHighAnimations(ts);
     loadGates(ts);
     
     console.log("Assets loaded");
     console.log(sprites);
 }
+
+function loadTwoHighAnimations(ts){
+
+    sprites['twoHigh1'] = getTileSourceAdjustable(ts,4, 15 ,48,96);
+    sprites['twoHigh2'] = getTileSourceAdjustable(ts,5, 15 ,48,96);
+    sprites['twoHigh3'] = getTileSourceAdjustable(ts,4, 17 ,48,96);
+    sprites['twoHigh4'] = getTileSourceAdjustable(ts,5, 17 ,48,96);
+
+    sprites['twoHigh5_1'] = getTileSourceAdjustable(ts,14, 16 ,48,96);
+    sprites['twoHigh5_2'] = getTileSourceAdjustable(ts,15, 16 ,48,96);
+    sprites['twoHigh5_3'] = getTileSourceAdjustable(ts,16, 16 ,48,96);
+    sprites['twoHigh5_4'] = getTileSourceAdjustable(ts,17, 16 ,48,96);
+
+    sprites['twoHigh6_1'] = getTileSourceAdjustable(ts,14, 18 ,48,96);
+    sprites['twoHigh6_2'] = getTileSourceAdjustable(ts,15, 18 ,48,96);
+    sprites['twoHigh6_3'] = getTileSourceAdjustable(ts,16, 18 ,48,96);
+    sprites['twoHigh6_4'] = getTileSourceAdjustable(ts,17, 18 ,48,96);
+
+    sprites['twoHigh7_1'] = getTileSourceAdjustable(ts,14, 20 ,48,96);
+    sprites['twoHigh7_2'] = getTileSourceAdjustable(ts,15, 20 ,48,96);
+    sprites['twoHigh7_3'] = getTileSourceAdjustable(ts,16, 20 ,48,96);
+    sprites['twoHigh7_4'] = getTileSourceAdjustable(ts,17, 20 ,48,96);
+
+    sprites['twoHigh8_1'] = getTileSourceAdjustable(ts,14, 22 ,48,96);
+    sprites['twoHigh8_2'] = getTileSourceAdjustable(ts,15, 22 ,48,96);
+    sprites['twoHigh8_3'] = getTileSourceAdjustable(ts,16, 22 ,48,96);
+    sprites['twoHigh8_4'] = getTileSourceAdjustable(ts,17, 22 ,48,96);
+}
+
 
 function loadGates(ts){
     sprites['gnw'] = getTileSourceRect(ts,0, 16);

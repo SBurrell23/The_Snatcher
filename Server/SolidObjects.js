@@ -233,7 +233,7 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
                             y: (k * global.map.getBlockSize()),
                             width: global.map.getBlockSize(),
                             height: global.map.getBlockSize(),
-                            color: this.color,
+                            randSeed: Math.random(),
                             type: this.getBlockType(maze,k,l)
                         });
                     }

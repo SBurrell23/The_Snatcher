@@ -910,27 +910,33 @@ function drawSolidObjects(ctx, currentRoomX, currentRoomY) {
                     continue;
                 }
 
-                const oneOrTwo = seededRandom(solidObject.x + solidObject.y, 1, 3);//1 or 2
+                const oneOrTwo = seededRandom(solidObject.randSeed, 1, 2);
+                const oneToFour = seededRandom(solidObject.randSeed, 1, 4);
+                const oneToEight = seededRandom(solidObject.randSeed, 1, 8);
 
-                if(solidObject.type == "b"){
-                    // //Draw flaming pylon
+                if(solidObject.type == "b"){//Draw flaming pylon
                     var aFrames = ['1', '2', '3', '4'];
                     let frameIndex = Math.floor((currentFrame + i * 10) / 55) % aFrames.length;
                     drawSprite(ctx, 'fireBlock'+ oneOrTwo + "_" + aFrames[frameIndex], solidObject.x, solidObject.y);
-                    //ctx.fillText(`${solidObject.type}`, solidObject.x + 15, solidObject.y + 24);
                     continue;
                 }
 
-                if (solidObject.type == "bs" && solidObject.y != canvas.height - 96)
-                    drawSprite(ctx, 'grave'+oneOrTwo, solidObject.x, solidObject.y);
+                if (solidObject.type == "bs" && solidObject.y != canvas.height - 96){
+                    if(oneToEight <= 4)
+                        drawSprite(ctx, 'twoHigh'+oneToEight, solidObject.x, solidObject.y);
+                    else{
+                        let frameIndex = Math.floor((currentFrame + i * 10) / 25) % ['1', '2', '3', '4'].length;
+                        drawSprite(ctx, 'twoHigh'+ oneToEight + "_" + ['1', '2', '3', '4'][frameIndex], solidObject.x, solidObject.y);
+                    }
+                }
                 else if (solidObject.type == "be" && !spriteExistsAt(solidObject.x + 48, solidObject.y - 48, roomObjects) && solidObject.x != canvas.width - 96){
-                    drawSprite(ctx, 'sidewaysStone'+oneOrTwo, solidObject.x, solidObject.y);
+                    drawSprite(ctx, 'twoWide'+oneToFour, solidObject.x, solidObject.y);
                 }
                 else if(solidObject.type == 'bne' || solidObject.type == 'bsw'){
-                    drawSprite(ctx, 'pool'+oneOrTwo, solidObject.x, solidObject.y);
+                    drawSprite(ctx, 'corner'+oneToEight, solidObject.x, solidObject.y);
                 }
                 else {
-                    drawSprite(ctx, 'block', solidObject.x, solidObject.y);
+                    drawSprite(ctx, 'block' + oneOrTwo, solidObject.x, solidObject.y);
                     //ctx.fillText(`${solidObject.type}`, solidObject.x + 15, solidObject.y + 24);
                 }
 
@@ -1068,13 +1074,11 @@ function isMe(id){
     return id == localState.playerId;
 }
 
-function seededRandom(seed, x, z) {
-    var m = 0x80000000;
-    seed = seed % m;
-    seed = (seed * 1103515245 + 12345) % m;
-    var random = seed / m;
-    return Math.floor(x + random * (z - x));
+function seededRandom(seed, low, high) {
+    let x = Math.sin(seed++) * 10000;
+    return Math.floor((x - Math.floor(x)) * (high - low + 1)) + low;
 }
+
 
 $(document).ready(function() {  
 

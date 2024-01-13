@@ -34,15 +34,15 @@ function loadMasterTileset(ts) {
 
     sprites['chest1'] = getTileSourceRect(ts,2, 0);
     sprites['chest2'] = getTileSourceRect(ts,4, 0);
-    sprites['key'] = getTileSourceRect(ts,0, 0);
+    sprites['key'] = getTileSourceRect(ts,1, 0);
 
-    sprites['pf_flyers'] = getTileSourceRect(ts,0, 1);
-    sprites['the_button'] = getTileSourceRect(ts,1, 2);
+    sprites['pf_flyers'] = getTileSourceRect(ts,1, 1);
+    sprites['the_button'] = getTileSourceRect(ts,0, 2);
     sprites['magic_monocle'] = getTileSourceRect(ts,1, 3);
 
-    sprites['bbq_chili'] = getTileSourceRect(ts,3, 1);
-    sprites['spare_eyeballs'] = getTileSourceRect(ts,3, 2);
-    sprites['kill_the_power'] = getTileSourceRect(ts,2, 3);
+    sprites['bbq_chili'] = getTileSourceRect(ts,2, 1);
+    sprites['spare_eyeballs'] = getTileSourceRect(ts,2, 2);
+    sprites['kill_the_power'] = getTileSourceRect(ts,3, 3);
 
     sprites['playerInventory'] = getTileSourceAdjustable(ts,8, 0 ,240,144);
     sprites['snatcherInventory'] = getTileSourceAdjustable(ts,13, 0 ,144,144);

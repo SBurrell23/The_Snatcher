@@ -383,7 +383,6 @@ MapBoard.prototype.sendSnatcherDoorInfo = function(gs) {
     const snatcherRoomX = snatcher.currRoom.x;
     const snatcherRoomY = snatcher.currRoom.y;
 
-
     //Right now this just finds the nearest player IF there is one in that direction 
     //and the player is within a certain radius
 
@@ -397,7 +396,7 @@ MapBoard.prototype.sendSnatcherDoorInfo = function(gs) {
     //This is a minimum radius around the snatcher for a door to light up.
     //Without this, a player could be 1 south & 10 east and the south door would be hot red which is too missleading
     //This also means doors will only light up if the snatcher is getting close
-    const mustBeInRadius = Math.floor( ((this.rows + this.cols)/2) / 2.5);
+    const mustBeInRadius = Math.floor( ((this.rows + this.cols)/2) / 2);
     //console.log(mustBeInRadius);
 
     for (let player of gs.players) {

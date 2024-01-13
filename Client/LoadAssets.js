@@ -32,8 +32,8 @@ function loadMasterTileset(ts) {
     sprites['corner7'] = getTileSourceRect(ts,10, 16);
     sprites['corner8'] = getTileSourceRect(ts,11, 16);
 
-    sprites['chest1'] = getTileSourceRect(ts,2, 0);
-    sprites['chest2'] = getTileSourceRect(ts,4, 0);
+    sprites['chest1'] = getTileSourceRect(ts,7, 0);
+    sprites['chest2'] = getTileSourceRect(ts,7, 0);
     sprites['key'] = getTileSourceRect(ts,1, 0);
 
     sprites['pf_flyers'] = getTileSourceRect(ts,1, 1);
@@ -51,12 +51,76 @@ function loadMasterTileset(ts) {
     sprites['exitdoorOpen'] = getTileSourceAdjustable(ts,12, 3 ,96,96);
 
     loadPlayerAnimations(ts);
+    loadGrassAnimations(ts);
     loadFireBlockAnimation(ts);
     loadTwoHighAnimations(ts);
     loadGates(ts);
     
     console.log("Assets loaded");
     console.log(sprites);
+}
+
+function loadGrassAnimations(ts){
+
+    sprites['grass1_1'] = getTileSourceRect(ts,0,20);
+    sprites['grass1_2'] = getTileSourceRect(ts,0,21);
+    sprites['grass1_3'] = getTileSourceRect(ts,0,22);
+    sprites['grass1_4'] = getTileSourceRect(ts,0,23 );
+
+    sprites['grass2_1'] = getTileSourceRect(ts,1,20);
+    sprites['grass2_2'] = getTileSourceRect(ts,1,21);
+    sprites['grass2_3'] = getTileSourceRect(ts,1,22);
+    sprites['grass2_4'] = getTileSourceRect(ts,1,23);
+
+    sprites['grass3_1'] = getTileSourceRect(ts,2,20);
+    sprites['grass3_2'] = getTileSourceRect(ts,2,21);
+    sprites['grass3_3'] = getTileSourceRect(ts,2,22);
+    sprites['grass3_4'] = getTileSourceRect(ts,2,23);
+
+    sprites['grass4_1'] = getTileSourceRect(ts,3,20);
+    sprites['grass4_2'] = getTileSourceRect(ts,3,21);
+    sprites['grass4_3'] = getTileSourceRect(ts,3,22);
+    sprites['grass4_4'] = getTileSourceRect(ts,3,23);
+
+    sprites['grass5_1'] = getTileSourceRect(ts,4,20);
+    sprites['grass5_2'] = getTileSourceRect(ts,4,21);
+    sprites['grass5_3'] = getTileSourceRect(ts,4,22);
+    sprites['grass5_4'] = getTileSourceRect(ts,4,23);
+
+    sprites['grass6_1'] = getTileSourceRect(ts,5,20);
+    sprites['grass6_2'] = getTileSourceRect(ts,5,21);
+    sprites['grass6_3'] = getTileSourceRect(ts,5,22);
+    sprites['grass6_4'] = getTileSourceRect(ts,5,23);
+
+    sprites['grass7_1'] = getTileSourceRect(ts,6,20);
+    sprites['grass7_2'] = getTileSourceRect(ts,6,21);
+    sprites['grass7_3'] = getTileSourceRect(ts,6,22);
+    sprites['grass7_4'] = getTileSourceRect(ts,6,23);
+
+    sprites['grass8_1'] = getTileSourceRect(ts,7,20);
+    sprites['grass8_2'] = getTileSourceRect(ts,7,21);
+    sprites['grass8_3'] = getTileSourceRect(ts,7,22);
+    sprites['grass8_4'] = getTileSourceRect(ts,7,23);
+
+    sprites['grass9_1'] = getTileSourceRect(ts,8,20);
+    sprites['grass9_2'] = getTileSourceRect(ts,8,21);
+    sprites['grass9_3'] = getTileSourceRect(ts,8,22);
+    sprites['grass9_4'] = getTileSourceRect(ts,8,23);
+
+    sprites['grass10_1'] = getTileSourceRect(ts,9,20);
+    sprites['grass10_2'] = getTileSourceRect(ts,9,21);
+    sprites['grass10_3'] = getTileSourceRect(ts,9,22);
+    sprites['grass10_4'] = getTileSourceRect(ts,9,23);
+
+    sprites['grass11_1'] = getTileSourceRect(ts,10,20);
+    sprites['grass11_2'] = getTileSourceRect(ts,10,21);
+    sprites['grass11_3'] = getTileSourceRect(ts,10,22);
+    sprites['grass11_4'] = getTileSourceRect(ts,10,23);
+
+    sprites['grass12_1'] = getTileSourceRect(ts,11,20);
+    sprites['grass12_2'] = getTileSourceRect(ts,11,21);
+    sprites['grass12_3'] = getTileSourceRect(ts,11,22);
+    sprites['grass12_4'] = getTileSourceRect(ts,11,23);
 }
 
 function loadTwoHighAnimations(ts){
@@ -86,7 +150,6 @@ function loadTwoHighAnimations(ts){
     sprites['twoHigh8_3'] = getTileSourceAdjustable(ts,16, 22 ,48,96);
     sprites['twoHigh8_4'] = getTileSourceAdjustable(ts,17, 22 ,48,96);
 }
-
 
 function loadGates(ts){
     sprites['gnw'] = getTileSourceRect(ts,0, 16);

@@ -46,15 +46,15 @@ var initRainFlag = true;
 
 var sc = { //Skill Check Variables
     barMoveAmount : 0,
-    barFillSpeed : 2,
+    barFillSpeed : 3,
     successAreaStart : 0,
-    successWidth : 12,
+    successWidth : 13,
     successAreaX : 0,
     lineX : 0,
     lineWidth: 2,
     barWidth : 140,
     barHeight : 25,
-    successAreaColor: 'green'
+    successAreaColor: '#25c213'
 };
 const scReset = JSON.stringify(sc);
 
@@ -84,7 +84,7 @@ function connectWebSocket() {
 
     //wss://the-snatcher.onrender.com
     //ws://localhost:8080
-    socket = new WebSocket('wss://the-snatcher.onrender.com');  
+    socket = new WebSocket('ws://localhost:8080');  
     socket.addEventListener('open', function () {
         console.log('Server connection established!');
         $("#offlineMessage").css("display", "none");
@@ -228,7 +228,7 @@ function drawGameState(gs) {
         drawPlayers(ctx, gs, currentRoomX, currentRoomY);
         
         //This needs to come after objects that are under the spotlight and before things over it
-        drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
+        //drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
 
         drawEventText(ctx,localState.eventText);
 
@@ -387,8 +387,8 @@ function drawMap(ctx, gs, map) {
 
         const noPowerRoom = 'rgba(0, 0, 0, 0)';
         const noRoom = 'rgba(255, 255, 255, .65)';
-        const emptyRoom = 'rgba(36, 66, 108, .60)';
-        const exitDoor = 'rgba(66, 29, 4, .75)';
+        const emptyRoom = 'rgba(58, 100, 158, .60)';
+        const exitDoor = 'rgba(155, 78, 35, .75)';
         const myRoom = getMe(gs).color;
         const snatcherInRoom = getSnatcher(gs).color;
 
@@ -492,7 +492,7 @@ function drawSkillCheck(ctx,player){
     ctx.fillRect(sc.lineX, skillCheckY, sc.lineWidth, sc.barHeight);
     
 
-    sc.barMoveAmount += sc.barFillSpeed;
+    sc.barMoveAmount += sc.barFillSpeed * (deltaTime * 100);
     
     if (sc.barMoveAmount >= sc.barWidth) {
         sc.barFillSpeed = sc.barFillSpeed * -1;
@@ -534,19 +534,12 @@ function drawLobby(ctx, gs) {
             sOffset = 80;
             x = (ctx.canvas.width / 2);
             y = (ctx.canvas.height / 2);
-            ctx.beginPath();
-            ctx.arc(x, y - 80, 19, 0, 2 * Math.PI);
-            ctx.fillStyle = '#d90f0f';
-            ctx.fill();
+            drawSprite(ctx,'player1' + "s1", x - 24, y - 108);
             // Draw snatcher's name
             ctx.fillStyle = '#d90f0f';
             ctx.fillText("Snatcher", x, y - 80 - 44);
         }else{
-            //Draw players
-            ctx.beginPath();
-            ctx.arc(x, y, 19, 0, 2 * Math.PI);
-            ctx.fillStyle = colors[i];
-            ctx.fill();
+            drawSprite(ctx,'player' + (i + 1) + "s1", x - 24, y - 28);
             // Draw player's name
             ctx.fillStyle = colors[i];
             ctx.fillText(names[i].charAt(0).toUpperCase() + names[i].slice(1), x, y - 44);
@@ -705,6 +698,14 @@ function drawBackground(ctx) {
         for (let y = 0; y < (ctx.canvas.height/blockSize); y ++) {
             let spriteName = groundPattern[x % 2][y % 2];
             drawSprite(ctx, spriteName, x * blockSize, y * blockSize);
+
+            const randGrassNum = seededRandom(y * x + y + x, 1, 12);
+            const spawnGrass = seededRandom(x+ y * x + y * x, 1, 3); //1 in 3 chance to spawn some kind of grass
+            if(spawnGrass == 1){
+                var aFrames = ['1', '2', '3', '4'];
+                let frameIndex = Math.floor((currentFrame + (x + y) * 10) / 40) % aFrames.length;
+                drawSprite(ctx, 'grass'+ randGrassNum + "_" + aFrames[frameIndex], x * blockSize, y * blockSize);
+            }
         }
     }
 }
@@ -864,9 +865,9 @@ function drawItems(ctx, currentRoomX, currentRoomY) {
             else{
                 if(item.inChest){
                     if(getMe(serverState).isSnatcher)
-                        drawSprite(ctx, 'chest2', item.currPos.x - 5, item.currPos.y - 5);
+                        drawSprite(ctx, 'chest2', item.currPos.x + 2, item.currPos.y + 2);
                     else
-                        drawSprite(ctx, 'chest1', item.currPos.x - 5, item.currPos.y - 5);
+                        drawSprite(ctx, 'chest1', item.currPos.x + 2, item.currPos.y + 2);
                 }else{
                     switch(item.type){
                         case 'pf_flyers':

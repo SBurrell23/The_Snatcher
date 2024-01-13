@@ -70,8 +70,8 @@ Items.prototype.spawnItems = function(gs) {
                 }else{
                     roomFound = true;
 
-                    item.currPos.x = spot.x + Math.floor((global.map.getBlockSize() - item.width) / 2);
-                    item.currPos.y = spot.y + Math.floor((global.map.getBlockSize() - item.height) / 2);
+                    item.currPos.x = (spot.x + Math.floor((global.map.getBlockSize() - item.width) / 2)) - 5;
+                    item.currPos.y = (spot.y + Math.floor((global.map.getBlockSize() - item.height) / 2)) - 5;
     
                     item.currRoom.x = randomX;
                     item.currRoom.y = randomY;
@@ -181,6 +181,10 @@ Items.prototype.pickupItemIfAllowed = function(player, item, pickupRequested) {
         if(item.specialCount >= global.keysNeededToOpenDoor && player.isAlive && pickupRequested && !player.isSnatcher){
             player.currPos.x = -1000;
             player.currPos.y = -1000;
+            setTimeout(function() {
+                player.currRoom.x = -1000;
+                player.currRoom.y = -1000;
+            }, 1000);
             player.isAlive = false;
             player.points += global.pointsForEscape;
             console.log("Player " + player.name + " has escaped through the exit door at " + item.currRoom.x + ", " + item.currRoom.y + "!");

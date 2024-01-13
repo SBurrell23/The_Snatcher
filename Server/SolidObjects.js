@@ -6,8 +6,8 @@ function SolidObjects() {
     this.mazeWidth = (global.canvasWidth / global.map.getBlockSize());
     //The canvas and block size must divide into an EVEN number
 
-    this.minNumberOfBlocks = 64;
-    this.maxNumberOfBlocks = 180;
+    this.minNumberOfBlocks = 60;
+    this.maxNumberOfBlocks = 200;
 }
 
 SolidObjects.prototype.get = function() {
@@ -222,7 +222,7 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
                 if(blockCount > this.minNumberOfBlocks && 
                     blockCount < this.maxNumberOfBlocks &&
                     this.largeSpots(maze, ' ', 5) == false &&  //5
-                    this.largeSpots(maze, '■' , 4) == false //6
+                    this.largeSpots(maze, '■' , 5) == false //6
                     )
                     isMazeFun = true;
 

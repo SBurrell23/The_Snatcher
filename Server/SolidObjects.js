@@ -6,7 +6,7 @@ function SolidObjects() {
     this.mazeWidth = (global.canvasWidth / global.map.getBlockSize());
     //The canvas and block size must divide into an EVEN number
 
-    this.minNumberOfBlocks = 60;
+    this.minNumberOfBlocks = 64;
     this.maxNumberOfBlocks = 180;
 }
 
@@ -221,14 +221,15 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
                 //TOO HIGH MAX AND TOO MANY LEVELS ARE SINGLE PATHS
                 if(blockCount > this.minNumberOfBlocks && 
                     blockCount < this.maxNumberOfBlocks &&
-                    this.largeSpots(maze, ' ', 5) == false && 
-                    this.largeSpots(maze, '■' , 6) == false
+                    this.largeSpots(maze, ' ', 5) == false &&  //5
+                    this.largeSpots(maze, '■' , 4) == false //6
                     )
                     isMazeFun = true;
 
             }
             
-            console.log("Creating room "+  roomNumber + " / " + (global.map.getAvailableRooms() + 2) );
+            gs.loadMsg = "digging graves "+  roomNumber + " / " + (global.map.getAvailableRooms() + 2);
+            global.sendAllClientsGS();
 
             //Finally after all the pathing is done turn any leftover '■' into solidObjects to build the room
             for (let k = 0; k < maze.length; k++) {

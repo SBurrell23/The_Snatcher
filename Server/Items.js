@@ -13,22 +13,22 @@ Items.prototype.spawnItems = function(gs) {
 
     //Name, number of items, width, height
     //We MUST spawn the exit doors 1st so we don't accidentally spawn another item in the room first
-    this.createItems('exitdoor','all', 2, 82,82); //2 exit doors ONLY!
+    this.createItems(gs,'exitdoor','all', 2, 82,82); //2 exit doors ONLY!
 
     const itemSize = global.map.getBlockSize() *  .8;
 
     var numKeys = (gs.players.length - 1) * 5 + 5;
-    this.createItems('key','all', numKeys, itemSize,itemSize);
+    this.createItems(gs,'key','all', numKeys, itemSize,itemSize);
 
     var numPlayerItems = (gs.players.length - 1) * 2 + 10
-    this.createItems('pf_flyers','runner', numPlayerItems, itemSize,itemSize);
-    this.createItems('the_button','runner', numPlayerItems, itemSize,itemSize);
-    this.createItems('magic_monocle','runner', numPlayerItems, itemSize,itemSize);
+    this.createItems(gs,'pf_flyers','runner', numPlayerItems, itemSize,itemSize);
+    this.createItems(gs,'the_button','runner', numPlayerItems, itemSize,itemSize);
+    this.createItems(gs,'magic_monocle','runner', numPlayerItems, itemSize,itemSize);
 
     var numSnatcherItems = (gs.players.length-1) * 2 + 6;
-    this.createItems('bbq_chili','snatcher', numSnatcherItems, itemSize,itemSize);
-    this.createItems('spare_eyeballs','snatcher', numSnatcherItems, itemSize,itemSize);
-    this.createItems('kill_the_power','snatcher', numSnatcherItems, itemSize,itemSize);
+    this.createItems(gs,'bbq_chili','snatcher', numSnatcherItems, itemSize,itemSize);
+    this.createItems(gs,'spare_eyeballs','snatcher', numSnatcherItems, itemSize,itemSize);
+    this.createItems(gs,'kill_the_power','snatcher', numSnatcherItems, itemSize,itemSize);
     
     //check to make sure available rooms is less then num items with some margin for error..
     var availableRooms = global.map.getAvailableRooms();
@@ -83,7 +83,12 @@ Items.prototype.spawnItems = function(gs) {
     console.log("Finished Spawning Items");
 }
 
-Items.prototype.createItems = function(type,whoIsFor,numItems,width,height) {
+
+Items.prototype.createItems = function(gs,type,whoIsFor,numItems,width,height) {
+
+    gs.loadMsg = "unearthing treasures " + global.items.length;
+    global.sendAllClientsGS();
+
     var doesItemStartInChest = true;
     var specialCount2 = 0;
 

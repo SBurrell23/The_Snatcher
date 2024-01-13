@@ -84,7 +84,7 @@ function connectWebSocket() {
 
     //wss://the-snatcher.onrender.com
     //ws://localhost:8080
-    socket = new WebSocket('ws://localhost:8080');  
+    socket = new WebSocket('wss://the-snatcher.onrender.com');  
     socket.addEventListener('open', function () {
         console.log('Server connection established!');
         $("#offlineMessage").css("display", "none");
@@ -228,7 +228,7 @@ function drawGameState(gs) {
         drawPlayers(ctx, gs, currentRoomX, currentRoomY);
         
         //This needs to come after objects that are under the spotlight and before things over it
-        //drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
+        drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
 
         drawEventText(ctx,localState.eventText);
 
@@ -311,15 +311,19 @@ function drawGameInProgress(ctx) {
     ctx.fillText('Game is currently in progress...', ctx.canvas.width / 2, ctx.canvas.height / 2);
 }
 
-function drawLoading(ctx) {
+function drawLoading(ctx,gs) {
     ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    ctx.font = '45px '+font;
-    ctx.fillStyle = 'white';
+    ctx.font = '75px '+font;
+    ctx.fillStyle = 'red';
     ctx.textAlign = 'center';
 
-    ctx.fillText(randomLoadingMessage, ctx.canvas.width / 2, ctx.canvas.height / 2);
+    ctx.fillText(randomLoadingMessage, ctx.canvas.width / 2, (ctx.canvas.height / 2) - 100);
+
+    ctx.font = '35px '+ font;
+    ctx.fillStyle = 'white';
+    ctx.fillText(gs.loadMsg, ctx.canvas.width / 2, (ctx.canvas.height / 2) + 50);
 }
 
 function drawGameOver(ctx, gs) {

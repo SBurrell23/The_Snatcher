@@ -16,6 +16,7 @@ var gs = {
     endReason: '',
     players:[],
     seed: 0,
+    loadMsg: ""
 };
 
 var playerObject ={
@@ -93,17 +94,13 @@ wss.on('connection', (ws) => {
         }
         //This needs to be removed once game is live
         if(message.type == "generateMap"){
-        startGame();
+        //startGame();
         //    for (let i = 0; i < gs.players.length; i++) {
         //         if(gs.players[i].id == message.id)
         //             new Event().teleportPlayerToRandomRoom(gs, gs.players[i]);
         //     }
         }
         if(message.type =="startGame"){
-            sendAllClients({type: "loadingGame"});
-            gs.state = 'loading';
-            sendAllClients(gs);
-
             startGame();
         }
         if(message.type == "mp"){
@@ -162,7 +159,12 @@ wss.on('connection', (ws) => {
 
 });
 
-function startGame(){
+function startGame(){     
+
+    sendAllClients({type: "loadingGame"});
+    gs.state = 'loading';
+    sendAllClients(gs);
+
     console.log("Starting game...");
     
     setSnatcher();
@@ -183,12 +185,19 @@ function startGame(){
 
     sendAllClients({type: "solidObjects", solidObjects: global.solidObjects.get()});
 
-    gs.state = 'playing';
-    console.log("Game Started!");
-    gs.seed = new Date().getTime();
-    sendAllClients(gs);
 
-    global.map.sendSnatcherDoorInfo(gs);
+    gs.loadMsg = "get ready...";
+    global.sendAllClientsGS();
+
+    //Short pause for dramatic effect...
+    clearAllTimeouts();
+    createTimeout(() => {
+        gs.state = 'playing';
+        console.log("Game Started!");
+        gs.seed = new Date().getTime();
+        sendAllClients(gs);
+        global.map.sendSnatcherDoorInfo(gs);
+    }, 2300);
 }
 
 //Last action can be 'escaped' or 'snatched or 'runnerdc'
@@ -263,6 +272,10 @@ global.sendSnatcherDoorInfo = function(doorInfoObject){
             if(player.isSnatcher)
                 sendClient(player.id,{type: "doorInfo", doorInfo: doorInfoObject});
 
+}
+
+global.sendAllClientsGS = function(){
+    sendAllClients(gs);
 }
 
 let timeoutRemainingTime = 10000; // Initial timeout duration in milliseconds

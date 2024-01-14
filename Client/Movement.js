@@ -68,6 +68,10 @@ $(document).keydown(function(e) {
                 else
                     sounds['chestOpen'].play();
 
+                var scTimeout = 1800;
+                if(getMe(serverState).isSnatcher)
+                    scTimeout = 2300;
+
                 setTimeout(function() {
                     if(isSCGood){
                         socket.send(JSON.stringify({
@@ -85,7 +89,7 @@ $(document).keydown(function(e) {
                         }));
                     }
                     localState.skillCheck = false;
-                }, 1500);
+                }, scTimeout);
 
             }
             else if(serverState && serverState.state == "playing" && getMe(serverState).isAlive && !localState.skillCheck){

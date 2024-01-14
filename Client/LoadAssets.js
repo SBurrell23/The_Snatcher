@@ -13,20 +13,41 @@ function loadAssets(){
 function loadSounds(){
     //sounds['scream1'].loop = true; 
     sounds['lobbyMusic'] = new Audio('Assets/Sounds/OST 3 - Eternal Night (Loopable).mp3');
-    sounds['lobbyMusic'].volume = 0.12;
+    sounds['lobbyMusic'].volume = 0.11;
     sounds['lobbyMusic'].loop = true;
 
+    sounds['lobbyJoin'] = new Audio('Assets/Sounds/lobbyJoin.mp3');
+    sounds['lobbyJoin'].volume = 0.4;
+
+    sounds['lobbyLeave'] = new Audio('Assets/Sounds/lobbyLeave.mp3');
+    sounds['lobbyLeave'].volume = 0.2;
+
+    sounds['gameMusic'] = new Audio('Assets/Sounds/Alone at Twilight ALL.mp3');
+    sounds['gameMusic'].volume = 0.09;
+    sounds['gameMusic'].loop = true;
+
+    sounds['forestNoise'] = new Audio('Assets/Sounds/forestWhiteNoise.mp3');
+    sounds['forestNoise'].volume = 0.3;
+    sounds['forestNoise'].loop = true;
+
+    sounds['thunder'] = new Audio('Assets/Sounds/thunder.mp3');
+    sounds['thunder'].volume = 0.35;
+
+    sounds['rainfall'] = new Audio('Assets/Sounds/rainfall.mp3');
+    sounds['rainfall'].volume = 0.021;
+    sounds['rainfall'].loop = true;
+    
     sounds['footStep1'] = new Audio('Assets/Sounds/SlimeBlobWalk.mp3');
     sounds['footStep1'].volume = 0.02;
 
     sounds['chestOpen'] = new Audio('Assets/Sounds/GS2_Treasure_Chest_Unlock_Open.mp3');
     sounds['chestOpen'].volume = 0.35;
 
-    sounds['scFailed'] = new Audio('Assets/Sounds/GS2_Vases_Breaking_3.mp3');
+    sounds['scFailed'] = new Audio('Assets/Sounds/scFailed.mp3');
     sounds['scFailed'].volume = 0.25;
 
     sounds['scStarted'] = new Audio('Assets/Sounds/Magic_Spell_21.mp3');
-    sounds['scStarted'].volume = 0.2;
+    sounds['scStarted'].volume = 0.15;
 
     sounds['tick'] = new Audio('Assets/Sounds/tick.mp3');
     sounds['tick'].volume = 0.15;
@@ -40,6 +61,9 @@ function loadSounds(){
     sounds['badEvent'] = new Audio('Assets/Sounds/Piano_stinger_dissonent.wav');
     sounds['badEvent'].volume = 0.25;
 
+    sounds['lacksSkill'] = new Audio('Assets/Sounds/Metal_twang.wav');
+    sounds['lacksSkill'].volume = 0.25;
+
     sounds['itemPickupOrDrop'] = new Audio('Assets/Sounds/Swoosh_3.wav');
     sounds['itemPickupOrDrop'].volume = 0.3;
 
@@ -51,13 +75,6 @@ function loadSounds(){
 
     sounds['playerSnatched'] = new Audio('Assets/Sounds/GS1_Damage_2.mp3');
     sounds['playerSnatched'].volume = 0.3;
-
-    sounds['thunder'] = new Audio('Assets/Sounds/thunder.mp3');
-    sounds['thunder'].volume = 0.4;
-
-    sounds['rainfall'] = new Audio('Assets/Sounds/rainfall.mp3');
-    sounds['rainfall'].volume = 0.020;
-    sounds['rainfall'].loop = true;
     
 }
 
@@ -66,6 +83,25 @@ function stopSound(soundKey) {
     if (sound) {
         sound.pause();
         sound.currentTime = 0;
+    }
+}
+
+function isSoundPlaying(soundKey) {
+    var sound = sounds[soundKey];
+    if (sound && !sound.paused && sound.currentTime > 0 && !sound.ended) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+function stopAllSounds() {
+    for (var soundKey in sounds) {
+        var sound = sounds[soundKey];
+        if (sound) {
+            sound.pause();
+            sound.currentTime = 0;
+        }
     }
 }
 
@@ -94,7 +130,7 @@ function loadMasterTileset(ts) {
 
     sprites['chest1'] = getTileSourceRect(ts,7, 0);
     sprites['chest2'] = getTileSourceRect(ts,7, 0);
-    sprites['key'] = getTileSourceRect(ts,1, 0);
+    sprites['key'] = getTileSourceRect(ts,7, 1);
 
     sprites['pf_flyers'] = getTileSourceRect(ts,1, 1);
     sprites['the_button'] = getTileSourceRect(ts,0, 2);
@@ -107,8 +143,8 @@ function loadMasterTileset(ts) {
     sprites['playerInventory'] = getTileSourceAdjustable(ts,8, 0 ,240,144);
     sprites['snatcherInventory'] = getTileSourceAdjustable(ts,13, 0 ,144,144);
 
-    sprites['exitdoorClosed'] = getTileSourceAdjustable(ts,9, 3 ,96,96);
-    sprites['exitdoorOpen'] = getTileSourceAdjustable(ts,12, 3 ,96,96);
+    sprites['exitdoorClosed'] = getTileSourceAdjustable(ts,12, 3 ,96,96);
+    sprites['exitdoorOpen'] = getTileSourceAdjustable(ts,14, 3 ,96,96);
 
     loadPlayerAnimations(ts);
     loadGrassAnimations(ts);

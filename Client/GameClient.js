@@ -103,6 +103,7 @@ function connectWebSocket() {
     socket.addEventListener('close', function(event) {
         console.log('WebSocket connection closed.');
         $("#offlineMessage").css("display", "flex");
+        stopAllSounds();
         reConnectInterval = setInterval(function() {
             connectWebSocket();
         }, 1000); //On disconnect, try to reconnect every second
@@ -163,6 +164,8 @@ function recievedServerMessage(message) {
             sounds['playerSnatched'].play();
         else if(m.data.text.includes("has opened"))
             sounds['exitDoorOpened'].play();
+        else if(m.data.text.includes("lacks skill"))
+            sounds['lacksSkill'].play();
         else if(!m.data.text.includes("delicious") && !m.data.text.includes("tells all") && !m.data.text.includes("have gone dark"))
             sounds['badEvent'].play();
 
@@ -222,6 +225,15 @@ function drawGameState(gs) {
 
     //Draw the lobby
     if(gs.state == "lobby"){
+        stopSound('gameMusic');
+        stopSound('forestNoise');
+        if (isSoundPlaying('lobbyMusic') == false) 
+            if(hasUserInteracted)
+                sounds['lobbyMusic'].play();
+        if (isSoundPlaying('rainfall') == false) 
+            if(hasUserInteracted)
+                sounds['rainfall'].play();     
+        
         drawLobby(ctx,gs);
     }
     else if(gs.state == "loading"){
@@ -232,7 +244,13 @@ function drawGameState(gs) {
     else if(gs.state == "playing" && getMe(gs).isAlive){
         if(gameStartOnce){
             stopSound('thunder');
+            stopSound('gameMusic');
+            stopSound('forestNoise');
+            stopSound('rainfall');
             sounds['thunder'].play();
+            sounds['gameMusic'].play();
+            sounds['forestNoise'].play();
+            sounds['rainfall'].play();
             gameStartOnce = false;
         }
         stopSound('lobbyMusic');
@@ -411,7 +429,7 @@ function drawMap(ctx, gs, map) {
         const noPowerRoom = 'rgba(0, 0, 0, 0)';
         const noRoom = 'rgba(255, 255, 255, .65)';
         const emptyRoom = 'rgba(58, 100, 158, .60)';
-        const exitDoor = 'rgba(155, 78, 35, .75)';
+        const exitDoor = 'rgba(255, 213, 25, .75)';
         const myRoom = getMe(gs).color;
         const snatcherInRoom = getSnatcher(gs).color;
 
@@ -433,7 +451,7 @@ function drawMap(ctx, gs, map) {
                     else if(localState.events['failedSkillCheck'].length > 0 && localState.events['failedSkillCheck'].includes(isRunnerInThisRoom(gs,row,col).id)){
                         drawRoomTile(ctx, roomX, roomY, isRunnerInThisRoom(gs,row,col).color); //Show that player to the killer
                     }
-                    else if(room == 3 && isExitDoorInRoomOpen(row,col)) // if this door is opened, the snatcher can see it on their map
+                    else if(room == 3 && isExitDoorInRoomOpen(row,col))// // if this door is opened, the snatcher can see it on their map
                         drawRoomTile(ctx, roomX, roomY, exitDoor);
                     else if (room == 1 || room == 3) //Draw empty rooms and also hide the door if it hasn't been opened
                         drawRoomTile(ctx, roomX, roomY, emptyRoom);
@@ -743,7 +761,7 @@ function drawPlayerInventory(ctx, gs) {
     if(me.isSnatcher){
         drawSprite(ctx,'snatcherInventory', ctx.canvas.width - 140, 10);
         if (me.hasItem) 
-            drawSprite(ctx, me.hasItem.type, ctx.canvas.width - 92, 42);
+            drawSprite(ctx, me.hasItem.type, ctx.canvas.width - 93, 41);
     }
     else{
         drawSprite(ctx,'playerInventory', ctx.canvas.width - 235, 10);
@@ -885,11 +903,11 @@ function drawItems(ctx, currentRoomX, currentRoomY) {
                     drawSprite(ctx, 'exitdoorOpen', item.currPos.x - 7, item.currPos.y - 7);
                 else{
                     drawSprite(ctx, 'exitdoorClosed', item.currPos.x - 7, item.currPos.y - 7);
-                    ctx.fillStyle = '#f7d707';
-                    ctx.font = '17px '+font2;
+                    ctx.fillStyle = 'black';
+                    ctx.font = '22px '+font2;
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
-                    ctx.fillText(item.specialCount+" / "+item.specialCount2, item.currPos.x + 1 + Math.ceil(item.width/2), item.currPos.y + 11 + Math.ceil(item.height/2));
+                    ctx.fillText(item.specialCount+" / "+item.specialCount2, item.currPos.x + 1 + Math.ceil(item.width/2), item.currPos.y - 10 + Math.ceil(item.height/2));
                 }
             }
             else{
@@ -1134,14 +1152,19 @@ $(document).ready(function() {
                 const button = joinButtons[buttonId];
                 if (x >= button.x && x <= button.x + button.width && y >= button.y && y <= button.y + button.height) {
                     //console.log("Player join/leave request: " + buttonId);
-                    if(localState.playerId == -1)
+                    if(localState.playerId == -1){
+                        stopSound('lobbyJoin');
+                        sounds['lobbyJoin'].play();
                         socket.send(JSON.stringify({
                             type:"playerJoin",
                             name:buttonId,
                             id: buttonId,
                             color: button.playerColor
                         }));
+                    }
                     else{
+                        stopSound('lobbyLeave');
+                        sounds['lobbyLeave'].play();
                         localState.playerId = -1;
                         socket.send(JSON.stringify({
                             type:"playerLeave",
@@ -1159,6 +1182,8 @@ $(document).ready(function() {
             y <= button.y + button.height &&
             isMe("snatcher") &&
             startGameButton && startGameButton.enabled) {
+            stopSound('lobbyJoin');
+            sounds['lobbyJoin'].play();
             socket.send(JSON.stringify({
                 type:"startGame",
             }));
@@ -1169,20 +1194,16 @@ $(document).ready(function() {
 
 });
 
-function playLobbyMusicOnFirstInteraction() {
+var hasUserInteracted = false;
+function playFirstInteractionSounds() {
+    hasUserInteracted = true;
     stopSound('thunder');
-    stopSound('rainfall');
-    stopSound('lobbyMusic');
     sounds['thunder'].play();
-    sounds['rainfall'].play();
-    setTimeout(function() {
-        sounds['lobbyMusic'].play();
-    }, 1500);
-    document.removeEventListener('click', playLobbyMusicOnFirstInteraction);
-    document.removeEventListener('keydown', playLobbyMusicOnFirstInteraction);
+    document.removeEventListener('click', playFirstInteractionSounds);
+    document.removeEventListener('keydown', playFirstInteractionSounds);
 }
 
-document.addEventListener('click', playLobbyMusicOnFirstInteraction);
-document.addEventListener('keydown', playLobbyMusicOnFirstInteraction);
+document.addEventListener('click', playFirstInteractionSounds);
+document.addEventListener('keydown', playFirstInteractionSounds);
 
 

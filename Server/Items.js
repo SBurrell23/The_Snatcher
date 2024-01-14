@@ -170,7 +170,7 @@ Items.prototype.pickupItemIfAllowed = function(player, item, pickupRequested) {
                 global.sendItemsToClientsInRoom(pRoomX,pRoomY);
                 if(item.specialCount >= global.keysNeededToOpenDoor){
                     global.sendEventToAllClients("eventMessage", {
-                        text: player.name + " has opened an exit door!"
+                        text: player.name + " has opened an escape passage!"
                     });
                     //This is really to just show the exit door on the snatchers map
                     global.sendEventToAllClients("exitDoorData", item);    

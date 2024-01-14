@@ -98,7 +98,7 @@ Event.prototype.triggerFailedSkillCheck = function(gs,player) {
             text: "A runner lacks skill..."
         });
         global.sendEventToClient("eventMessage",player.id,{
-            text: "You've been revealed to the snatcher!"
+            text: "You've been revealed!"
         });
     }else{ //Snatcher failed skill check, embarass him and tell the players
         global.sendEventToAllRunners("eventMessage", {

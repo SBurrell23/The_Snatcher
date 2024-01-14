@@ -147,6 +147,7 @@ Items.prototype.pickupItemIfAllowed = function(player, item, pickupRequested) {
     if (item.type == "key" && player.hasKeys.length < 2 && !item.isConsumed && !player.isSnatcher){
         this.putItemInPlayerInventory(player,item);
         
+        sendSoundToClient(player.id,"keyPickup");
         console.log("Player " + player.name + " picked up item " + item.id);
         global.sendItemsToClientsInRoom(pRoomX,pRoomY);
     }
@@ -163,6 +164,7 @@ Items.prototype.pickupItemIfAllowed = function(player, item, pickupRequested) {
                 keyItem.ownerId = -1;
                 item.specialCount += 1;
                 player.points += global.pointsForKeyAddedToDoor;
+                sendSoundToClient(player.id,"keyAdded");
                 console.log("Player added key to the exit door at " + item.currRoom.x + ", " + item.currRoom.y + "!");
                 console.log(JSON.stringify(item));
                 global.sendItemsToClientsInRoom(pRoomX,pRoomY);
@@ -242,6 +244,7 @@ Items.prototype.putItemInPlayerInventory = function(player,item) {
     if(item.type == "key")
         player.hasKeys.push(true);
     else{
+        sendSoundToClient(player.id,"itemPickupOrDrop");
         player.hasItem = {
             type: item.type,
             id: item.id
@@ -283,6 +286,7 @@ Items.prototype.pickupItem = function(gs, playerId) {
     if(this.isItemStillInChest(player)) //We start the skillcheck here
         return;
 
+
     this.checkForItemCollision(player,true);
 }
 
@@ -292,6 +296,7 @@ Items.prototype.dropItem = function(gs, playerId, checkForSwap) {
     if(this.isItemStillInChest(player)) //We start the skillcheck here
         return;
 
+    sendSoundToClient(player.id,"itemPickupOrDrop");
     player.hasItem = undefined;
 
     for (let item of global.items) {
@@ -302,11 +307,11 @@ Items.prototype.dropItem = function(gs, playerId, checkForSwap) {
                 //A quick sneaky check to see if a player is currently on another item
                 //If yes, we pick it up before resetting the old item (A HOT SWAP!)
                 if(checkForSwap)
-                    this.checkForItemCollision(player,true);
+                    this.checkForItemCollision(player,true); 
                 item.ownerId = -1;
                 item.isConsumed = false;
-                item.currPos.x = player.currPos.x - player.radius;
-                item.currPos.y = player.currPos.y;
+                item.currPos.x = player.currPos.x - 24;
+                item.currPos.y = player.currPos.y - 24;
                 item.currRoom.x = player.currRoom.x;
                 item.currRoom.y = player.currRoom.y;
                 

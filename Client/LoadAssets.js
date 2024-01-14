@@ -11,11 +11,54 @@ function loadAssets(){
 }
 
 function loadSounds(){
-    sounds['scream1'] = new Audio('Assets/Sounds/sound1.mp3');
-    sounds['scream1'].volume = 0.5;
+    //sounds['scream1'].loop = true; 
+    sounds['lobbyMusic'] = new Audio('Assets/Sounds/OST 3 - Eternal Night (Loopable).mp3');
+    sounds['lobbyMusic'].volume = 0.12;
+    sounds['lobbyMusic'].loop = true;
 
-    sounds['scream2'] = new Audio('Assets/Sounds/sound2.mp3');
-    sounds['scream2'].loop = true; 
+    sounds['footStep1'] = new Audio('Assets/Sounds/SlimeBlobWalk.mp3');
+    sounds['footStep1'].volume = 0.02;
+
+    sounds['chestOpen'] = new Audio('Assets/Sounds/GS2_Treasure_Chest_Unlock_Open.mp3');
+    sounds['chestOpen'].volume = 0.35;
+
+    sounds['scFailed'] = new Audio('Assets/Sounds/GS2_Vases_Breaking_3.mp3');
+    sounds['scFailed'].volume = 0.25;
+
+    sounds['scStarted'] = new Audio('Assets/Sounds/Magic_Spell_21.mp3');
+    sounds['scStarted'].volume = 0.2;
+
+    sounds['tick'] = new Audio('Assets/Sounds/tick.mp3');
+    sounds['tick'].volume = 0.15;
+
+    sounds['keyPickup'] = new Audio('Assets/Sounds/GS2_Item_Acquire_1.mp3');
+    sounds['keyPickup'].volume = 0.25;
+
+    sounds['itemUsed'] = new Audio('Assets/Sounds/GS2_Item_Acquire_4.mp3');
+    sounds['itemUsed'].volume = 0.25;
+
+    sounds['badEvent'] = new Audio('Assets/Sounds/Piano_stinger_dissonent.wav');
+    sounds['badEvent'].volume = 0.25;
+
+    sounds['itemPickupOrDrop'] = new Audio('Assets/Sounds/Swoosh_3.wav');
+    sounds['itemPickupOrDrop'].volume = 0.3;
+
+    sounds['keyAdded'] = new Audio('Assets/Sounds/GS2_Door_Open_2.mp3');
+    sounds['keyAdded'].volume = 0.3;
+
+    sounds['exitDoorOpened'] = new Audio('Assets/Sounds/GS2_Item_Acquire_3.mp3');
+    sounds['exitDoorOpened'].volume = 0.3;
+
+    sounds['playerSnatched'] = new Audio('Assets/Sounds/GS1_Damage_2.mp3');
+    sounds['playerSnatched'].volume = 0.3;
+
+    sounds['thunder'] = new Audio('Assets/Sounds/thunder.mp3');
+    sounds['thunder'].volume = 0.4;
+
+    sounds['rainfall'] = new Audio('Assets/Sounds/rainfall.mp3');
+    sounds['rainfall'].volume = 0.020;
+    sounds['rainfall'].loop = true;
+    
 }
 
 function stopSound(soundKey) {

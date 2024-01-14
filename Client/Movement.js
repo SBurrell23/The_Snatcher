@@ -28,6 +28,10 @@ function handlePlayerMovement(){
     }
 }
 
+function isPlayerMoving(){
+    return keys['w'] || keys['a'] || keys['s'] || keys['d'];
+}
+
 function movePlayer(direction){
     if(serverState && serverState.state == "playing" && getMe(serverState).isAlive){
         socket.send(JSON.stringify({
@@ -57,8 +61,12 @@ $(document).keydown(function(e) {
                 sc.barFillSpeed = 0;
                 var isSCGood = (sc.lineX >= sc.successAreaX && (sc.lineX+sc.lineWidth) <= sc.successAreaX + sc.successWidth);
                 
-                if(!isSCGood)
+                if(!isSCGood){
                     sc.successAreaColor = 'red';
+                    sounds['scFailed'].play();
+                }
+                else
+                    sounds['chestOpen'].play();
 
                 setTimeout(function() {
                     if(isSCGood){
@@ -98,6 +106,7 @@ $(document).keydown(function(e) {
         e.preventDefault();
         if(serverState && serverState.state == "playing" && getMe(serverState).isAlive){
             if(getMe(serverState).hasItem != undefined){
+                sounds['itemUsed'].play();
                 socket.send(JSON.stringify({
                     type: "useItem",
                     id: localState.playerId,

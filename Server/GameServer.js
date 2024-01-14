@@ -257,6 +257,10 @@ global.sendEventToClient = function(type,playerId, data){
     sendClient(playerId,{type: type, data: data});
 }
 
+global.sendSoundToClient = function(playerId, sound){
+    sendClient(playerId,{type: 'sound', data: sound});
+}
+
 global.sendEventToAllClients = function(type, data){
     sendAllClients({type: type, data: data});
 }

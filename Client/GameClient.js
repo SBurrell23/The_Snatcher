@@ -132,6 +132,7 @@ function recievedServerMessage(message) {
             sc.successAreaStart = Math.floor(Math.random() * 121) - 60;
             localState.skillCheckItemId = m.data;
             localState.skillCheck = true;
+            sounds['scStarted'].play();
         }
     }else if(m.type == "failedSkillCheck"){
         var failedPlayerId = m.data.playerId;
@@ -157,6 +158,14 @@ function recievedServerMessage(message) {
             localState.events['kill_the_power'] = false;
         }, m.data.unrevealTime);
     }else if(m.type == "eventMessage"){
+
+        if(m.data.text.includes("has been snatched"))
+            sounds['playerSnatched'].play();
+        else if(m.data.text.includes("has opened"))
+            sounds['exitDoorOpened'].play();
+        else if(!m.data.text.includes("delicious") && !m.data.text.includes("tells all") && !m.data.text.includes("have gone dark"))
+            sounds['badEvent'].play();
+
         setEventText(m.data.text);
     }else if(m.type == "exitDoorData"){
         localState.exitDoors.push(m.data);
@@ -169,6 +178,9 @@ function recievedServerMessage(message) {
         randomLoadingMessage = loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
         localState.roomsIveBeenIn = [];
         isGameLoading = true;
+    }else if(m.type == "sound"){
+        console.log(m);
+        sounds[m.data].play();
     }
 
 }
@@ -200,7 +212,7 @@ function gameLoop() {
     requestAnimationFrame(gameLoop); // schedule next game loop
 }
 
-
+var gameStartOnce = true;
 function drawGameState(gs) {
     
     var ctx = document.getElementById('canvas').getContext('2d');
@@ -212,10 +224,18 @@ function drawGameState(gs) {
     if(gs.state == "lobby"){
         drawLobby(ctx,gs);
     }
-    else if(gs.state == "loading")
+    else if(gs.state == "loading"){
+        gameStartOnce = true;
         drawLoading(ctx,gs);
+    }
     //Draw the game
     else if(gs.state == "playing" && getMe(gs).isAlive){
+        if(gameStartOnce){
+            stopSound('thunder');
+            sounds['thunder'].play();
+            gameStartOnce = false;
+        }
+        stopSound('lobbyMusic');
         isGameLoading = false;
         var currentRoomX = getMe(gs).currRoom.x;
         var currentRoomY = getMe(gs).currRoom.y;
@@ -226,10 +246,12 @@ function drawGameState(gs) {
         drawItems(ctx,currentRoomX, currentRoomY);
         if(getMe(gs).isSnatcher)
             drawSnatcherDoorInfo(ctx,gs,localState.doorInfo);
+
+        drawRain(ctx,'rgba(86, 122, 179, .75)');
         drawPlayers(ctx, gs, currentRoomX, currentRoomY);
         
         //This needs to come after objects that are under the spotlight and before things over it
-        //drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
+        drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
 
         drawEventText(ctx,localState.eventText);
 
@@ -249,10 +271,10 @@ function drawGameState(gs) {
 }   
 
 var raindrops = [];
-function drawRain(ctx) {
+function drawRain(ctx,color) {
 
     // Set the color of the raindrops
-    ctx.fillStyle = 'red';
+    ctx.fillStyle = color;
 
     // Draw each raindrop
     for (let i = 0; i < raindrops.length; i++) {
@@ -284,18 +306,18 @@ function drawRain(ctx) {
         if (raindrop.y > canvas.height) {
             raindrop.y = 0 - raindrop.length;
             raindrop.x = Math.random() * canvas.width;
-            raindrop.speed = Math.random() * 1.4 + 1.25;
+            raindrop.speed = Math.random() * 1.6 + 1.55;
             raindrop.length = Math.random() * 12 + 5;
         }
     }
 }
 
 function initRain(){
-    for (let i = 0; i < 155; i++) {
+    for (let i = 0; i < 175; i++) {
         raindrops.push({
             x: Math.random() * canvas.width,  // Random x position
             y: Math.random() * canvas.height, // Random y position
-            speed: Math.random() * 1.4 + 1.25,     // Random speed
+            speed: Math.random() * 1.6 + 1.55,     // Random speed
             length: Math.random() * 12 + 5   // Random length
         });
     }
@@ -497,8 +519,12 @@ function drawSkillCheck(ctx,player){
     
     if (sc.barMoveAmount >= sc.barWidth) {
         sc.barFillSpeed = sc.barFillSpeed * -1;
+        stopSound('tick');
+        sounds['tick'].play();
     } else if (sc.barMoveAmount <= 0) {
         sc.barFillSpeed = sc.barFillSpeed * -1;
+        stopSound('tick');
+        sounds['tick'].play();
     }   
 
 }
@@ -508,7 +534,7 @@ function drawLobby(ctx, gs) {
     ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    drawRain(ctx);
+    drawRain(ctx,'red');
 
     // Draw the red THE SNATCHER Title
     ctx.fillStyle = '#FF0000';
@@ -837,6 +863,9 @@ function drawPlayer(ctx, player, x, y) {
     let frameIndex = Math.floor(currentFrame / framesBeforeNextAnimate) % aFrame.length;
 
     drawSprite(ctx, pName+ aFrame[frameIndex], px, py);
+
+    if(currentFrame % 15 == 0 && isPlayerMoving() && isMe(player.name))
+        sounds['footStep1'].play();
 }
 
 function drawItems(ctx, currentRoomX, currentRoomY) {
@@ -1139,5 +1168,21 @@ $(document).ready(function() {
     });
 
 });
+
+function playLobbyMusicOnFirstInteraction() {
+    stopSound('thunder');
+    stopSound('rainfall');
+    stopSound('lobbyMusic');
+    sounds['thunder'].play();
+    sounds['rainfall'].play();
+    setTimeout(function() {
+        sounds['lobbyMusic'].play();
+    }, 1500);
+    document.removeEventListener('click', playLobbyMusicOnFirstInteraction);
+    document.removeEventListener('keydown', playLobbyMusicOnFirstInteraction);
+}
+
+document.addEventListener('click', playLobbyMusicOnFirstInteraction);
+document.addEventListener('keydown', playLobbyMusicOnFirstInteraction);
 
 

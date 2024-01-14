@@ -175,7 +175,7 @@ Movement.prototype.checkForPlayerCollision = function(gs, player) {
 
             player.points += global.pointsForSnatching;
             console.log("The snatcher has SNATCHED " + snatchedPlayer.name + "!!! RIP!!!");
-            global.sendEventToAllRunners("eventMessage", {
+            global.sendEventToAllClients("eventMessage", {
                 text: snatchedPlayer.name.toUpperCase() + " has been snatched! RIP..."
             });
             global.map.sendSnatcherDoorInfo(gs);

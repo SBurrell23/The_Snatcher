@@ -51,6 +51,9 @@ Event.prototype.triggerItemEvent = function(gs,player,item) {
         case "bbq_chili":
             var data = {revealTime: this.bbqChiliRevealTime};
             global.sendEventToClient("bbq_chili",player.id,data);
+            global.sendEventToClient("eventMessage",player.id,{
+                text: "The runners look delicious..."
+            });
             global.sendEventToAllRunners("eventMessage", {
                 text: "The snatcher has revealed all runners!"
             });

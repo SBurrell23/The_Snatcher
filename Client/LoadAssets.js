@@ -7,6 +7,23 @@ new FontFace('Jolly Lodger','url(Assets/Fonts/JollyLodger-Regular.ttf)').load().
 
 function loadAssets(){
     loadMasterTileset(masterTileset);
+    loadSounds();
+}
+
+function loadSounds(){
+    sounds['scream1'] = new Audio('Assets/Sounds/sound1.mp3');
+    sounds['scream1'].volume = 0.5;
+
+    sounds['scream2'] = new Audio('Assets/Sounds/sound2.mp3');
+    sounds['scream2'].loop = true; 
+}
+
+function stopSound(soundKey) {
+    var sound = sounds[soundKey];
+    if (sound) {
+        sound.pause();
+        sound.currentTime = 0;
+    }
 }
 
 function loadMasterTileset(ts) {
@@ -199,7 +216,6 @@ function loadPlayerAnimations(ts){
     }
     //console.log(sprites);
 }
-
 
 function getTileSourceRect(tileset, tileX, tileY) {
     var tileSize = 48;

@@ -6,8 +6,8 @@ function SolidObjects() {
     this.mazeWidth = (global.canvasWidth / global.map.getBlockSize());
     //The canvas and block size must divide into an EVEN number
 
-    this.minNumberOfBlocks = 60;
-    this.maxNumberOfBlocks = 200;
+    this.minNumberOfBlocks = 90;
+    this.maxNumberOfBlocks = 206;
 }
 
 SolidObjects.prototype.get = function() {
@@ -66,94 +66,24 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
                 }
                 //Ratio is 10 to 14, each door must be 2 75px blocks wide
                 //Ratio must multiply into canvas ratio or doors wont work
-                
-                //4 DOORS
-                if(this.isRoom(map,'north',rX,rY) && this.isRoom(map,'south',rX,rY) && this.isRoom(map,'west',rX,rY) && this.isRoom(map,'east',rX,rY)){
-                    this.createRandomPath(maze,'north','south');//The actual path
-                    this.createRandomPath(maze,'east','west');//The actual path
-                    this.openDoors(maze,['north','south','east','west']);
-                    //This actually is guaranteed to work because the paths MUST cross
-                }
 
-                // 3 DOORS
-                //North, South, East
-                else if(this.isRoom(map,'north',rX,rY) && this.isRoom(map,'south',rX,rY) && this.isRoom(map,'east',rX,rY)){
-                    this.createRandomPath(maze,'north','south');
-                    this.createRandomPath(maze,'south','east');
-                    this.openDoors(maze,['north','south','east']);
-                }
-                //North, South, West
-                else if(this.isRoom(map,'north',rX,rY) && this.isRoom(map,'south',rX,rY) && this.isRoom(map,'west',rX,rY)){
-                    this.createRandomPath(maze,'north','south');
-                    this.createRandomPath(maze,'north','west');
-                    this.openDoors(maze,['north','south','west']);
-                }
-                //North, East, West
-                else if(this.isRoom(map,'north',rX,rY) && this.isRoom(map,'east',rX,rY) && this.isRoom(map,'west',rX,rY)){
-                    this.createRandomPath(maze,'east','west');
-                    this.createRandomPath(maze,'north','west');
-                    this.openDoors(maze,['north','east','west']);
-                }
-                //South, East, West
-                else if(this.isRoom(map,'south',rX,rY) && this.isRoom(map,'east',rX,rY) && this.isRoom(map,'west',rX,rY)){
-                    this.createRandomPath(maze,'east','west');
-                    this.createRandomPath(maze,'south','east');
-                    this.openDoors(maze,['south','east','west']);
-                }
 
-                // 2 DOORS
-                //East to West
-                else if(this.isRoom(map,'east',rX,rY) && this.isRoom(map,'west',rX,rY)){
-                    this.createRandomPath(maze,'east','west');
-                    this.openDoors(maze,['east','west']);
-                }
-                //North to south
-                else if(this.isRoom(map,'north',rX,rY) && this.isRoom(map,'south',rX,rY)){
-                    this.createRandomPath(maze,'north','south');
-                    this.openDoors(maze,['north','south']);
-                }
-                //South to West
-                else if(this.isRoom(map,'south',rX,rY) && this.isRoom(map,'west',rX,rY)){
-                    this.createRandomPath(maze,'south','west');
-                    this.openDoors(maze,['south','west']);
-                }
-                //West to North
-                else if(this.isRoom(map,'west',rX,rY) && this.isRoom(map,'north',rX,rY)){
-                    this.createRandomPath(maze,'west','north');
-                    this.openDoors(maze,['west','north']);
-                }
-                //North to East
-                else if(this.isRoom(map,'north',rX,rY) && this.isRoom(map,'east',rX,rY)){
-                    this.createRandomPath(maze,'north','east');
-                    this.openDoors(maze,['north','east']);
-                }
-                //East to South
-                else if(this.isRoom(map,'east',rX,rY) && this.isRoom(map,'south',rX,rY)){
-                    this.createRandomPath(maze,'east','south');
-                    this.openDoors(maze,['east','south']);
-                }
-
-                // 1 DOOR (AKA DEAD ENDS!)
                 //North
-                else if(this.isRoom(map,'north',rX,rY)){
-                    this.createRandomPath(maze,'north','middle');
-                    this.openDoors(maze,['north','middle']);
-                }
+                if(this.isRoom(map,'north',rX,rY))
+                    this.openDoors(maze,['north']);
                 //South
-                else if(this.isRoom(map,'south',rX,rY)){
-                    this.createRandomPath(maze,'south','middle');
-                    this.openDoors(maze,['south','middle']);
-                }
+                if(this.isRoom(map,'south',rX,rY))
+                    this.openDoors(maze,['south']);
                 //East
-                else if(this.isRoom(map,'east',rX,rY)){
-                    this.createRandomPath(maze,'east','middle');
-                    this.openDoors(maze,['east','middle']);
-                }
+                if(this.isRoom(map,'east',rX,rY))
+                    this.openDoors(maze,['east']);
                 //West
-                else if(this.isRoom(map,'west',rX,rY)){
-                    this.createRandomPath(maze,'west','middle');
-                    this.openDoors(maze,['west','middle']);
-                }
+                if(this.isRoom(map,'west',rX,rY))
+                    this.openDoors(maze,['west']);
+                
+                this.createRandomPath(maze,'north','south');//The actual path
+                this.createRandomPath(maze,'east','west');//The actual path
+
 
                 //Adjust the killer starting room and make sure he has space to spawn
                 if(rX == Math.floor(map.length/2) && rY == Math.floor(map[i].length/2)){

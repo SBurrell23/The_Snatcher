@@ -40,6 +40,7 @@ var colors = { //Map colors
 
 var eventTextInterval = null;
 
+var sounds = {};
 var sprites = {};
 let currentFrame = 0;
 var initRainFlag = true;
@@ -478,7 +479,7 @@ function drawSkillCheck(ctx,player){
     ctx.clearRect(player.currPos.x - sc.barWidth / 2, skillCheckY, sc.barWidth, sc.barHeight);
 
     // Draw the bar outline
-    ctx.fillStyle = '#000';
+    ctx.fillStyle = '#141414';
     ctx.fillRect(player.currPos.x - sc.barWidth / 2, skillCheckY, sc.barWidth, sc.barHeight);
 
     // Draw the success area

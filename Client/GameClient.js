@@ -549,7 +549,7 @@ function drawSkillCheck(ctx,player){
 
 function drawLobby(ctx, gs) {
     
-    ctx.fillStyle = '#000000';
+    ctx.fillStyle = '#121212';
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
     drawRain(ctx,'red');

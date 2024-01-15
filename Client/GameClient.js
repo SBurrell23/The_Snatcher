@@ -269,7 +269,7 @@ function drawGameState(gs) {
         drawPlayers(ctx, gs, currentRoomX, currentRoomY);
         
         //This needs to come after objects that are under the spotlight and before things over it
-        //drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
+        drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
 
         drawEventText(ctx,localState.eventText);
 
@@ -360,6 +360,8 @@ function drawLoading(ctx,gs) {
     ctx.fillStyle = 'red';
     ctx.textAlign = 'center';
 
+    drawRain(ctx,'red');
+
     ctx.fillText(randomLoadingMessage, ctx.canvas.width / 2, (ctx.canvas.height / 2) - 100);
 
     ctx.font = '35px '+ font;
@@ -432,6 +434,14 @@ function drawMap(ctx, gs, map) {
         const exitDoor = 'rgba(255, 213, 25, .75)';
         const myRoom = getMe(gs).color;
         const snatcherInRoom = getSnatcher(gs).color;
+
+        const mapWidth = map[0].length * roomSize;
+        const mapHeight = map.length * roomSize;
+
+        // Draw black border around the map
+        ctx.strokeStyle = 'rgba(10, 10, 10,.7)';
+        ctx.lineWidth = 4;
+        ctx.strokeRect(walloffset-1, walloffset-2, mapWidth+ 4, mapHeight + 4);
 
         for (let row = 0; row < map.length; row++) {
             for (let col = map[row].length - 1; col >= 0; col--) { // Reverse the loop for horizontal flipping
@@ -592,7 +602,12 @@ function drawLobby(ctx, gs) {
             sOffset = 80;
             x = (ctx.canvas.width / 2);
             y = (ctx.canvas.height / 2);
-            drawSprite(ctx,'player1' + "s1", x - 24, y - 108);
+
+            const framesBeforeNextAnimate = 50;
+            aFrame = ['s1','s2','s3','s2'];
+            let frameIndex = Math.floor(currentFrame / framesBeforeNextAnimate) % aFrame.length;
+            drawSprite(ctx, 'player1'+ aFrame[frameIndex], x - 24, y - 108);
+            
             // Draw snatcher's name
             ctx.fillStyle = '#d90f0f';
             ctx.fillText("Snatcher", x, y - 80 - 44);
@@ -906,12 +921,32 @@ function drawPlayer(ctx, player, x, y) {
     else if(lastDir == "west")
         aFrame = ['w1','w2','w3'];
 
-    const framesBeforeNextAnimate = 45;
-    let frameIndex = Math.floor(currentFrame / framesBeforeNextAnimate) % aFrame.length;
 
-    drawSprite(ctx, pName+ aFrame[frameIndex], px, py);
 
-    if(currentFrame % 15 == 0 && isPlayerMoving() && isMe(player.name))
+    if(!player.isSnatcher){
+        const framesBeforeNextAnimate = 42;
+        let frameIndex = Math.floor(currentFrame / framesBeforeNextAnimate) % aFrame.length;
+        drawSprite(ctx, pName+ aFrame[frameIndex], px, py);
+    }
+    else{
+        if(player.isSnatcher){ //&& isPlayerMoving()
+            const framesBeforeNextAnimate = 25;
+            let frameIndex = Math.floor(currentFrame / framesBeforeNextAnimate) % aFrame.length;
+            drawSprite(ctx, pName+ aFrame[frameIndex], px, py);
+        }
+        // else{
+        //     if(lastDir == "north")
+        //         drawSprite(ctx, pName+ "n2", px, py);
+        //     else if(lastDir == "south")
+        //         drawSprite(ctx, pName+ "s2", px, py);
+        //     else if(lastDir == "east")
+        //         drawSprite(ctx, pName+ "e2", px, py);
+        //     else if(lastDir == "west")
+        //         drawSprite(ctx, pName+ "w2", px, py);
+        // }
+    }
+
+    if(currentFrame % 18 == 0 && isPlayerMoving() && isMe(player.name))
         sounds['footStep1'].play();
 }
 

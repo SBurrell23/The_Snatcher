@@ -85,7 +85,7 @@ function connectWebSocket() {
 
     //wss://the-snatcher.onrender.com
     //ws://localhost:8080
-    socket = new WebSocket('wss://the-snatcher.onrender.com');  
+    socket = new WebSocket('ws://localhost:8080');  
     socket.addEventListener('open', function () {
         console.log('Server connection established!');
         $("#offlineMessage").css("display", "none");
@@ -269,7 +269,7 @@ function drawGameState(gs) {
         drawPlayers(ctx, gs, currentRoomX, currentRoomY);
         
         //This needs to come after objects that are under the spotlight and before things over it
-        drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
+        //drawSpotlights(ctx, gs, currentRoomX, currentRoomY);
 
         drawEventText(ctx,localState.eventText);
 
@@ -518,9 +518,20 @@ function drawSkillCheck(ctx,player){
 
     ctx.clearRect(player.currPos.x - sc.barWidth / 2, skillCheckY, sc.barWidth, sc.barHeight);
 
-    // Draw the bar outline
+    // Draw the bar outline with border radius (the border radius is why this is not 1 line...)
     ctx.fillStyle = '#141414';
-    ctx.fillRect(player.currPos.x - sc.barWidth / 2, skillCheckY, sc.barWidth, sc.barHeight);
+    ctx.beginPath();
+    ctx.moveTo(player.currPos.x - sc.barWidth / 2 + 4, skillCheckY);
+    ctx.lineTo(player.currPos.x + sc.barWidth / 2 - 4, skillCheckY);
+    ctx.quadraticCurveTo(player.currPos.x + sc.barWidth / 2, skillCheckY, player.currPos.x + sc.barWidth / 2, skillCheckY + 4);
+    ctx.lineTo(player.currPos.x + sc.barWidth / 2, skillCheckY + sc.barHeight - 4);
+    ctx.quadraticCurveTo(player.currPos.x + sc.barWidth / 2, skillCheckY + sc.barHeight, player.currPos.x + sc.barWidth / 2 - 4, skillCheckY + sc.barHeight);
+    ctx.lineTo(player.currPos.x - sc.barWidth / 2 + 4, skillCheckY + sc.barHeight);
+    ctx.quadraticCurveTo(player.currPos.x - sc.barWidth / 2, skillCheckY + sc.barHeight, player.currPos.x - sc.barWidth / 2, skillCheckY + sc.barHeight - 4);
+    ctx.lineTo(player.currPos.x - sc.barWidth / 2, skillCheckY + 4);
+    ctx.quadraticCurveTo(player.currPos.x - sc.barWidth / 2, skillCheckY, player.currPos.x - sc.barWidth / 2 + 4, skillCheckY);
+    ctx.closePath();
+    ctx.fill();
 
     // Draw the success area
     ctx.fillStyle = sc.successAreaColor;
@@ -536,10 +547,12 @@ function drawSkillCheck(ctx,player){
     sc.barMoveAmount += sc.barFillSpeed * (deltaTime * 100);
     
     if (sc.barMoveAmount >= sc.barWidth) {
+        sc.barMoveAmount = sc.barWidth;
         sc.barFillSpeed = sc.barFillSpeed * -1;
         stopSound('tick');
         sounds['tick'].play();
     } else if (sc.barMoveAmount <= 0) {
+        sc.barMoveAmount = 0;
         sc.barFillSpeed = sc.barFillSpeed * -1;
         stopSound('tick');
         sounds['tick'].play();
@@ -549,7 +562,7 @@ function drawSkillCheck(ctx,player){
 
 function drawLobby(ctx, gs) {
     
-    ctx.fillStyle = '#121212';
+    ctx.fillStyle = '#0a0a0a';
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
     drawRain(ctx,'red');
@@ -762,18 +775,28 @@ function drawPlayerInventory(ctx, gs) {
         drawSprite(ctx,'snatcherInventory', ctx.canvas.width - 140, 10);
         if (me.hasItem) 
             drawSprite(ctx, me.hasItem.type, ctx.canvas.width - 93, 41);
+        else{
+            ctx.fillStyle = 'rgba(28, 28, 28, .60)';
+            ctx.font = 'bold 46px ' + font;
+            ctx.fillText('E', ctx.canvas.width - 70, 69);
+        }
     }
     else{
         drawSprite(ctx,'playerInventory', ctx.canvas.width - 235, 10);
 
         if (me.hasItem) 
             drawSprite(ctx, me.hasItem.type, ctx.canvas.width - 92, 42);
+        else{
+            ctx.fillStyle = 'rgba(28, 28, 28, .60)';
+            ctx.font = 'bold 46px ' + font;
+            ctx.fillText('E', ctx.canvas.width - 67, 69);
+        }
 
         if (me.hasKeys.length == 1)
-            drawSprite(ctx,'key', ctx.canvas.width - 200, 42);
+            drawSprite(ctx,'key', ctx.canvas.width - 197, 42);
         else if (me.hasKeys.length == 2){
-            drawSprite(ctx,'key', ctx.canvas.width - 200, 42);
-            drawSprite(ctx,'key', ctx.canvas.width - 150, 42);
+            drawSprite(ctx,'key', ctx.canvas.width - 197, 42);
+            drawSprite(ctx,'key', ctx.canvas.width - 144, 42);
         }
     }
     

@@ -6,8 +6,8 @@ function SolidObjects() {
     this.mazeWidth = (global.canvasWidth / global.map.getBlockSize());
     //The canvas and block size must divide into an EVEN number
 
-    this.minNumberOfBlocks = 90;
-    this.maxNumberOfBlocks = 206;
+    this.minNumberOfBlocks = 100;
+    this.maxNumberOfBlocks = 180;
 }
 
 SolidObjects.prototype.get = function() {
@@ -67,7 +67,6 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
                 //Ratio is 10 to 14, each door must be 2 75px blocks wide
                 //Ratio must multiply into canvas ratio or doors wont work
 
-
                 //North
                 if(this.isRoom(map,'north',rX,rY))
                     this.openDoors(maze,['north']);
@@ -87,12 +86,22 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
 
                 //Adjust the killer starting room and make sure he has space to spawn
                 if(rX == Math.floor(map.length/2) && rY == Math.floor(map[i].length/2)){
-                    //no need to check east and north because these are guaranteed to be rooms based on the map generation
-                    this.createRandomPath(maze,'middle','east');
-                    this.createRandomPath(maze,'middle','north');
-                    this.createRandomPath(maze,'middle','south');
-                    this.createRandomPath(maze,'middle','west');
-                    this.openDoors(maze,['middle']);
+                    if(this.isRoom(map,'north',rX,rY)){
+                        this.createRandomPath(maze,'middle','north');
+                        this.openDoors(maze,['middle']); 
+                    }
+                    else if(this.isRoom(map,'south',rX,rY)){
+                        this.createRandomPath(maze,'middle','south');
+                        this.openDoors(maze,['middle']);
+                    }
+                    else if(this.isRoom(map,'east',rX,rY)){
+                        this.createRandomPath(maze,'middle','east');
+                        this.openDoors(maze,['middle']);
+                    }
+                    else if(this.isRoom(map,'west',rX,rY)){
+                        this.createRandomPath(maze,'middle','west');
+                        this.openDoors(maze,['middle']);
+                    }
                 }
 
                 //Adjust the door rooms and make sure they have plenty of space to spawn

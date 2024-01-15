@@ -85,7 +85,7 @@ function connectWebSocket() {
 
     //wss://the-snatcher.onrender.com
     //ws://localhost:8080
-    socket = new WebSocket('ws://localhost:8080');  
+    socket = new WebSocket('wss://the-snatcher.onrender.com');  
     socket.addEventListener('open', function () {
         console.log('Server connection established!');
         $("#offlineMessage").css("display", "none");
@@ -607,7 +607,7 @@ function drawLobby(ctx, gs) {
             aFrame = ['s1','s2','s3','s2'];
             let frameIndex = Math.floor(currentFrame / framesBeforeNextAnimate) % aFrame.length;
             drawSprite(ctx, 'player1'+ aFrame[frameIndex], x - 24, y - 108);
-            
+
             // Draw snatcher's name
             ctx.fillStyle = '#d90f0f';
             ctx.fillText("Snatcher", x, y - 80 - 44);
@@ -946,8 +946,12 @@ function drawPlayer(ctx, player, x, y) {
         // }
     }
 
-    if(currentFrame % 18 == 0 && isPlayerMoving() && isMe(player.name))
+    if(currentFrame % 18 == 0 && isPlayerMoving() && isMe(player.name) && player.isSnatcher == false){
         sounds['footStep1'].play();
+    }
+    if(currentFrame % 30 == 0 && isPlayerMoving() && isMe(player.name) && player.isSnatcher == true){
+        sounds['footStep2'].play();
+    }
 }
 
 function drawItems(ctx, currentRoomX, currentRoomY) {

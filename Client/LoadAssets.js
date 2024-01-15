@@ -40,6 +40,9 @@ function loadSounds(){
     sounds['footStep1'] = new Audio('Assets/Sounds/SlimeBlobWalk.mp3');
     sounds['footStep1'].volume = 0.015;
 
+    sounds['footStep2'] = new Audio('Assets/Sounds/snatcherWalk.mp3');
+    sounds['footStep2'].volume = 0.3;
+
     sounds['chestOpen'] = new Audio('Assets/Sounds/GS2_Treasure_Chest_Unlock_Open.mp3');
     sounds['chestOpen'].volume = 0.35;
 

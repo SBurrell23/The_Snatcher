@@ -383,86 +383,68 @@ MapBoard.prototype.sendSnatcherDoorInfo = function(gs) {
     const snatcherRoomX = snatcher.currRoom.x;
     const snatcherRoomY = snatcher.currRoom.y;
 
-    //Right now this just finds the nearest player IF there is one in that direction 
-    //and the player is within a certain radius
-
-    //An alternative would be to find out how many rooms away the nearest player is in each direction
-    //This might be nice but could aso be too easy?
-
     let nearestNorth = this.rows;
     let nearestSouth = this.rows;
     let nearestEast = this.cols;
     let nearestWest = this.cols;
-    //This is a minimum radius around the snatcher for a door to light up.
-    //Without this, a player could be 1 south & 10 east and the south door would be hot red which is too missleading
-    //This also means doors will only light up if the snatcher is getting close
-    const mustBeInRadius = Math.floor( ((this.rows + this.cols)/2) / 1.5);
-    //console.log(mustBeInRadius);
+    const mustBeInRadius = Math.floor(((this.rows + this.cols) / 2) / 1.5);
 
     for (let player of gs.players) {
-        if (!player.isSnatcher && player.currRoom.y < snatcherRoomY && this.isPlayerWithinRadius(snatcherRoomX,snatcherRoomY,mustBeInRadius,player)) {
-            const distance = snatcherRoomY - player.currRoom.y;
-            if (distance < nearestNorth) {
-                nearestNorth = distance;
+        if (!player.isSnatcher && this.isPlayerWithinRadius(snatcherRoomX, snatcherRoomY, mustBeInRadius, player)) {
+            const distanceX = Math.abs(snatcherRoomX - player.currRoom.x);
+            const distanceY = Math.abs(snatcherRoomY - player.currRoom.y);
+
+            if (player.currRoom.y < snatcherRoomY && distanceY < nearestNorth) {
+                nearestNorth = distanceY;
             }
-        }
-        if (!player.isSnatcher && player.currRoom.y > snatcherRoomY && this.isPlayerWithinRadius(snatcherRoomX,snatcherRoomY,mustBeInRadius,player)) {
-            const distance = player.currRoom.y - snatcherRoomY;
-            if (distance < nearestSouth) {
-                nearestSouth = distance;
+            if (player.currRoom.y > snatcherRoomY && distanceY < nearestSouth) {
+                nearestSouth = distanceY;
             }
-        }
-        if (!player.isSnatcher && player.currRoom.x > snatcherRoomX && this.isPlayerWithinRadius(snatcherRoomX,snatcherRoomY,mustBeInRadius,player)) {
-            const distance = player.currRoom.x - snatcherRoomX;
-            if (distance < nearestWest) {
-                nearestWest = distance;
+            if (player.currRoom.x > snatcherRoomX && distanceX < nearestWest) {
+                nearestWest = distanceX;
             }
-        }
-        if (!player.isSnatcher && player.currRoom.x < snatcherRoomX && this.isPlayerWithinRadius(snatcherRoomX,snatcherRoomY,mustBeInRadius,player)) {
-            const distance = snatcherRoomX - player.currRoom.x;
-            if (distance < nearestEast) {
-                nearestEast = distance;
+            if (player.currRoom.x < snatcherRoomX && distanceX < nearestEast) {
+                nearestEast = distanceX;
             }
         }
     }
 
-    if(this.isRoom(this.gameMap,'north',snatcherRoomX,snatcherRoomY))
-        nearestNorth = (nearestNorth/this.rows).toFixed(2);
-    else
-        nearestNorth = undefined;
+    if (nearestNorth < this.rows && this.isRoom(this.gameMap,'north',snatcherRoomX,snatcherRoomY)) {
+        nearestNorth = nearestNorth + 1;
+    } else {
+        nearestNorth = 0;
+    }
 
-    if(this.isRoom(this.gameMap,'south',snatcherRoomX,snatcherRoomY))
-        nearestSouth = (nearestSouth/this.rows).toFixed(2);
-    else
-        nearestSouth = undefined;
+    if (nearestSouth < this.rows && this.isRoom(this.gameMap,'south',snatcherRoomX,snatcherRoomY)) {
+        nearestSouth = nearestSouth + 1;
+    } else {
+        nearestSouth = 0;
+    }
 
-    if(this.isRoom(this.gameMap,'east',snatcherRoomX,snatcherRoomY))
-        nearestEast = (nearestEast/this.cols).toFixed(2);
-    else
-        nearestEast = undefined;
+    if (nearestEast < this.cols && this.isRoom(this.gameMap,'east',snatcherRoomX,snatcherRoomY)) {
+        nearestEast = nearestEast + 1;
+    } else {
+        nearestEast = 0;
+    }
 
-    if(this.isRoom(this.gameMap,'west',snatcherRoomX,snatcherRoomY))
-        nearestWest = (nearestWest/this.cols).toFixed(2);
-    else
-        nearestWest = undefined;
+    if (nearestWest < this.cols && this.isRoom(this.gameMap,'west',snatcherRoomX,snatcherRoomY)) {
+        nearestWest = nearestWest + 1;
+    } else {
+        nearestWest = 0;
+    }
 
-
-    // console.log("Nearest North: " + nearestNorth);
-    // console.log("Nearest South: " + nearestSouth);
-    // console.log("Nearest East: " + nearestEast);
-    // console.log("Nearest West: " + nearestWest);
-    // console.log("-----Lower means closer-----");
-
-    //Some fun calcuation to create the alpha values.
     var doorInfo = {
-        north: (((1 - parseFloat(nearestNorth)) - 0.5) * 2),
-        south: (((1 - parseFloat(nearestSouth)) - 0.5) * 2),
-        east:  (((1 - parseFloat(nearestEast)) - 0.5) * 2),
-        west:  (((1 - parseFloat(nearestWest)) - 0.5) * 2)
+        north: nearestNorth,
+        south: nearestSouth,
+        east: nearestEast,
+        west: nearestWest
     };
+    //This algorithm will highlight the nearest x,y doors in the direction of the closest player
+    //It does not take into account walls/empty rooms
+    //This makes empty rooms a great way for players to try and lose the snatcher
 
+    //console.log(doorInfo);
     global.sendSnatcherDoorInfo(doorInfo);
-
 }
 
 MapBoard.prototype.isPlayerWithinRadius = function(snatcherRoomX,snatcherRoomY,radius,player){

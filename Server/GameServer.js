@@ -37,8 +37,8 @@ var playerObject ={
     lastDirection: "south"
 };
 
-global.baseSpeed = JSON.stringify(340);
-global.killerBaseSpotlight = JSON.stringify(245);
+global.baseSpeed = JSON.stringify(320);
+global.killerBaseSpotlight = JSON.stringify(250);
 
 var timeouts = [];
 
@@ -94,11 +94,11 @@ wss.on('connection', (ws) => {
         }
         //This needs to be removed once game is live
         if(message.type == "generateMap"){
-        //startGame();
-           for (let i = 0; i < gs.players.length; i++) {
-                if(gs.players[i].id == message.id)
-                    new Event().teleportPlayerToRandomRoom(gs, gs.players[i]);
-            }
+        startGame();
+        //    for (let i = 0; i < gs.players.length; i++) {
+        //         if(gs.players[i].id == message.id)
+        //             new Event().teleportPlayerToRandomRoom(gs, gs.players[i]);
+        //     }
         }
         if(message.type =="startGame"){
             startGame();
@@ -179,7 +179,7 @@ function startGame(){
     global.keysNeededToOpenDoor = ((gs.players.length-1) * 2) + 1;
     
     global.solidObjects = new SolidObjects();
-    global.solidObjects.createMazeWalls(gs, global.map.get());
+    //global.solidObjects.createMazeWalls(gs, global.map.get());
 
     new Items().spawnItems(gs);
 

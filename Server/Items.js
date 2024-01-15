@@ -20,7 +20,7 @@ Items.prototype.spawnItems = function(gs) {
     var numKeys = (gs.players.length - 1) * 5 + 5;
     this.createItems(gs,'key','all', numKeys, itemSize,itemSize);
 
-    var numPlayerItems = (gs.players.length - 1) * 2 + 10
+    var numPlayerItems = (gs.players.length - 1) * 3 + 10
     this.createItems(gs,'pf_flyers','runner', numPlayerItems, itemSize,itemSize);
     this.createItems(gs,'the_button','runner', numPlayerItems, itemSize,itemSize);
     this.createItems(gs,'magic_monocle','runner', numPlayerItems, itemSize,itemSize);

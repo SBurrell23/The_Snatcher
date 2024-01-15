@@ -718,29 +718,35 @@ function drawSnatcherDoorInfo(ctx, gs, doorInfo) {
     
     // Draw red rectangle on the north side
     if(doorInfo.north){
-        ctx.fillStyle ='rgba(255, 0, 0, '+doorInfo.north+')';
+        ctx.fillStyle ='rgba(255, 0, 0, '+valueToAlpha(doorInfo.north)+')';
         ctx.fillRect((canvasWidth - rectHeight) / 2, rectOffset, rectHeight, rectWidth);
     }
     
     // Draw red rectangle on the south side
     if(doorInfo.south){
-        ctx.fillStyle ='rgba(255, 0, 0, '+doorInfo.south+')';
+        ctx.fillStyle ='rgba(255, 0, 0, '+valueToAlpha(doorInfo.south)+')';
         ctx.fillRect((canvasWidth - rectHeight) / 2, canvasHeight - rectWidth - rectOffset, rectHeight, rectWidth);
     }
     
     // Draw red rectangle on the east side
     if(doorInfo.east){
-        ctx.fillStyle ='rgba(255, 0, 0, '+doorInfo.east+')';
+        ctx.fillStyle ='rgba(255, 0, 0, '+valueToAlpha(doorInfo.east)+')';
         ctx.fillRect(canvasWidth - rectWidth - rectOffset, (canvasHeight - rectHeight) / 2, rectWidth, rectHeight);
     }
     
     // Draw red rectangle on the west side
     if(doorInfo.west){
-        ctx.fillStyle ='rgba(255, 0, 0, '+doorInfo.west+')';
+        ctx.fillStyle ='rgba(255, 0, 0, '+valueToAlpha(doorInfo.west)+')';
         ctx.fillRect(rectOffset, (canvasHeight - rectHeight) / 2, rectWidth, rectHeight);
     }
     
     //console.log(doorInfo);
+}
+
+function valueToAlpha(value) {
+    if (value >= 10)
+        return 0;
+    return (10 - value) / 10;
 }
 
 function drawBackground(ctx) {

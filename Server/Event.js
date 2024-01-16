@@ -2,14 +2,14 @@ function Event() {
     this.failedSkillCheckRevealTime = 5000;
 
     this.pfFlyersSpeed = 250;
-    this.pfFlyersTime = 5000;
+    this.pfFlyersTime = 4000;
 
     this.magicMonocleRevealTime = 7000;
 
-    this.bbqChiliRevealTime = 3200;
+    this.bbqChiliRevealTime = 6000;
 
-    this.spareEyeballsSpotlight = 400;
-    this.spareEyeballsTime = 8000;
+    this.spareEyeballsSpotlight = 420;
+    this.spareEyeballsTime = 10000;
 
     this.killThePowerUnrevealTime = 12000;
 }

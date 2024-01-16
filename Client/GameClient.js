@@ -85,7 +85,7 @@ function connectWebSocket() {
 
     //wss://the-snatcher.onrender.com
     //ws://localhost:8080
-    socket = new WebSocket('wss://the-snatcher.onrender.com');  
+    socket = new WebSocket('ws://localhost:8080');  
     socket.addEventListener('open', function () {
         console.log('Server connection established!');
         $("#offlineMessage").css("display", "none");
@@ -461,7 +461,7 @@ function drawMap(ctx, gs, map) {
                     else if(localState.events['failedSkillCheck'].length > 0 && localState.events['failedSkillCheck'].includes(isRunnerInThisRoom(gs,row,col).id)){
                         drawRoomTile(ctx, roomX, roomY, isRunnerInThisRoom(gs,row,col).color); //Show that player to the killer
                     }
-                    else if(room == 3 && isExitDoorInRoomOpen(row,col))// // if this door is opened, the snatcher can see it on their map
+                    else if(room == 3)//&& isExitDoorInRoomOpen(row,col) // if this door is opened, the snatcher can see it on their map
                         drawRoomTile(ctx, roomX, roomY, exitDoor);
                     else if (room == 1 || room == 3) //Draw empty rooms and also hide the door if it hasn't been opened
                         drawRoomTile(ctx, roomX, roomY, emptyRoom);

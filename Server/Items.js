@@ -154,27 +154,44 @@ Items.prototype.pickupItemIfAllowed = function(player, item, pickupRequested) {
     else if(item.type == "exitdoor"){
         if(player.hasKeys.length > 0 && item.specialCount < global.keysNeededToOpenDoor ){
 
-            player.hasKeys = [];
-            //Set the players inventory to 0 and go through and use each keyItem on the exit door
-            var keyItems = global.items.filter(item => item.type == "key" && item.ownerId == player.id && item.isConsumed == false);
-            
-            for(var i = 0; i < keyItems.length; i++){
-                var keyItem = keyItems[i];
-                keyItem.isConsumed = true;
-                keyItem.ownerId = -1;
-                item.specialCount += 1;
-                player.points += global.pointsForKeyAddedToDoor;
-                sendSoundToClient(player.id,"keyAdded");
-                console.log("Player added key to the exit door at " + item.currRoom.x + ", " + item.currRoom.y + "!");
-                console.log(JSON.stringify(item));
-                global.sendItemsToClientsInRoom(pRoomX,pRoomY);
-                if(item.specialCount >= global.keysNeededToOpenDoor){
-                    global.sendEventToAllClients("eventMessage", {
-                        text: player.name + " has opened an escape passage!"
+            // The player must be moving on the exit door to unlock it
+            if(player.hasKeys[0] <= 900){
+                if(player.hasKeys[0] == 120){
+                    global.sendEventToSnatcher("eventMessage",{
+                        text: "A player is unlocking an escape passage!"
                     });
-                    //This is really to just show the exit door on the snatchers map
-                    global.sendEventToAllClients("exitDoorData", item);    
-                    break;
+                    global.sendEventToClient("eventMessage",player.id,{
+                        text: "The snatcher hears you unlocking the passage!"
+                    });
+                }
+                player.hasKeys[0] += 1;
+            }else{
+                player.hasKeys.shift();
+                //Set the players inventory to 0 and go through and use each keyItem on the exit door
+                var keyItems = global.items.filter(item => item.type == "key" && item.ownerId == player.id && item.isConsumed == false);
+                for(var i = 0; i < keyItems.length; i++){
+                    var keyItem = keyItems[i];
+                    keyItem.isConsumed = true;
+                    keyItem.ownerId = -1;
+                    item.specialCount += 1;
+                    player.points += global.pointsForKeyAddedToDoor;
+                    sendSoundToClient(player.id,"keyAdded");
+                    console.log("Player added key to the exit door at " + item.currRoom.x + ", " + item.currRoom.y + "!");
+                    console.log(JSON.stringify(item));
+                    global.sendItemsToClientsInRoom(pRoomX,pRoomY);
+                    if(item.specialCount >= global.keysNeededToOpenDoor){
+                        global.sendEventToAllClients("eventMessage", {
+                            text: player.name + " has opened an escape passage!"
+                        });
+                        //This is really to just show the exit door on the snatchers map
+                        global.sendEventToAllClients("exitDoorData", item);    
+                        break;
+                    }else{
+                        global.sendEventToAllClients("eventMessage", {
+                            text: player.name + " has added a key to an escape passage!"
+                        });
+                    }
+                    break; //This is a little hack so only one key is used per unlock
                 }
             }
             
@@ -244,7 +261,7 @@ Items.prototype.putItemInPlayerInventory = function(player,item) {
     item.currPos.y = -2000;
 
     if(item.type == "key")
-        player.hasKeys.push(true);
+        player.hasKeys.push(0);
     else{
         sendSoundToClient(player.id,"itemPickupOrDrop");
         player.hasItem = {
@@ -357,6 +374,9 @@ Items.prototype.checkForItemCollision = function(player, pickupRequested) {
                 player.currPos.y - player.radius <= item.currPos.y + item.height
             ) {
                 new Items().pickupItemIfAllowed(player,item,pickupRequested);
+            }else{
+                if(player.hasKeys[0])
+                    player.hasKeys[0] = 0;
             }
         }
     });

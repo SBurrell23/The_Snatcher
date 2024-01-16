@@ -1,15 +1,15 @@
 function Event() {
     this.failedSkillCheckRevealTime = 5000;
 
-    this.pfFlyersSpeed = 250;
-    this.pfFlyersTime = 4000;
+    this.pfFlyersSpeed = 230;
+    this.pfFlyersTime = 6000;
 
     this.magicMonocleRevealTime = 7000;
 
-    this.bbqChiliRevealTime = 6000;
+    this.bbqChiliRevealTime = 6500;
 
     this.spareEyeballsSpotlight = 420;
-    this.spareEyeballsTime = 10000;
+    this.spareEyeballsTime = 12000;
 
     this.killThePowerUnrevealTime = 12000;
 }

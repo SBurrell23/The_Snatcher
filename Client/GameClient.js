@@ -85,7 +85,7 @@ function connectWebSocket() {
 
     //wss://the-snatcher.onrender.com
     //ws://localhost:8080
-    socket = new WebSocket('wss://the-snatcher.onrender.com');  
+    socket = new WebSocket('ws://localhost:8080');  
     socket.addEventListener('open', function () {
         console.log('Server connection established!');
         $("#offlineMessage").css("display", "none");
@@ -461,6 +461,7 @@ function drawMap(ctx, gs, map) {
                     else if(localState.events['failedSkillCheck'].length > 0 && localState.events['failedSkillCheck'].includes(isRunnerInThisRoom(gs,row,col).id)){
                         drawRoomTile(ctx, roomX, roomY, isRunnerInThisRoom(gs,row,col).color); //Show that player to the killer
                     }
+                    //need to draw which door is open
                     else if(room == 3)//&& isExitDoorInRoomOpen(row,col) // if this door is opened, the snatcher can see it on their map
                         drawRoomTile(ctx, roomX, roomY, exitDoor);
                     else if (room == 1 || room == 3) //Draw empty rooms and also hide the door if it hasn't been opened
@@ -924,6 +925,19 @@ function drawPlayer(ctx, player, x, y) {
 
 
     if(!player.isSnatcher){
+        if(player.hasKeys.length > 0 && player.hasKeys[0] > 0){
+            // Draw black bar above player's head
+            ctx.fillStyle = '#050505';
+            ctx.fillRect(px - 25, py - 15, 101, 18);
+            // Calculate the fill percentage based on player.hasKeys[0] value
+            const fillPercentage = player.hasKeys[0] / 900;
+            // Calculate the width of the green fill based on the fill percentage
+            const fillWidth = fillPercentage * 101;
+            // Draw green fill on the black bar
+            ctx.fillStyle = '#ffbe0a';
+            ctx.fillRect(px - 25, py - 15, fillWidth, 18);
+            console.log(player.hasKeys[0]);
+        }
         const framesBeforeNextAnimate = 42;
         let frameIndex = Math.floor(currentFrame / framesBeforeNextAnimate) % aFrame.length;
         drawSprite(ctx, pName+ aFrame[frameIndex], px, py);
@@ -934,16 +948,6 @@ function drawPlayer(ctx, player, x, y) {
             let frameIndex = Math.floor(currentFrame / framesBeforeNextAnimate) % aFrame.length;
             drawSprite(ctx, pName+ aFrame[frameIndex], px, py);
         }
-        // else{
-        //     if(lastDir == "north")
-        //         drawSprite(ctx, pName+ "n2", px, py);
-        //     else if(lastDir == "south")
-        //         drawSprite(ctx, pName+ "s2", px, py);
-        //     else if(lastDir == "east")
-        //         drawSprite(ctx, pName+ "e2", px, py);
-        //     else if(lastDir == "west")
-        //         drawSprite(ctx, pName+ "w2", px, py);
-        // }
     }
 
     if(currentFrame % 18 == 0 && isPlayerMoving() && isMe(player.name) && player.isSnatcher == false){

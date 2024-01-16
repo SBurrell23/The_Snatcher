@@ -37,8 +37,8 @@ var playerObject ={
     lastDirection: "south"
 };
 
-global.baseSpeed = JSON.stringify(320);
-global.killerBaseSpotlight = JSON.stringify(250);
+global.baseSpeed = JSON.stringify(245);
+global.killerBaseSpotlight = JSON.stringify(275);
 
 var timeouts = [];
 
@@ -310,7 +310,7 @@ function setSnatcher(){
     if(gs.players.length == 0)
         return;
     
-    var snatcherSpeedMod = 1.135; // :)
+    var snatcherSpeedMod = 1.55; // :)
     var snatcher = gs.players.find(player => player.name === 'snatcher');
 
     snatcher.isSnatcher = true;

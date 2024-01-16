@@ -219,7 +219,7 @@ Items.prototype.pickupItemIfAllowed = function(player, item, pickupRequested) {
 Items.prototype.skillCheckResult = function(gs,playerId,itemId,result){
     var player = gs.players.find(player => player.id == playerId);
     var item = global.items.find(item => item.id == itemId);
-    if(player.isAlive == false)
+    if(!player || player.isAlive == false)
         return;
     const pRoomX = player.currRoom.x;
     const pRoomY = player.currRoom.y;

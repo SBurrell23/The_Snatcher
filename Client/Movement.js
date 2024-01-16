@@ -70,7 +70,7 @@ $(document).keydown(function(e) {
 
                 var scTimeout = 1800;
                 if(getMe(serverState).isSnatcher)
-                    scTimeout = 2300;
+                    scTimeout = 2000;
 
                 setTimeout(function() {
                     if(isSCGood){

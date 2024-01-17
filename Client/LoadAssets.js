@@ -136,7 +136,7 @@ function loadMasterTileset(ts) {
 
     sprites['chest1'] = getTileSourceRect(ts,7, 0);
     sprites['chest2'] = getTileSourceRect(ts,7, 0);
-    sprites['key'] = getTileSourceRect(ts,7, 1);
+    sprites['key'] = getTileSourceRect(ts,5, 2);
 
     sprites['pf_flyers'] = getTileSourceRect(ts,1, 1);
     sprites['the_button'] = getTileSourceRect(ts,0, 2);

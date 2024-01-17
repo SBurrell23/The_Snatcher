@@ -93,15 +93,15 @@ wss.on('connection', (ws) => {
             clients.delete(ws);
         }
         //These two needs to be removed once game is live
-        if(message.type == "newGamePls"){
-            startGame();
-        }
-        if(message.type == "randomTeleportPls"){
-            for (let i = 0; i < gs.players.length; i++) {
-                if(gs.players[i].id == message.id)
-                    new Event().teleportPlayerToRandomRoom(gs, gs.players[i]);
-            }
-        }
+        // if(message.type == "newGamePls"){
+        //     startGame();
+        // }
+        // if(message.type == "randomTeleportPls"){
+        //     for (let i = 0; i < gs.players.length; i++) {
+        //         if(gs.players[i].id == message.id)
+        //             new Event().teleportPlayerToRandomRoom(gs, gs.players[i]);
+        //     }
+        // }
         if(message.type =="startGame"){
             startGame();
         }

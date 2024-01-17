@@ -85,7 +85,7 @@ function connectWebSocket() {
 
     //wss://the-snatcher.onrender.com
     //ws://localhost:8080
-    socket = new WebSocket('ws://localhost:8080');  
+    socket = new WebSocket('wss://the-snatcher.onrender.com');  
     socket.addEventListener('open', function () {
         console.log('Server connection established!');
         $("#offlineMessage").css("display", "none");
@@ -281,7 +281,7 @@ function drawGameState(gs) {
         drawSkillCheck(ctx,getMe(gs));
         
         drawMap(ctx,gs,localState.map);
-        drawPlayerInventory(ctx, gs);
+        drawInventory(ctx, gs);
 
         drawPing(ctx);
     }else{
@@ -800,7 +800,7 @@ function drawBackground(ctx) {
     }
 }
 
-function drawPlayerInventory(ctx, gs) {
+function drawInventory(ctx, gs) {
     var me = getMe(gs);
 
     if(me.isSnatcher){

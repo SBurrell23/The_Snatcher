@@ -436,7 +436,7 @@ function drawMap(ctx, gs, map) {
         const noPowerRoom = 'rgba(0, 0, 0, 0)';
         const noRoom = 'rgba(255, 255, 255, .65)';
         const emptyRoom = 'rgba(58, 100, 158, .60)';
-        const exitDoor = 'rgba(255, 213, 25, .75)';
+        const exitDoor = 'rgba(128, 88, 15, .75)';
         const myRoom = getMe(gs).color;
         const snatcherInRoom = getSnatcher(gs).color;
 

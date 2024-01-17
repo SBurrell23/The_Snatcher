@@ -620,7 +620,10 @@ function drawLobby(ctx, gs) {
             ctx.fillStyle = '#d90f0f';
             ctx.fillText("Snatcher", x, y - 80 - 44);
         }else{
-            drawSprite(ctx,'player' + (i + 1) + "s1", x - 24, y - 28);
+            const framesBeforeNextAnimate = seededRandom(i,45, 58);
+            aFrame = ['s1','s2','s3'];
+            let frameIndex = Math.floor(currentFrame / framesBeforeNextAnimate) % aFrame.length;
+            drawSprite(ctx,'player' + (i + 1) + aFrame[frameIndex], x - 24, y - 28);
             // Draw player's name
             ctx.fillStyle = colors[i];
             ctx.fillText(names[i].charAt(0).toUpperCase() + names[i].slice(1), x, y - 44);
@@ -997,6 +1000,7 @@ function drawItems(ctx, currentRoomX, currentRoomY) {
                         drawSprite(ctx, 'chest1', item.currPos.x + 2, item.currPos.y + 2);
                 }else{
                     switch(item.type){
+                        //This can probably be simplified at this point down to one line...
                         case 'pf_flyers':
                             drawSprite(ctx, 'pf_flyers', item.currPos.x, item.currPos.y);
                             break;

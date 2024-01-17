@@ -11,6 +11,8 @@ Items.prototype.spawnItems = function(gs) {
     var gameMap = global.map.get();
     //console.log(gameMap);
 
+    var availableRooms = global.map.getAvailableRooms();
+
     //Name, number of items, width, height
     //We MUST spawn the exit doors 1st so we don't accidentally spawn another item in the room first
     this.createItems(gs,'exitdoor','all', 2, 82,82); //2 exit doors ONLY!
@@ -20,23 +22,36 @@ Items.prototype.spawnItems = function(gs) {
     var numKeys = (gs.players.length - 1) * 5 + 5;
     this.createItems(gs,'key','all', numKeys, itemSize,itemSize);
 
-    var numPlayerItems = (gs.players.length - 1) * 3 + 10
+    var numPlayerItems = Math.floor((availableRooms/2)/3);//2nd num should be num player items
     this.createItems(gs,'pf_flyers','runner', numPlayerItems, itemSize,itemSize);
     this.createItems(gs,'the_button','runner', numPlayerItems, itemSize,itemSize);
     this.createItems(gs,'magic_monocle','runner', numPlayerItems, itemSize,itemSize);
 
-    var numSnatcherItems = (gs.players.length-1) * 2 + 6;
+    var numSnatcherItems = Math.floor((availableRooms/4)/4);//2nd num should be num snatcher items
+    this.createItems(gs,'book_of_the_dead','snatcher', numSnatcherItems, itemSize,itemSize);
     this.createItems(gs,'bbq_chili','snatcher', numSnatcherItems, itemSize,itemSize);
     this.createItems(gs,'spare_eyeballs','snatcher', numSnatcherItems, itemSize,itemSize);
     this.createItems(gs,'kill_the_power','snatcher', numSnatcherItems, itemSize,itemSize);
     
     //check to make sure available rooms is less then num items with some margin for error..
-    var availableRooms = global.map.getAvailableRooms();
-    while(global.items.length > (availableRooms-10)){ //10 Is a buffer zone of empty rooms we want to keep
+    while(global.items.length > (availableRooms-10)){ //10 Is a buffer zone of empty rooms we want to keep just because..
         console.log("Not enough rooms to spawn items! " + availableRooms + " rooms available and " + global.items.length + " items to spawn!");
         //This will only trim runner items as to not remove keys/doors/snatcher items are more limited anyway
         this.trimItemsIftooMany();
     }
+
+
+    var itemCounts = {};
+
+    for (let item of global.items) {
+        if (itemCounts[item.type]) {
+            itemCounts[item.type]++;
+        } else {
+            itemCounts[item.type] = 1;
+        }
+    }
+
+    console.log("Item Counts:", itemCounts);
 
     console.log("Spawning " + global.items.length + " items in " + availableRooms + " rooms");
 
@@ -155,7 +170,7 @@ Items.prototype.pickupItemIfAllowed = function(player, item, pickupRequested) {
         if(player.hasKeys.length > 0 && item.specialCount < global.keysNeededToOpenDoor ){
 
             // The player must be moving on the exit door to unlock it
-            if(player.hasKeys[0] <= 900){
+            if(player.hasKeys[0] <= 850){
                 if(player.hasKeys[0] == 120){
                     global.sendEventToSnatcher("eventMessage",{
                         text: "A player is unlocking an escape passage!"
@@ -167,7 +182,7 @@ Items.prototype.pickupItemIfAllowed = function(player, item, pickupRequested) {
                 player.hasKeys[0] += 1;
             }else{
                 player.hasKeys.shift();
-                //Set the players inventory to 0 and go through and use each keyItem on the exit door
+                //Set the players inventory to 0 and go through and use the first found item key on the door
                 var keyItems = global.items.filter(item => item.type == "key" && item.ownerId == player.id && item.isConsumed == false);
                 for(var i = 0; i < keyItems.length; i++){
                     var keyItem = keyItems[i];
@@ -181,8 +196,9 @@ Items.prototype.pickupItemIfAllowed = function(player, item, pickupRequested) {
                     global.sendItemsToClientsInRoom(pRoomX,pRoomY);
                     if(item.specialCount >= global.keysNeededToOpenDoor){
                         global.sendEventToAllClients("eventMessage", {
-                            text: player.name + " has opened an escape passage!"
+                            text: player.name + " opened an escape passage! All runners are revealed!"
                         });
+                        global.sendEventToSnatcher("bbq_chili",{revealTime: 4000});
                         //This is really to just show the exit door on the snatchers map
                         global.sendEventToAllClients("exitDoorData", item);    
                         break;

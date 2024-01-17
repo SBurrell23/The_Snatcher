@@ -1,8 +1,8 @@
 function Event() {
     this.failedSkillCheckRevealTime = 5000;
 
-    this.pfFlyersSpeed = 230;
-    this.pfFlyersTime = 6000;
+    this.pfFlyersSpeed = 150;
+    this.pfFlyersTime = 8000;
 
     this.magicMonocleRevealTime = 7000;
 
@@ -74,6 +74,19 @@ Event.prototype.triggerItemEvent = function(gs,player,item) {
             global.sendEventToAllRunners("eventMessage", {
                 text: "The snatcher has cut the power!"
             });
+            break;
+        case "book_of_the_dead":
+            global.sendEventToClient("eventMessage",player.id,{
+                text: "The runners seem lost..."
+            });
+            global.sendEventToAllRunners("eventMessage", {
+                text: "The snatcher shuffled all runners!"
+            });
+            gs.players.forEach(function(player) {
+                if (!player.isSnatcher) {
+                    this.teleportPlayerToRandomRoom(gs, player);
+                }
+            }, this);
             break;
         default:
             console.log("Item event not found!");

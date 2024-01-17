@@ -78,6 +78,9 @@ function loadSounds(){
 
     sounds['playerSnatched'] = new Audio('Assets/Sounds/GS1_Damage_2.mp3');
     sounds['playerSnatched'].volume = 0.3;
+
+    sounds['childLaugh'] = new Audio('Assets/Sounds/Child laugh_6.wav');
+    sounds['childLaugh'].volume = 0.3;
     
 }
 
@@ -141,7 +144,8 @@ function loadMasterTileset(ts) {
 
     sprites['bbq_chili'] = getTileSourceRect(ts,2, 1);
     sprites['spare_eyeballs'] = getTileSourceRect(ts,2, 2);
-    sprites['kill_the_power'] = getTileSourceRect(ts,3, 3);
+    sprites['kill_the_power'] = getTileSourceRect(ts,2, 3);
+    sprites['book_of_the_dead'] = getTileSourceRect(ts,3, 3);
 
     sprites['playerInventory'] = getTileSourceAdjustable(ts,8, 0 ,240,144);
     sprites['snatcherInventory'] = getTileSourceAdjustable(ts,13, 0 ,144,144);

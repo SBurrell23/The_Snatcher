@@ -37,7 +37,7 @@ var playerObject ={
     lastDirection: "south"
 };
 
-global.baseSpeed = JSON.stringify(240);
+global.baseSpeed = JSON.stringify(250);
 global.killerBaseSpotlight = JSON.stringify(275);
 
 var timeouts = [];
@@ -92,10 +92,12 @@ wss.on('connection', (ws) => {
             console.log('Player left: ' + clients.get(ws));
             clients.delete(ws);
         }
-        //This needs to be removed once game is live
-        if(message.type == "generateMap"){
-        //startGame();
-           for (let i = 0; i < gs.players.length; i++) {
+        //These two needs to be removed once game is live
+        if(message.type == "newGamePls"){
+            startGame();
+        }
+        if(message.type == "randomTeleportPls"){
+            for (let i = 0; i < gs.players.length; i++) {
                 if(gs.players[i].id == message.id)
                     new Event().teleportPlayerToRandomRoom(gs, gs.players[i]);
             }
@@ -316,7 +318,7 @@ function setSnatcher(){
     if(gs.players.length == 0)
         return;
     
-    var snatcherSpeedMod = 1.45; // :)
+    var snatcherSpeedMod = 1.40; // :)
     var snatcher = gs.players.find(player => player.name === 'snatcher');
 
     snatcher.isSnatcher = true;

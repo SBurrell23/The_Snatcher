@@ -2,34 +2,34 @@ function handlePlayerMovement(){
     if(localState.skillCheck)
         return;
 
-    if(keys['w'] && keys['a']){
+    if((keys['w'] && keys['a']) || (keys['ArrowUp'] && keys['ArrowLeft'])){
         movePlayer("ul");
     }
-    else if(keys['w'] && keys['d']){
+    else if((keys['w'] && keys['d']) || (keys['ArrowUp'] && keys['ArrowRight'])){
         movePlayer("ur");
     }
-    else if(keys['s'] && keys['a']){
+    else if((keys['s'] && keys['a']) || (keys['ArrowDown'] && keys['ArrowLeft'])){
         movePlayer("dl");
     }
-    else if(keys['s'] && keys['d']){
+    else if((keys['s'] && keys['d']) || (keys['ArrowDown'] && keys['ArrowRight'])){
         movePlayer("dr");
     }
-    else if(keys['w']){
+    else if((keys['w']) || (keys['ArrowUp'])){
         movePlayer("u");
     }
-    else if(keys['s']){
+    else if((keys['s']) || (keys['ArrowDown'])){
         movePlayer("d");
     }
-    else if(keys['a']){
+    else if((keys['a']) || (keys['ArrowLeft'])){
         movePlayer("l");
     }
-    else if(keys['d'] ){
+    else if((keys['d'] ) || (keys['ArrowRight'])){
         movePlayer("r");
     }
 }
 
 function isPlayerMoving(){
-    return keys['w'] || keys['a'] || keys['s'] || keys['d'];
+    return keys['w'] || keys['a'] || keys['s'] || keys['d'] || keys['ArrowUp'] || keys['ArrowLeft'] || keys['ArrowDown'] || keys['ArrowRight'];
 }
 
 function movePlayer(direction){
@@ -48,7 +48,13 @@ $(document).keydown(function(e) {
     if (e.which === 13) { // Enter key
         e.preventDefault();
         socket.send(JSON.stringify({
-            type: "generateMap",
+            type: "randomTeleportPls",
+            id: localState.playerId
+        }));
+    }else if (e.which === 80) { // P key
+        e.preventDefault();
+        socket.send(JSON.stringify({
+            type: "newGamePls",
             id: localState.playerId
         }));
     }else if (e.which === 32) { // Space to pickup or drop an item or do a skill check

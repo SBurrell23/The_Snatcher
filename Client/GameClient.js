@@ -166,7 +166,12 @@ function recievedServerMessage(message) {
             sounds['exitDoorOpened'].play();
         else if(m.data.text.includes("lacks skill"))
             sounds['lacksSkill'].play();
-        else if(!m.data.text.includes("delicious") && !m.data.text.includes("tells all") && !m.data.text.includes("have gone dark"))
+        else if (m.data.text.includes("seem lost") || m.data.text.includes("shuffled"))
+            sounds['childLaugh'].play();
+        else if(
+            !m.data.text.includes("delicious") && 
+            !m.data.text.includes("tells all") && 
+            !m.data.text.includes("have gone dark"))
             sounds['badEvent'].play();
 
         setEventText(m.data.text);
@@ -265,7 +270,7 @@ function drawGameState(gs) {
         if(getMe(gs).isSnatcher)
             drawSnatcherDoorInfo(ctx,gs,localState.doorInfo);
 
-        drawRain(ctx,'rgba(86, 122, 179, .75)');
+        drawRain(ctx,'rgba(86, 122, 179, .85)');
         drawPlayers(ctx, gs, currentRoomX, currentRoomY);
         
         //This needs to come after objects that are under the spotlight and before things over it
@@ -439,9 +444,11 @@ function drawMap(ctx, gs, map) {
         const mapHeight = map.length * roomSize;
 
         // Draw black border around the map
-        ctx.strokeStyle = 'rgba(10, 10, 10,.7)';
-        ctx.lineWidth = 4;
-        ctx.strokeRect(walloffset-1, walloffset-2, mapWidth+ 4, mapHeight + 4);
+        if(!localState.events['kill_the_power']){
+            ctx.strokeStyle = 'rgba(10, 10, 10,.7)';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(walloffset-1, walloffset-2, mapWidth+ 4, mapHeight + 4);
+        }
 
         for (let row = 0; row < map.length; row++) {
             for (let col = map[row].length - 1; col >= 0; col--) { // Reverse the loop for horizontal flipping
@@ -930,7 +937,7 @@ function drawPlayer(ctx, player, x, y) {
             ctx.fillStyle = '#050505';
             ctx.fillRect(px - 25, py - 15, 101, 18);
             // Calculate the fill percentage based on player.hasKeys[0] value
-            const fillPercentage = player.hasKeys[0] / 900;
+            const fillPercentage = player.hasKeys[0] / 850; //This has to match the server value...
             // Calculate the width of the green fill based on the fill percentage
             const fillWidth = fillPercentage * 101;
             // Draw green fill on the black bar
@@ -1007,6 +1014,9 @@ function drawItems(ctx, currentRoomX, currentRoomY) {
                             break;
                         case 'kill_the_power':
                             drawSprite(ctx, 'kill_the_power', item.currPos.x, item.currPos.y);
+                            break;
+                        case 'book_of_the_dead':
+                                drawSprite(ctx, 'book_of_the_dead', item.currPos.x, item.currPos.y);
                             break;
                         default:
                             break;

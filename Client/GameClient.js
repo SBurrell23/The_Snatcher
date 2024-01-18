@@ -77,8 +77,6 @@ var randomLoadingMessage = null; //This chosen then the player loads
 
 function connectWebSocket() {
     console.log("Attempting to connect to server...");
-    serverState = null;
-    localState.playerId = -1;
     
     clearInterval(reConnectInterval);
     clearInterval(pingInterval);
@@ -97,21 +95,32 @@ function connectWebSocket() {
         });
         lastFrameTime = performance.now();
         requestAnimationFrame(gameLoop);
-
     });
 
     socket.addEventListener('close', function(event) {
+        //localState.playerId = -1;
         console.log('WebSocket connection closed.');
+        console.log(event);
         $("#offlineMessage").css("display", "flex");
         stopAllSounds();
         reConnectInterval = setInterval(function() {
             connectWebSocket();
-        }, 1000); //On disconnect, try to reconnect every second
+        }, 500); //On disconnect, try to reconnect every 500ms
     });
+    
+    socket.addEventListener('error', function (event) {
+        console.error('WebSocket connection error:', event);
+    });
+
+    socket.onerror = function(event) {
+        console.error('WebSocket error observed:', event);
+    };
 }
 
 loadAssets();
 connectWebSocket();
+
+
 
 function recievedServerMessage(message) {
     var m = JSON.parse(message);
@@ -201,6 +210,12 @@ function sendPing() {
 var lastFrameTime = 0;
 var deltaTime = 0;
 function gameLoop() {
+
+    if(socket.readyState == 0){ //On a dead socket, stop all sonds and stop the game loop
+        stopAllSounds();
+        return;
+    }
+
     deltaTime = (performance.now() - lastFrameTime) / 1000; // Calculate delta time in seconds
 
     //Cap the game at ~144 FPS
@@ -222,7 +237,7 @@ function gameLoop() {
 
 var gameStartOnce = true;
 function drawGameState(gs) {
-    
+
     var ctx = document.getElementById('canvas').getContext('2d');
 
     if(initRainFlag)
@@ -946,7 +961,7 @@ function drawPlayer(ctx, player, x, y) {
             // Draw green fill on the black bar
             ctx.fillStyle = '#ffbe0a';
             ctx.fillRect(px - 25, py - 15, fillWidth, 18);
-            console.log(player.hasKeys[0]);
+            //console.log(player.hasKeys[0]);
         }
         const framesBeforeNextAnimate = 42;
         let frameIndex = Math.floor(currentFrame / framesBeforeNextAnimate) % aFrame.length;
@@ -1282,6 +1297,8 @@ $(document).ready(function() {
 
 var hasUserInteracted = false;
 function playFirstInteractionSounds() {
+    if(!serverState)
+        return;
     hasUserInteracted = true;
     stopSound('thunder');
     sounds['thunder'].play();

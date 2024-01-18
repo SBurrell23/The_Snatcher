@@ -160,7 +160,7 @@ function loadMasterTileset(ts) {
     loadGates(ts);
     
     console.log("Assets loaded");
-    console.log(sprites);
+    //console.log(sprites);
 }
 
 function loadGrassAnimations(ts){

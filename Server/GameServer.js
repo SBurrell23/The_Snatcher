@@ -128,9 +128,10 @@ wss.on('connection', (ws) => {
 
     //A user has disconnected
     ws.on('close', function(code, reason) {
-        console.log(`WebSocket connection closed with code: ${code} and reason: ${reason}`);
+        console.log(`WebSocket connection closed with code: ${code}`);
         if(code == 1006 || code == "1006")
-            return; //abnoraml closure not allowed
+            return; //abnormal closure not allowed
+        
         console.log('User id ' + clients.get(ws) + ' disconnected');
         const disconnectedUserId = clients.get(ws);
         clients.delete(ws);
@@ -404,7 +405,7 @@ function gameLoop() {
     sendAllClients(gs);
     
     lastUpdateTime = now;
-    setTimeout(gameLoop, 1000 / 60); // Run the game loop 60 times per second
+    setTimeout(gameLoop, 1000 / 600); // Run the game loop 60 times per second
     //This ends up being 16.6ms per frame (not counting deltaTime)
 }
 gameLoop();

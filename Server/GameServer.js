@@ -127,7 +127,8 @@ wss.on('connection', (ws) => {
     });
 
     //A user has disconnected
-    ws.on('close', function() {
+    ws.on('close', function(code, reason) {
+        console.log(`WebSocket connection closed with code: ${code} and reason: ${reason}`);
         console.log('User id ' + clients.get(ws) + ' disconnected');
         const disconnectedUserId = clients.get(ws);
         clients.delete(ws);

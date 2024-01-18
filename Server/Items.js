@@ -171,7 +171,7 @@ Items.prototype.pickupItemIfAllowed = function(player, item, pickupRequested) {
 
             // The player must be moving on the exit door to unlock it
             if(player.hasKeys[0] <= 900){
-                if(player.hasKeys[0] == 120){
+                if(player.hasKeys[0] == 150){
                     global.sendEventToSnatcher("eventMessage",{
                         text: "A player is unlocking an escape passage!"
                     });

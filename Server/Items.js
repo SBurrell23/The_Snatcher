@@ -101,7 +101,7 @@ Items.prototype.spawnItems = function(gs) {
 
 Items.prototype.createItems = function(gs,type,whoIsFor,numItems,width,height) {
 
-    gs.loadMsg = "unearthing treasures " + global.items.length;
+    gs.lm = "unearthing treasures " + global.items.length;
     global.sendAllClientsGS();
 
     var doesItemStartInChest = true;
@@ -170,7 +170,7 @@ Items.prototype.pickupItemIfAllowed = function(player, item, pickupRequested) {
         if(player.hasKeys.length > 0 && item.specialCount < global.keysNeededToOpenDoor ){
 
             // The player must be moving on the exit door to unlock it
-            if(player.hasKeys[0] <= 850){
+            if(player.hasKeys[0] <= 900){
                 if(player.hasKeys[0] == 120){
                     global.sendEventToSnatcher("eventMessage",{
                         text: "A player is unlocking an escape passage!"
@@ -179,7 +179,7 @@ Items.prototype.pickupItemIfAllowed = function(player, item, pickupRequested) {
                         text: "The snatcher hears you unlocking the passage!"
                     });
                 }
-                player.hasKeys[0] += 1;
+                player.hasKeys[0] += 1.5;
             }else{
                 player.hasKeys.shift();
                 //Set the players inventory to 0 and go through and use the first found item key on the door

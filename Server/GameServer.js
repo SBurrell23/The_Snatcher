@@ -13,16 +13,14 @@ global.canvasHeight = 768;
 var gs = {
     type: "gs",
     state: 'lobby',
-    endReason: '',
     players:[],
-    seed: 0,
-    loadMsg: ""
+    er: '', //end reason
+    lm: "" //load message
 };
 
 var playerObject ={
     id: -1,
     name: "",
-    isConnected: false,
     isAlive: false,
     points:0,
     currRoom:{x:-1,y:-1},
@@ -34,7 +32,7 @@ var playerObject ={
     spotlight: 375,
     isSnatcher: false,
     color: "#000000",
-    lastDirection: "south"
+    ld: "s" //last direction
 };
 
 global.baseSpeed = JSON.stringify(250);
@@ -71,7 +69,6 @@ wss.on('connection', (ws) => {
             console.log("Player join request: " + message.id);
             if(playerTaken(message.name) == false){
                 var newPlayer = JSON.parse(JSON.stringify(playerObject));
-                newPlayer.isConnected = true;
                 newPlayer.color = message.color;
                 newPlayer.speed = JSON.parse(global.baseSpeed);
                 newPlayer.name = message.name;
@@ -84,7 +81,8 @@ wss.on('connection', (ws) => {
 
             }else{
                 //Player is already connected
-                console.log("Player already connected: " + message.id);
+                clients.set(ws, message.name);
+                console.log("Player re-connected: " + message.id);
             }
         }
         if(message.type == "playerLeave"){
@@ -101,6 +99,7 @@ wss.on('connection', (ws) => {
         //         if(gs.players[i].id == message.id)
         //             new Event().teleportPlayerToRandomRoom(gs, gs.players[i]);
         //     }
+        //     //console.log(gs);
         // }
         if(message.type =="startGame"){
             startGame();
@@ -129,15 +128,19 @@ wss.on('connection', (ws) => {
     //A user has disconnected
     ws.on('close', function(code, reason) {
         console.log(`WebSocket connection closed with code: ${code}`);
-        if(code == 1006 || code == "1006")
-            return; //abnormal closure not allowed
-        
+
         console.log('User id ' + clients.get(ws) + ' disconnected');
         const disconnectedUserId = clients.get(ws);
         clients.delete(ws);
 
         if(disconnectedUserId == undefined){
             return;
+        }
+
+        //1006 - abnormal closure not allowed
+        //We will attempt to recconect this user...
+        if(code == 1006 || code == 4006){ 
+            return; 
         }
 
         //If nobody is left reset the game
@@ -192,7 +195,7 @@ function startGame(){
     sendAllClients({type: "solidObjects", solidObjects: global.solidObjects.get()});
 
 
-    gs.loadMsg = "get ready...";
+    gs.lm = "get ready...";
     global.sendAllClientsGS();
 
     //Short pause for dramatic effect...
@@ -200,7 +203,6 @@ function startGame(){
     createTimeout(() => {
         gs.state = 'playing';
         console.log("Game Started!");
-        gs.seed = new Date().getTime();
         sendAllClients(gs);
         global.map.sendSnatcherDoorInfo(gs);
     }, 1); // 2500
@@ -297,7 +299,7 @@ global.sendAllClientsGS = function(){
 let timeoutRemainingTime = 10000; // Initial timeout duration in milliseconds
 function setGameOver(whyIsGameOver) {
     gs.state = 'gameover';
-    gs.endReason = whyIsGameOver + ":" + (timeoutRemainingTime / 1000);
+    gs.er = whyIsGameOver + ":" + (timeoutRemainingTime / 1000);
     sendAllClients(gs);
 
     // Start the timeout and track remaining time
@@ -309,7 +311,7 @@ function setGameOver(whyIsGameOver) {
     // Update remaining time every second
     const interval = setInterval(() => {
         timeoutRemainingTime -= 1000;
-        gs.endReason = whyIsGameOver + ":" + (timeoutRemainingTime / 1000);
+        gs.er = whyIsGameOver + ":" + (timeoutRemainingTime / 1000);
         sendAllClients(gs);
         if (timeoutRemainingTime <= 0) {
             timeoutRemainingTime = 10000;
@@ -405,7 +407,8 @@ function gameLoop() {
     sendAllClients(gs);
     
     lastUpdateTime = now;
-    setTimeout(gameLoop, 1000 / 60); // Run the game loop 60 times per second
+    setTimeout(gameLoop, 1000 / 45); // Run the game loop 60 times per second
     //This ends up being 16.6ms per frame (not counting deltaTime)
 }
+
 gameLoop();

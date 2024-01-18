@@ -167,7 +167,7 @@ SolidObjects.prototype.createMazeWalls = function(gs, map) {
 
             }
             
-            gs.loadMsg = "digging graves "+  roomNumber + " / " + (global.map.getAvailableRooms() + 2);
+            gs.lm = "digging graves "+  roomNumber + " / " + (global.map.getAvailableRooms() + 2);
             global.sendAllClientsGS();
 
             //Finally after all the pathing is done turn any leftover '■' into solidObjects to build the room

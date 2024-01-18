@@ -1,5 +1,6 @@
 var socket = null;
 var reConnectInterval = null;
+var reConnectIntervalError = null;
 var pingInterval = null;
 var keys = {};
 var font = "Metal Mania";
@@ -79,17 +80,28 @@ function connectWebSocket() {
     console.log("Attempting to connect to server...");
     
     clearInterval(reConnectInterval);
+    clearInterval(reConnectIntervalError);
     clearInterval(pingInterval);
 
     //wss://the-snatcher.onrender.com
     //ws://localhost:8080
-    socket = new WebSocket('wss://the-snatcher.onrender.com');  
+    socket = new WebSocket('ws://localhost:8080');  
+
     socket.addEventListener('open', function () {
         console.log('Server connection established!');
+        //If the player has an id, we should reconnect them.
+        if(localState.playerId != -1){
+            socket.send(JSON.stringify({
+                type:"playerJoin",
+                name:localState.playerId,
+                id: localState.playerId,
+                color: getMe(serverState).color
+            }));
+        }
         $("#offlineMessage").css("display", "none");
         pingInterval = setInterval(function() {
             sendPing();
-        }, 200);
+        }, 350);
         socket.addEventListener('message', function (event) {
             recievedServerMessage(event.data);
         });
@@ -102,19 +114,13 @@ function connectWebSocket() {
         console.log('WebSocket connection closed.');
         console.log(event);
         $("#offlineMessage").css("display", "flex");
-        stopAllSounds();
-        reConnectInterval = setInterval(function() {
-            connectWebSocket();
-        }, 500); //On disconnect, try to reconnect every 500ms
+        reConnectInterval = setInterval(function() { connectWebSocket();}, 150);
     });
-    
     socket.addEventListener('error', function (event) {
         console.error('WebSocket connection error:', event);
+        reConnectIntervalError = setInterval(function() { connectWebSocket();}, 150);
     });
 
-    socket.onerror = function(event) {
-        console.error('WebSocket error observed:', event);
-    };
 }
 
 loadAssets();
@@ -207,7 +213,7 @@ function sendPing() {
     socket.send(JSON.stringify({ type: 'ping', id: localState.playerId }));
 }
 
-var lastFrameTime = 0;
+var lastFrameTime = performance.now();
 var deltaTime = 0;
 function gameLoop() {
 
@@ -219,7 +225,7 @@ function gameLoop() {
     deltaTime = (performance.now() - lastFrameTime) / 1000; // Calculate delta time in seconds
 
     //Cap the game at ~144 FPS
-    if (deltaTime < .0069444) {
+    if (deltaTime < 1 / 144) {
         requestAnimationFrame(gameLoop);
         return;
     }
@@ -247,11 +253,9 @@ function drawGameState(gs) {
     if(gs.state == "lobby"){
         stopSound('gameMusic');
         stopSound('forestNoise');
-        if (isSoundPlaying('lobbyMusic') == false) 
-            if(hasUserInteracted)
+        if (isSoundPlaying('lobbyMusic') == false && hasUserInteracted) 
                 sounds['lobbyMusic'].play();
-        if (isSoundPlaying('rainfall') == false) 
-            if(hasUserInteracted)
+        if (isSoundPlaying('rainfall') == false && hasUserInteracted) 
                 sounds['rainfall'].play();     
         
         drawLobby(ctx,gs);
@@ -264,17 +268,23 @@ function drawGameState(gs) {
     else if(gs.state == "playing" && getMe(gs).isAlive){
         if(gameStartOnce){
             stopSound('thunder');
+            sounds['thunder'].play();
             stopSound('gameMusic');
             stopSound('forestNoise');
             stopSound('rainfall');
-            sounds['thunder'].play();
-            sounds['gameMusic'].play();
-            sounds['forestNoise'].play();
-            sounds['rainfall'].play();
-            gameStartOnce = false;
         }
         stopSound('lobbyMusic');
+
+        if (isSoundPlaying('gameMusic') == false && hasUserInteracted) 
+            sounds['gameMusic'].play();
+        if (isSoundPlaying('forestNoise') == false && hasUserInteracted) 
+            sounds['forestNoise'].play();
+        if (isSoundPlaying('rainfall') == false && hasUserInteracted) 
+            sounds['rainfall'].play();
+
+        gameStartOnce = false;
         isGameLoading = false;
+
         var currentRoomX = getMe(gs).currRoom.x;
         var currentRoomY = getMe(gs).currRoom.y;
         
@@ -301,7 +311,7 @@ function drawGameState(gs) {
         drawPing(ctx);
     }else{
         if(gs.state == "playing")
-            drawGameInProgress(ctx);
+            drawGameInProgress(ctx,gs);
         else if(gs.state == "gameover")
             drawGameOver(ctx,gs);
     }
@@ -362,7 +372,7 @@ function initRain(){
     initRainFlag = false;
 }
 
-function drawGameInProgress(ctx) {
+function drawGameInProgress(ctx,gs) {
     ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
@@ -370,6 +380,9 @@ function drawGameInProgress(ctx) {
     ctx.fillStyle = 'white';
     ctx.textAlign = 'center';
     ctx.fillText('Game is currently in progress...', ctx.canvas.width / 2, ctx.canvas.height / 2);
+
+    if(currentFrame % 600 == 0)
+        console.log(gs.players);
 }
 
 function drawLoading(ctx,gs) {
@@ -386,14 +399,14 @@ function drawLoading(ctx,gs) {
 
     ctx.font = '35px '+ font;
     ctx.fillStyle = 'white';
-    ctx.fillText(gs.loadMsg, ctx.canvas.width / 2, (ctx.canvas.height / 2) + 50);
+    ctx.fillText(gs.lm, ctx.canvas.width / 2, (ctx.canvas.height / 2) + 50);
 }
 
 function drawGameOver(ctx, gs) {
     localState.playerId = -1;
     var gameOverMessage = 'Game Over!';
-    var reason = gs.endReason.split(":")[0];
-    var timeBeforeReset = gs.endReason.split(":")[1];
+    var reason = gs.er.split(":")[0];
+    var timeBeforeReset = gs.er.split(":")[1];
     var subText = "Returning to lobby in " + timeBeforeReset + "..."
 
     if (reason == "snatched") {
@@ -937,14 +950,14 @@ function drawPlayer(ctx, player, x, y) {
     }
 
     var aFrame;
-    var lastDir = player.lastDirection;
-    if(lastDir == "north")
+    var lastDir = player.ld; //last direction
+    if(lastDir == "n")
         aFrame = ['n1','n2','n3'];
-    else if(lastDir == "south")
+    else if(lastDir == "s")
         aFrame = ['s1','s2','s3'];
-    else if(lastDir == "east")
+    else if(lastDir == "e")
         aFrame = ['e1','e2','e3'];
-    else if(lastDir == "west")
+    else if(lastDir == "w")
         aFrame = ['w1','w2','w3'];
 
 
@@ -955,7 +968,7 @@ function drawPlayer(ctx, player, x, y) {
             ctx.fillStyle = '#050505';
             ctx.fillRect(px - 25, py - 15, 101, 18);
             // Calculate the fill percentage based on player.hasKeys[0] value
-            const fillPercentage = player.hasKeys[0] / 850; //This has to match the server value...
+            const fillPercentage = player.hasKeys[0] / 900; //This has to match the server value...
             // Calculate the width of the green fill based on the fill percentage
             const fillWidth = fillPercentage * 101;
             // Draw green fill on the black bar
@@ -1000,7 +1013,7 @@ function drawItems(ctx, currentRoomX, currentRoomY) {
                     drawSprite(ctx, 'exitdoorOpen', item.currPos.x - 7, item.currPos.y - 7);
                 else{
                     drawSprite(ctx, 'exitdoorClosed', item.currPos.x - 7, item.currPos.y - 7);
-                    ctx.fillStyle = 'black';
+                    ctx.fillStyle = '#fcba03';
                     ctx.font = '22px '+font2;
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
@@ -1239,7 +1252,7 @@ $(document).ready(function() {
     // Add the event listener here
     canvas.addEventListener('click', function(event) {
 
-        if(serverState.state != "lobby")
+        if(!serverState || serverState.state != "lobby" || !socket || socket.readyState != 1)
             return;
 
         var rect = canvas.getBoundingClientRect();

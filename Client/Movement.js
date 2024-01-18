@@ -44,7 +44,14 @@ function movePlayer(direction){
 
 let isSpaceDown = false;
 $(document).keydown(function(e) {
+    if(!serverState || !socket || socket.readyState != 1)
+        return;
+
     keys[e.key] = true;
+
+    // if (e.which === 75)
+    //     socket.close(4006);
+
     if (e.which === 13) { // Enter key
         e.preventDefault();
         socket.send(JSON.stringify({

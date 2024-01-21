@@ -170,7 +170,7 @@ Items.prototype.pickupItemIfAllowed = function(player, item, pickupRequested) {
         if(player.hasKeys.length > 0 && item.specialCount < global.keysNeededToOpenDoor ){
 
             // The player must be moving on the exit door to unlock it
-            if(player.hasKeys[0] <= 900){
+            if(player.hasKeys[0] <= 800){
                 if(player.hasKeys[0] == 150){
                     global.sendEventToSnatcher("eventMessage",{
                         text: "A player is unlocking an escape passage!"
@@ -381,6 +381,7 @@ Items.prototype.dropKeys = function(gs, playerId) {
 
 Items.prototype.checkForItemCollision = function(player, pickupRequested) {
     var items = global.items.filter(item => item.currRoom.x == player.currRoom.x && item.currRoom.y == player.currRoom.y);
+    var isPlayerColliding = false;
     items.forEach(item => {
         if (item.ownerId == -1) { //The item is -1 if it is on the ground
             if (
@@ -390,12 +391,14 @@ Items.prototype.checkForItemCollision = function(player, pickupRequested) {
                 player.currPos.y - player.radius <= item.currPos.y + item.height
             ) {
                 new Items().pickupItemIfAllowed(player,item,pickupRequested);
-            }else{
-                if(player.hasKeys[0])
-                    player.hasKeys[0] = 0;
+                isPlayerColliding = true;
             }
         }
     });
+    if(!isPlayerColliding){
+        if(player.hasKeys[0])
+            player.hasKeys[0] = 0;
+    }
 }
 
 Items.prototype.findExitDoorRoom = function() {

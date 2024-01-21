@@ -72,8 +72,10 @@ $(document).keydown(function(e) {
                 //This is used to stop the bar from moving, but we want to wait a sec
                 //so the player can see their result before formally ending the skill check and sending the rsponse
                 sc.barFillSpeed = 0;
-                var isSCGood = (sc.lineX >= sc.successAreaX && (sc.lineX+sc.lineWidth) <= sc.successAreaX + sc.successWidth);
+                var isSCGood = (sc.lineX >= sc.successAreaX && (sc.lineX) <= sc.successAreaX + sc.successWidth);
                 
+                console.log("Skill check result: " + isSCGood);
+                console.log("LineX: " + sc.lineX + " SuccessAreaX: " + sc.successAreaX + " SuccessWidth: " + sc.successWidth + " LineWidth: " + sc.lineWidth)
                 if(!isSCGood){
                     sc.successAreaColor = 'red';
                     sounds['scFailed'].play();

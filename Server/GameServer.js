@@ -90,17 +90,17 @@ wss.on('connection', (ws) => {
             console.log('Player left: ' + clients.get(ws));
             clients.delete(ws);
         }
-        //These two needs to be removed once game is live
-        // if(message.type == "newGamePls"){
-        //     startGame();
-        // }
-        // if(message.type == "randomTeleportPls"){
-        //     for (let i = 0; i < gs.players.length; i++) {
-        //         if(gs.players[i].id == message.id)
-        //             new Event().teleportPlayerToRandomRoom(gs, gs.players[i]);
-        //     }
-        //     //console.log(gs);
-        // }
+        //////These two needs to be removed once game is live
+        if(message.type == "newGamePls"){
+            startGame();
+        }
+        if(message.type == "randomTeleportPls"){
+            for (let i = 0; i < gs.players.length; i++) {
+                if(gs.players[i].id == message.id)
+                    new Event().teleportPlayerToRandomRoom(gs, gs.players[i]);
+            }
+            //console.log(gs);
+        }
         if(message.type =="startGame"){
             startGame();
         }
@@ -393,7 +393,8 @@ function sendClient(id,object){
 
 function updateMovements(deltaTime){
     movementQueue.forEach((dir, id) => {
-        new Movement().movePlayer(gs,global.map.get(),id, dir,deltaTime);
+        if(global.map != null)
+            new Movement().movePlayer(gs,global.map.get(),id, dir,deltaTime);
     });
     movementQueue.clear();
 }
@@ -407,7 +408,7 @@ function gameLoop() {
     sendAllClients(gs);
     
     lastUpdateTime = now;
-    setTimeout(gameLoop, 1000 / 45); // Run the game loop 60 times per second
+    setTimeout(gameLoop, 1000 / 60); // Run the game loop 60 times per second
     //This ends up being 16.6ms per frame (not counting deltaTime)
 }
 

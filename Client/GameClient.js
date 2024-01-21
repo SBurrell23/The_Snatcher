@@ -85,7 +85,7 @@ function connectWebSocket() {
 
     //wss://the-snatcher.onrender.com
     //ws://localhost:8080
-    socket = new WebSocket('wss://the-snatcher.onrender.com');  
+    socket = new WebSocket('ws://localhost:8080');  
 
     socket.addEventListener('open', function () {
         console.log('Server connection established!');
@@ -566,18 +566,7 @@ function drawSkillCheck(ctx,player){
 
     // Draw the bar outline with border radius (the border radius is why this is not 1 line...)
     ctx.fillStyle = '#141414';
-    ctx.beginPath();
-    ctx.moveTo(player.currPos.x - sc.barWidth / 2 + 4, skillCheckY);
-    ctx.lineTo(player.currPos.x + sc.barWidth / 2 - 4, skillCheckY);
-    ctx.quadraticCurveTo(player.currPos.x + sc.barWidth / 2, skillCheckY, player.currPos.x + sc.barWidth / 2, skillCheckY + 4);
-    ctx.lineTo(player.currPos.x + sc.barWidth / 2, skillCheckY + sc.barHeight - 4);
-    ctx.quadraticCurveTo(player.currPos.x + sc.barWidth / 2, skillCheckY + sc.barHeight, player.currPos.x + sc.barWidth / 2 - 4, skillCheckY + sc.barHeight);
-    ctx.lineTo(player.currPos.x - sc.barWidth / 2 + 4, skillCheckY + sc.barHeight);
-    ctx.quadraticCurveTo(player.currPos.x - sc.barWidth / 2, skillCheckY + sc.barHeight, player.currPos.x - sc.barWidth / 2, skillCheckY + sc.barHeight - 4);
-    ctx.lineTo(player.currPos.x - sc.barWidth / 2, skillCheckY + 4);
-    ctx.quadraticCurveTo(player.currPos.x - sc.barWidth / 2, skillCheckY, player.currPos.x - sc.barWidth / 2 + 4, skillCheckY);
-    ctx.closePath();
-    ctx.fill();
+    ctx.fillRect(player.currPos.x - sc.barWidth / 2 , skillCheckY, sc.barWidth, sc.barHeight);
 
     // Draw the success area
     ctx.fillStyle = sc.successAreaColor;
@@ -586,7 +575,7 @@ function drawSkillCheck(ctx,player){
 
     // Draw the moving line
     ctx.fillStyle = 'white';
-    sc.lineX = (player.currPos.x - sc.barWidth / 2) + sc.barMoveAmount;
+    sc.lineX = (player.currPos.x - (sc.barWidth / 2)) + sc.barMoveAmount;
     ctx.fillRect(sc.lineX, skillCheckY, sc.lineWidth, sc.barHeight);
     
 

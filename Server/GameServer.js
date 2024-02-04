@@ -35,7 +35,7 @@ var playerObject ={
     ld: "s" //last direction
 };
 
-global.baseSpeed = JSON.stringify(250);
+global.baseSpeed = JSON.stringify(260);
 global.killerBaseSpotlight = JSON.stringify(275);
 
 var timeouts = [];

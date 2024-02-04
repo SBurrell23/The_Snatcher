@@ -6,9 +6,9 @@ function Event() {
 
     this.magicMonocleRevealTime = 7000;
 
-    this.bbqChiliRevealTime = 6500;
+    this.bbqChiliRevealTime = 8000;
 
-    this.spareEyeballsSpotlight = 420;
+    this.spareEyeballsSpotlight = 460;
     this.spareEyeballsTime = 12000;
 
     this.killThePowerUnrevealTime = 12000;
@@ -83,7 +83,7 @@ Event.prototype.triggerItemEvent = function(gs,player,item) {
                 text: "The snatcher shuffled all runners!"
             });
             gs.players.forEach(function(player) {
-                if (!player.isSnatcher) {
+                if (!player.isSnatcher && player.isAlive) {
                     this.teleportPlayerToRandomRoom(gs, player);
                 }
             }, this);

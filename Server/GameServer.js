@@ -36,7 +36,7 @@ var playerObject ={
 };
 
 global.baseSpeed = JSON.stringify(260);
-global.killerBaseSpotlight = JSON.stringify(275);
+global.killerBaseSpotlight = JSON.stringify(325);
 
 var timeouts = [];
 
@@ -91,16 +91,16 @@ wss.on('connection', (ws) => {
             clients.delete(ws);
         }
         //////These two needs to be removed once game is live
-        if(message.type == "newGamePls"){
-            startGame();
-        }
-        if(message.type == "randomTeleportPls"){
-            for (let i = 0; i < gs.players.length; i++) {
-                if(gs.players[i].id == message.id)
-                    new Event().teleportPlayerToRandomRoom(gs, gs.players[i]);
-            }
-            //console.log(gs);
-        }
+        // if(message.type == "newGamePls"){
+        //     startGame();
+        // }
+        // if(message.type == "randomTeleportPls"){
+        //     for (let i = 0; i < gs.players.length; i++) {
+        //         if(gs.players[i].id == message.id)
+        //             new Event().teleportPlayerToRandomRoom(gs, gs.players[i]);
+        //     }
+        //     //console.log(gs);
+        // }
         if(message.type =="startGame"){
             startGame();
         }

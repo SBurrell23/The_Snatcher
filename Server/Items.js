@@ -29,7 +29,7 @@ Items.prototype.spawnItems = function(gs) {
 
     var numSnatcherItems = Math.floor((availableRooms/4)/4);//2nd num should be num snatcher items
     this.createItems(gs,'book_of_the_dead','snatcher', numSnatcherItems, itemSize,itemSize);
-    this.createItems(gs,'bbq_chili','snatcher', numSnatcherItems, itemSize,itemSize);
+    this.createItems(gs,'bbq_chili','snatcher', numSnatcherItems + 3, itemSize,itemSize);
     this.createItems(gs,'spare_eyeballs','snatcher', numSnatcherItems, itemSize,itemSize);
     this.createItems(gs,'kill_the_power','snatcher', numSnatcherItems, itemSize,itemSize);
     

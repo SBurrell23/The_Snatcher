@@ -5,7 +5,7 @@ const SolidObjects = require('./SolidObjects.js');
 const Items = require('./Items.js');
 const Event = require('./Event.js');
 
-const wss = new WebSocket.Server({ port: 8080 });
+const wss = new WebSocket.Server({ port: 80 });
 
 global.canvasWidth = 1152;
 global.canvasHeight = 768;

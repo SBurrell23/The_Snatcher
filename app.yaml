@@ -2,7 +2,7 @@ runtime: nodejs20
 
 service: the-snatcher
 
-entrypoint: node Server/Server.js
+entrypoint: node Server/GameServer.js
 
 handlers:
   - url: /.*

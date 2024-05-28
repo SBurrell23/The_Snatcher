@@ -1,4 +1,4 @@
-runtime: nodejs20
+runtime: nodejs
 env: flex
 
 service: the-snatcher

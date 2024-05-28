@@ -1,0 +1,9 @@
+runtime: nodejs20
+
+service: the-snatcher
+
+entrypoint: node Server/Server.js
+
+handlers:
+  - url: /.*
+    script: auto

@@ -85,7 +85,7 @@ function connectWebSocket() {
 
     //wss://the-snatcher.onrender.com
     //ws://localhost:8080
-    socket = new WebSocket('wss://the-snatcher.onrender.com');  
+    socket = new WebSocket('wss://the-snatcher-dot-steven-burrell-personal.wm.r.appspot.com');  
 
     socket.addEventListener('open', function () {
         console.log('Server connection established!');

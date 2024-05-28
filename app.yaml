@@ -1,8 +1,15 @@
 runtime: nodejs20
+env: flex
 
 service: the-snatcher
 
 entrypoint: node Server/GameServer.js
+
+manual_scaling:
+  instances: 1
+
+network:
+  session_affinity: true
 
 handlers:
   - url: /.*
